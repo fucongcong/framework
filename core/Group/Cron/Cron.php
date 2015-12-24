@@ -1,7 +1,7 @@
 <?php
 
-use core\Group\Cron\ParseCrontab;
-use core\Group\App\App;
+use Group\Cron\ParseCrontab;
+use Group\App\App;
 
 class Cron
 {
