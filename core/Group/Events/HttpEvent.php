@@ -2,7 +2,7 @@
 
 namespace Group\Events;
 
-class HttpEvent extends \Event
+final class HttpEvent extends \Event
 {	
 	protected $request;
 

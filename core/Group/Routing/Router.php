@@ -5,6 +5,8 @@ namespace Group\Routing;
 use Group\Common\ArrayToolkit;
 use Group\Contracts\Routing\Router as RouterContract;
 use App;
+use Group\Events\KernalEvent;
+use Group\Events\HttpEvent;
 
 Class Router implements RouterContract
 {
