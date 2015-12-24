@@ -47,7 +47,6 @@ Class Router implements RouterContract
 	/**
 	 * match the uri
 	 *
-	 * @return  void
 	 */
 	public function match()
 	{
@@ -57,7 +56,8 @@ Class Router implements RouterContract
 
 		if (isset($routing[$requestUri])) {
 
-			return $this -> controller($routing[$requestUri]);
+			$this -> controller($routing[$requestUri]);
+			return;
 		}
 
 		foreach ($routing as $routeKey => $route) {
@@ -73,11 +73,12 @@ Class Router implements RouterContract
 
 			if ($config) {
 
-				return $this -> controller($config);
+				$this -> controller($config);
+				return;
 			}
 		}
 
-		return $this -> controller(array('controller'=>"Web:Error:NotFound:index"));		
+		\EventDispatcher::dispatch(KernalEvent::NOTFOUND, new HttpEvent($this -> container -> getRequest()));		
 	}
 
 	/**
@@ -132,7 +133,6 @@ Class Router implements RouterContract
 	 * do the controller
 	 *
 	 * @param  routing config
-	 * @return string
 	 */
 	public function controller($config)
 	{	
