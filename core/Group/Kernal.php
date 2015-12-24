@@ -1,6 +1,6 @@
 <?php
 
-namespace core\Group;
+namespace Group;
 
 use core\Group\App\App;
 
