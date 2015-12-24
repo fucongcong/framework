@@ -3,6 +3,7 @@
     "description": "The Group Framework.",
     "keywords": ["framework", "Group"],
     "type": "project",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Group\\": "core/Group/"
@@ -21,6 +22,7 @@
         "twig/twig": "~1.0",
         "symfony/filesystem": "~2.7.0",
         "aura/sql": "~2.4.3",
+
         "monolog/monolog":"~1.17.1",
         "symfony/http-foundation": "~2.7.0",
         "mtdowling/cron-expression":"~1.0",
