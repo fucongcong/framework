@@ -30,6 +30,16 @@ class KernalInitListener extends \Listener
                 'listener'  => 'Group\Listeners\ExceptionListener',
                 'priority'  => 0,
             ],
+            [
+                'eventName' => KernalEvent::NOTFOUND,
+                'listener'  => 'Group\Listeners\NotFoundListener',
+                'priority'  => 0,
+            ],
+            [
+                'eventName' => KernalEvent::HTTPFINISH,
+                'listener'  => 'Group\Listeners\HttpFinishListener',
+                'priority'  => 0,
+            ],
         ];
 
         $listeners = array_merge(\Config::get('listener::services'), $listeners);

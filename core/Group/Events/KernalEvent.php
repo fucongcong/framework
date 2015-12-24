@@ -12,4 +12,7 @@ final class KernalEvent extends \Event
 
 	const EXCEPTION = "kernal.exception";
 
+	const NOTFOUND = "kernal.notfound";
+
+	const HTTPFINISH = "kernal.httpfinish";
 }

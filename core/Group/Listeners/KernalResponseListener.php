@@ -10,7 +10,9 @@ class KernalResponseListener extends \Listener
     }
 
     public function onKernalResponse(\Event $event)
-    {
-        $event -> getResponse() -> send();
+    {	
+    	$response = $event -> getResponse();
+        if($response instanceof \Response)
+         	$response -> send();
     }
 }
