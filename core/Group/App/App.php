@@ -86,9 +86,6 @@ class App
         
         \EventDispatcher::dispatch(KernalEvent::INIT);
 
-        //做一些request过来要做的 然后在派发事件
-        //\EventDispatcher::dispatch(KernalEvent::REQUEST, new HttpEvent($request));
-
         $this -> container = $this -> singleton('container');
         $this -> container -> setAppPath($path);
         $this -> container -> setRequest($request);

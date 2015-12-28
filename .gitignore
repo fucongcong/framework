@@ -6,3 +6,5 @@ index.php
 /app
 /asset
 /src
+/config/view.php
+/config/cron.php
