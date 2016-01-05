@@ -33,9 +33,11 @@ class LocalFileCacheService
         $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
         $dir = $cache_dir.$cacheName;
 
-        $data = var_export($data, true);
-        $data = "<?php
+        if (is_array($data)) {
+            $data = var_export($data, true);
+            $data = "<?php
 return ".$data.";";
+        }
 
         $parts = explode('/', $dir);
         $file = array_pop($parts);

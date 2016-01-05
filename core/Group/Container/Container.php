@@ -6,6 +6,8 @@ use ReflectionClass;
 use App;
 use Group\Exceptions\NotFoundException;
 use Group\Contracts\Container\Container as ContainerContract;
+use Group\Events\HttpEvent;
+use Group\Events\KernalEvent;
 
 class Container implements ContainerContract
 {   
@@ -207,7 +209,8 @@ class Container implements ContainerContract
      *
      */
     public function setRequest(\Request $request)
-    {
+    {   
+        \EventDispatcher::dispatch(KernalEvent::REQUEST, new HttpEvent($request));
         $this -> request = $request;
     }
 

@@ -6,13 +6,13 @@ use Group\App\App;
 
 class Kernal
 {
-	public function init($path)
+	public function init($path, $loader)
 	{
 		$this -> fix_gpc_magic();
 
 		$app = new App();
-
-	   	$app -> init($path);
+		
+	   	$app -> init($path, $loader);
 
 	   	$app -> handleHttp();
 	}
