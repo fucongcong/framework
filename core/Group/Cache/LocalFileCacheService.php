@@ -43,7 +43,6 @@ return ".$data.";";
         $file = array_pop($parts);
         $dir = '';
         foreach ($parts as $part) {
-
             if (!is_dir($dir .= "$part/")) {
                  mkdir($dir);
             }

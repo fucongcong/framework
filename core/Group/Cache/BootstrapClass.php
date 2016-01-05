@@ -39,7 +39,16 @@ class BootstrapClass
             $data .= substr(file_get_contents($file), 5); 
         }
         
-        file_put_contents($this -> cacheDir, $data);
+        $parts = explode('/', $this -> cacheDir);
+        $file = array_pop($parts);
+        $dir = '';
+        foreach ($parts as $part) {
+            if (!is_dir($dir .= "$part/")) {
+                 mkdir($dir);
+            }
+        }
+        
+        file_put_contents("$dir/$file", $data);
     }
 
     /**
