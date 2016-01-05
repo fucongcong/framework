@@ -20,11 +20,6 @@ class KernalInitListener extends \Listener
                 'listener'  => 'Group\Listeners\KernalResponseListener',
                 'priority'  => 0,
             ],
-            // [
-            //     'eventName' => KernalEvent::REQUEST,
-            //     'listener'  => 'Group\Listeners\KernalRequestListener',
-            //     'priority'  => 0,
-            // ],
             [
                 'eventName' => KernalEvent::EXCEPTION,
                 'listener'  => 'Group\Listeners\ExceptionListener',
@@ -33,11 +28,6 @@ class KernalInitListener extends \Listener
             [
                 'eventName' => KernalEvent::NOTFOUND,
                 'listener'  => 'Group\Listeners\NotFoundListener',
-                'priority'  => 0,
-            ],
-            [
-                'eventName' => KernalEvent::HTTPFINISH,
-                'listener'  => 'Group\Listeners\HttpFinishListener',
                 'priority'  => 0,
             ],
         ];

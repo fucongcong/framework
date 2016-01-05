@@ -8,6 +8,7 @@ use Group\Routing\Router;
 use Group\Handlers\ExceptionsHandler;
 use Group\Events\HttpEvent;
 use Group\Events\KernalEvent;
+use Group\Cache\BootstrapClass;
 
 class App
 {
@@ -76,11 +77,13 @@ class App
      * init appliaction
      *
      */
-    public function init($path)
+    public function init($path, $loader)
     {
         $this -> initSelf();
 
         $request = \Request::createFromGlobals();
+
+        $this -> doBootstrap($loader);
 
         $this -> registerServices();
         
@@ -152,11 +155,7 @@ class App
      *
      */
     public function registerServices()
-    {
-        $providers = Config::get('app::serviceProviders');
-
-        $this -> serviceProviders = array_merge($providers, $this -> serviceProviders);
-
+    {   
         foreach ($this -> serviceProviders as $provider) {
 
             $provider = new $provider(self::$instance);
@@ -179,6 +178,10 @@ class App
         return self::$instance;
     }
 
+    /**
+     * 处理响应请求
+     *
+     */
     public function handleHttp()
     {
         $response = $this -> container -> getResponse();
@@ -195,5 +198,38 @@ class App
     {
         if(isset($this -> singletons[$name]))
             unset($this -> singletons[$name]);
+    }
+
+    /**
+     * 类文件缓存
+     *
+     * @param loader
+     */
+    public function doBootstrap($loader) 
+    {   
+        $this -> setServiceProviders();
+
+        if (Config::get('app::environment') == "prod" && file_exists("runtime/cache/bootstrap.class.cache")) {
+            require "runtime/cache/bootstrap.class.cache";
+            return;
+        }
+
+        $bootstrapClass = new BootstrapClass($loader);
+        foreach ($this -> serviceProviders as $serviceProvider) {
+            $bootstrapClass -> setClass($serviceProvider);
+        }
+        $bootstrapClass -> bootstrap();
+    }
+
+    /**
+     * set ServiceProviders
+     *
+     */
+    public function setServiceProviders()
+    {
+        $providers = Config::get('app::serviceProviders');
+
+        $this -> serviceProviders = array_merge($providers, $this -> serviceProviders);
+
     }
 }
