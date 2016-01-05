@@ -13,6 +13,8 @@ status:队列的数据统计，失败，成功次数。共享内存实现
 */
 namespace Group\Queue;
 
+use Group\Queue\Bear;
+
 class MessageQueue
 {
     protected $argv;
@@ -57,28 +59,8 @@ class MessageQueue
         $argv = $this -> argv;
         if (!isset($argv[1])) return;
         if (!in_array($argv[1], ['start', 'restart', 'stop', 'status'])) return;
-        $this -> $argv[1]();
+        $bear = new Bear();
+        $bear -> $argv[1]();
         die;
-     
-    }
-
-    private function start()
-    {
-        echo 'start';
-    }
-
-    private function restart()
-    {
-        
-    }
-
-    private function stop()
-    {
-        
-    }
-
-    private function status()
-    {
-        
     }
 }

@@ -18,6 +18,7 @@ class Cron
 
         $app = new App();
         $app -> initSelf();
+        $app -> doBootstrap($loader);
         $app -> registerServices();
 
         $this -> cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron/';
@@ -85,8 +86,8 @@ class Cron
             $filesystem = new \Filesystem();
             $filesystem -> remove($this -> cacheDir);
             if (swoole_process::kill($pid, 0)) {
-                swoole_process::kill($pid, SIGUSR1);        
-            }
+                swoole_process::kill($pid, SIGTERM);
+            }   
         }
     }
 }

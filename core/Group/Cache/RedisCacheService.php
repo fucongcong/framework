@@ -2,7 +2,6 @@
 
 namespace Group\Cache;
 
-use Exception;
 use Group\Contracts\Cache\Cache as CacheContract;
 
 class RedisCacheService implements CacheContract
