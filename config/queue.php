@@ -35,7 +35,7 @@ return [
 
     ],
 
-    'work_num' => 4,
+    'worker_num' => 4,
     //默认开启10个task处理队列任务 也可以在queue中覆盖此选项
     'task_worker_num' => 10,
 

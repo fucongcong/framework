@@ -10,6 +10,8 @@
 status:队列的数据统计，失败，成功次数。共享内存实现
 
 中间有一个轮询监听器来监控是否有队列任务，如果存在随机派发到work中处理，使用管道进行work间的通信
+
+beanstalkd -l 127.0.0.1 -p 11300
 */
 namespace Group\Queue;
 

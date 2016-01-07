@@ -8,6 +8,12 @@ class Cron
     protected $cacheDir;
 
     /**
+     * 定时器轮询周期，精确到毫秒
+     *
+     */
+    protected $tickTime;
+
+    /**
      * 初始化环境
      *
      */
@@ -21,7 +27,9 @@ class Cron
         $app -> doBootstrap($loader);
         $app -> registerServices();
 
-        $this -> cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron/';
+        $this -> cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
+        $this -> cacheDir = $this -> cacheDir."/";
+        $this -> tickTime = \Config::get('cron::tick_time') ? : 1000;
     }
 
     /**
@@ -29,13 +37,15 @@ class Cron
      *
      */
     public function run()
-    {
+    {   
+        //将主进程设置为守护进程
+        swoole_process::daemon(true);
+
         $this -> checkStatus();
 
-        $pid = posix_getpid();
-        file_put_contents("runtime/pid", $pid);
+        $this -> setPid();
 
-        swoole_timer_tick(45000, function($timerId){
+        swoole_timer_tick($this -> tickTime, function($timerId){
 
             $jobs = \Config::get('cron::job');
 
@@ -79,8 +89,7 @@ class Cron
      */
     public function checkStatus()
     {
-        if (file_exists("runtime/pid"))
-        $pid = file_get_contents("runtime/pid");
+        $pid = $this -> getPid();
 
         if (!empty($pid) && $pid) {
             $filesystem = new \Filesystem();
@@ -89,5 +98,25 @@ class Cron
                 swoole_process::kill($pid, SIGTERM);
             }   
         }
+    }
+
+    public function setPid()
+    {
+        $pid = posix_getpid();
+        $parts = explode('/', $this -> cacheDir."pid");
+        $file = array_pop($parts);
+        $dir = '';
+        foreach ($parts as $part) {
+            if (!is_dir($dir .= "$part/")) {
+                 mkdir($dir);
+            }
+        }
+        file_put_contents("$dir/$file", $pid);
+    }
+
+    public function getPid()
+    {
+        if (file_exists($this -> cacheDir."pid"))
+        return file_get_contents($this -> cacheDir."pid");
     }
 }

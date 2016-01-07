@@ -19,7 +19,7 @@ class Log
         'emergency' => Logger::EMERGENCY,
     ];
 
-    protected static $cache_dir = "runtime/logs/";
+    public static $cache_dir = "runtime/logs/";
 
     public static function debug($message, array $context, $model = 'web.app')
     {
