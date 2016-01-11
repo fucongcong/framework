@@ -4,14 +4,16 @@ namespace Group\Queue;
 
 use swoole_process;
 use Group\Queue\TubeTick;
+use Pheanstalk\Pheanstalk;
+use Group\Cache\BootstrapClass;
 
 class Bear
 {
     protected $log_dir;
 
-    protected $worker_num;
+    protected $class_cache;
 
-    protected $task_worker_num;
+    protected $worker_num;
 
     protected $queue_jobs;
 
@@ -19,13 +21,20 @@ class Bear
 
     protected $workers;
 
-    public function __construct()
+    protected $tubes;
+
+    protected $pheanstalk;
+
+    protected $linstener;
+
+    public function __construct($loader)
     {
-        $this -> initParam(); 
+        $this -> initParam($loader); 
     }
 
     public function start()
     {	
+        \Log::info("异步队列服务启动", [], 'queue.bear');
         //将主进程设置为守护进程
         swoole_process::daemon(true);
         //设置信号
@@ -37,19 +46,14 @@ class Bear
         //启动队列监听器
         $this -> bindTubeTick();
 
-        $this -> setPid();
-
-        \Log::info("异步队列服务启动", [], 'queue.bear');
+        $this -> setPid(); 
     }
 
     public function restart()
     {
-      	$pid = $this -> getPid();
-        if (!empty($pid) && $pid) {
-            if (swoole_process::kill($pid, 0)) {
-                swoole_process::kill($pid, SIGUSR1);
-            }   
-        }
+        $this -> stop();
+        sleep(1);
+        $this -> start();
     }
 
     public function stop()
@@ -107,9 +111,9 @@ class Bear
         });
 
     	//主进程重启时收到的信号,该信号用于用户自定义
-    	swoole_process::signal(SIGUSR1, function ($signo) {
+    	// swoole_process::signal(SIGUSR1, function ($signo) {
 
-    	});
+    	// });
     }
 
     public function startWorkers()
@@ -119,16 +123,36 @@ class Bear
             $process = new swoole_process(array($this, 'workerCallBack'), false);
             $processPid = $process->start();
             $this -> setWorkerPids($processPid);
-            $this -> workers[$processPid] = $process;
+            $this -> workers[$processPid] = [
+                'process' => $process,
+                'tube' => $this -> tubes[$i],
+            ];
         }
     }
 
     public function workerCallBack(swoole_process $worker) 
-    {
-        //子进程
-        swoole_event_add($worker -> pipe, function($pipe) use ($worker) {
+    {   
+        $pheanstalk = $this -> pheanstalk;
+        $listener = $this -> listener;
+        //worker进程
+        swoole_event_add($worker -> pipe, function($pipe) use ($worker, $pheanstalk, $listener) {
             $recv = $worker -> read();
-            \Log::info("收到 {$recv}", [], 'queue.worker');  
+            $recv = $this -> listener -> getJob($recv);
+            $recv = unserialize($recv); 
+            if (is_object($recv['job'])) {
+                try{
+                    foreach ($recv['handle'] as $handerClass => $job) {
+                       $handler = new $handerClass($recv['job'] -> getId(), $recv['job'] -> getData());
+                       $handler -> handle();
+                    }
+                    //删除任务
+                    $pheanstalk -> delete($recv['job']);
+                    \Log::info("jobId:".$recv['job'] -> getId()."任务完成", [], 'queue.worker');
+                }catch(\Exception $e){
+                    \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData()], 'queue.worker');
+                }
+            } 
+
         });
     }
 
@@ -140,20 +164,36 @@ class Bear
 
     public function bindTubeTick()
     {
-        $tick = new TubeTick($this -> workers);
+        $tick = new TubeTick($this -> workers, $this -> pheanstalk);
         $tick -> work();
     }
 
-    public function initParam()
+    public function initParam($loader)
     {
     	$this -> log_dir = \Config::get("queue::log_dir"); 
         \Log::$cache_dir = $this -> log_dir;
-    	$this -> worker_num = \Config::get("queue::worker_num"); 
-    	$this -> task_worker_num = \Config::get("queue::task_worker_num"); 
+    	
+        $this -> class_cache = \Config::get("queue::class_cache"); 
+        $server = \Config::get("queue::server");
+        //换一个类库 基本跑通
+        $this -> pheanstalk = new Pheanstalk($server['host'], $server['port'], 10, true);
+
+        //开始队列任务的监听
+        $this -> listener = new TubeListener($this -> pheanstalk);
+        $this -> worker_num = $this -> listener -> getTubesCount();
+        $this -> tubes = $this -> listener -> getTubes();
+        $this -> bootstrapClass($loader, $this -> listener -> getJobs());  
     }
 
-    public static function __callStatic($method, $parameters)
+    public function bootstrapClass($loader, $jobs)
     {
-        return call_user_func_array([$this, $method], $parameters);
+        $classCache = new BootstrapClass($loader, $this -> class_cache);
+        foreach ($jobs as $job) {
+            foreach ($job as $handerClass => $value) {
+                $classCache -> setClass($handerClass);
+            }  
+        }
+        $classCache -> bootstrap();
+        require $this -> class_cache;
     }
 }

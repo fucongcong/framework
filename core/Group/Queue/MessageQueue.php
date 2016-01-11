@@ -21,6 +21,8 @@ class MessageQueue
 {
     protected $argv;
 
+    protected $loader;
+
     protected $help = "
 \033[34m
  ----------------------------------------------------------
@@ -37,9 +39,10 @@ class MessageQueue
 \033[33m Usage: core/queue [start|restart|stop|status] \033[0m
 ";
 
-    public function __construct($argv)
+    public function __construct($argv, $loader)
     {
         $this -> argv = $argv;
+        $this -> loader = $loader;
     }
 
     /**
@@ -61,7 +64,7 @@ class MessageQueue
         $argv = $this -> argv;
         if (!isset($argv[1])) return;
         if (!in_array($argv[1], ['start', 'restart', 'stop', 'status'])) return;
-        $bear = new Bear();
+        $bear = new Bear($this -> loader);
         $bear -> $argv[1]();
         die;
     }
