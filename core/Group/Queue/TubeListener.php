@@ -17,6 +17,11 @@ class TubeListener
 		$this -> setTubes();
 	}
 
+    /**
+     * 设置队列jobs
+     *
+     * @param jobs 
+     */
 	public function setJobs($jobs)
 	{
 		foreach ($jobs as $job) {
@@ -24,28 +29,62 @@ class TubeListener
 		}
 	}
 
+    /**
+     * 设置监听队列
+     *
+     */
 	public function setTubes()
 	{
 		foreach ($this -> jobs as $tube => $job) {
-			$this -> tubes[] = $tube;
+			$task_worker_num = 0;
+            foreach ($job as $key => $value) {
+               if ($task_worker_num < $value['task_worker_num']) {
+                    $task_worker_num = $value['task_worker_num'];
+                }
+            }
+            for($i = 0; $i < $task_worker_num; $i++) {
+            	$this -> tubes[] = $tube;
+            }
 		}
 	}
 
+    /**
+     * 获取队列names
+     *
+     * @return tubes 
+     */
 	public function getTubes()
 	{
 		return $this -> tubes;
 	}
 
+    /**
+     * 获取队列jobs
+     *
+     * @return jobs 
+     */
 	public function getJobs()
 	{
 		return $this -> jobs;
 	}
 
+    /**
+     * 获取队列数量
+     *
+     * @return int 
+     */
 	public function getTubesCount()
 	{
 		return count($this -> tubes);
 	}
 
+    /**
+     * 获取队列数量
+     *
+     * @param string tube
+     * @param Pheanstalk pheanstalk
+     * @return string|boolean 
+     */
 	public function getJob($tube, Pheanstalk $pheanstalk)
 	{	
 		if (!isset($this -> jobs[$tube])) return false;

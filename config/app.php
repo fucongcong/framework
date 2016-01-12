@@ -2,7 +2,7 @@
 return [
 
     // prod|dev
-    'environment' => 'prod',
+    'environment' => 'dev',
 
     //zh|en|fr...
     'locale' => 'zh',
@@ -23,6 +23,7 @@ return [
         'Group\Session\SessionServiceProvider',
         'Group\Routing\RouteServiceProvider',
         'Group\EventDispatcher\EventDispatcherServiceProvider',
+        'Group\Queue\QueueServiceProvider',
     ],
 
     //需要实例化的单例

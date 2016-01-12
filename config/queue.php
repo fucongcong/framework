@@ -11,6 +11,10 @@ return [
     //log路径
     'log_dir' => 'runtime/queue',
 
+    //tick队列任务的频率，精确到毫秒
+    'timer' => 100,
+
+    //类文件缓存
     'class_cache' => 'runtime/queue/bootstrap.class.cache',
 
     //处理队列任务
@@ -36,6 +40,8 @@ return [
         ]
 
     ],
+
+
 
     //这里是push到队列是需要用到的参数
     'priority' => 10,//该任务的重要程度，越小优先处理
