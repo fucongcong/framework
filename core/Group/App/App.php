@@ -49,6 +49,7 @@ class App
         'Test'              => 'Group\Test\Test',
         'Log'               => 'Group\Log\Log',
         'Listener'          => 'Group\Listeners\Listener',
+        'Queue'             => 'Group\Queue\Queue',
     ];
 
     /**
@@ -86,7 +87,7 @@ class App
         $this -> doBootstrap($loader);
 
         $this -> registerServices();
-        
+       
         \EventDispatcher::dispatch(KernalEvent::INIT);
 
         $this -> container = $this -> singleton('container');
