@@ -52,7 +52,7 @@ class MessageQueue
     {
         $argv = $this -> argv;
         if (!isset($argv[1])) return;
-        if (!in_array($argv[1], ['start', 'restart', 'stop', 'status'])) return;
+        if (!in_array($argv[1], ['start', 'restart', 'stop'])) return;
         $bear = new Bear($this -> loader);
         $bear -> $argv[1]();
         die;

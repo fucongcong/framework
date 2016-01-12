@@ -27,10 +27,13 @@ class QueueService
 		$this -> delaytime = \Config::get("queue::delaytime") ? : 0;
 		$this -> lifetime = \Config::get("queue::lifetime") ? : 60;
 		$this -> pheanstalk = new Pheanstalk($this -> host, $this -> port);
+		if(!$this -> pheanstalk -> getConnection() -> isServiceListening()) {
+            throw new \Exception("beanstalkd服务没有启动", 1);
+        }
 	}
 
 	public function put($tube, $data)
-	{
+	{	
 		return $this -> pheanstalk -> useTube($tube) -> put($data, $this -> priority, $this -> delaytime, $this -> lifetime);
 	}
 }
