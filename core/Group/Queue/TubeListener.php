@@ -2,18 +2,16 @@
 
 namespace Group\Queue;
 
+use Pheanstalk\Pheanstalk;
+
 class TubeListener
 {	
-	private $pheanstalk;
-
 	private $jobs;
 
 	private $tubes;
 
-	public function __construct($pheanstalk)
+	public function __construct()
 	{
-		$this -> pheanstalk = $pheanstalk;
-
 		$jobs = \Config::get("queue::queue_jobs");
 		$this -> setJobs($jobs);
 		$this -> setTubes();
@@ -48,11 +46,14 @@ class TubeListener
 		return count($this -> tubes);
 	}
 
-	public function getJob($tube)
+	public function getJob($tube, Pheanstalk $pheanstalk)
 	{	
-		$timeout = 10;
-		$job = $this -> pheanstalk -> watch($tube) -> reserve($timeout);
-		if (empty($job)) return false;
+		if (!isset($this -> jobs[$tube])) return false;
+		
+		$timeout = 3;
+		$job = $pheanstalk -> watch($tube) -> reserve($timeout);
+		if (empty($job) || !is_object($job) || $job -> getId() == 0 || empty($job -> getData())) return false;
+		
 		$data = [
 			'job' => $job,
 			'handle' => $this -> jobs[$tube],

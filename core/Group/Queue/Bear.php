@@ -27,6 +27,8 @@ class Bear
 
     protected $linstener;
 
+    protected $server;
+
     public function __construct($loader)
     {
         $this -> initParam($loader); 
@@ -120,7 +122,7 @@ class Bear
     {   
         //启动worker进程
         for ($i=0; $i < $this -> worker_num; $i++) { 
-            $process = new swoole_process(array($this, 'workerCallBack'), false);
+            $process = new swoole_process(array($this, 'workerCallBack'), true);
             $processPid = $process->start();
             $this -> setWorkerPids($processPid);
             $this -> workers[$processPid] = [
@@ -132,27 +134,42 @@ class Bear
 
     public function workerCallBack(swoole_process $worker) 
     {   
-        $pheanstalk = $this -> pheanstalk;
+        $server = $this -> server;
         $listener = $this -> listener;
         //worker进程
-        swoole_event_add($worker -> pipe, function($pipe) use ($worker, $pheanstalk, $listener) {
-            $recv = $worker -> read();
-            $recv = $this -> listener -> getJob($recv);
-            $recv = unserialize($recv); 
-            if (is_object($recv['job'])) {
-                try{
-                    foreach ($recv['handle'] as $handerClass => $job) {
-                       $handler = new $handerClass($recv['job'] -> getId(), $recv['job'] -> getData());
-                       $handler -> handle();
-                    }
-                    //删除任务
-                    $pheanstalk -> delete($recv['job']);
-                    \Log::info("jobId:".$recv['job'] -> getId()."任务完成", [], 'queue.worker');
-                }catch(\Exception $e){
-                    \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData()], 'queue.worker');
-                }
-            } 
+        swoole_event_add($worker -> pipe, function($pipe) use ($worker, $server, $listener) {
 
+            $recv = $worker -> read();
+            $jobs = $listener -> getJobs();
+            $task_num = 0;
+            foreach ($jobs[$recv] as $class => $job) {
+                if ($task_num < $job['task_worker_num']) {
+                    $task_num = $job['task_worker_num'];
+                }
+            }
+            $pheanstalk = new Pheanstalk($server['host'], $server['port'], 10);
+            //这里还需要优化 目前定时器在一个进程的话还是会阻塞的
+            for($i=0;$i<$task_num;$i++) {
+
+                swoole_timer_tick(500, function($timerId) use ($recv, $listener, $pheanstalk){
+                    
+                    $recv = $listener -> getJob($recv, $pheanstalk);
+                    $recv = unserialize($recv); 
+                    if (is_object($recv['job'])) {
+                        try{
+                            foreach ($recv['handle'] as $handerClass => $job) {
+                               $handler = new $handerClass($recv['job'] -> getId(), $recv['job'] -> getData());
+                               $handler -> handle();
+                            }
+                            //删除任务
+                            $pheanstalk -> delete($recv['job']);
+                            \Log::info("jobId:".$recv['job'] -> getId()."任务完成".$recv['job'] -> getData(), [], 'queue.worker');
+                        }catch(\Exception $e){
+                            \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData()], 'queue.worker');
+                        }
+                    } 
+                });
+            }            
         });
     }
 
@@ -175,11 +192,17 @@ class Bear
     	
         $this -> class_cache = \Config::get("queue::class_cache"); 
         $server = \Config::get("queue::server");
-        //换一个类库 基本跑通
+        
+        $this -> server = $server;
         $this -> pheanstalk = new Pheanstalk($server['host'], $server['port'], 10, true);
 
+        if(!$this -> pheanstalk -> getConnection() -> isServiceListening()) {
+            
+            die("beanstalkd队列服务器连接失败");
+        }
+
         //开始队列任务的监听
-        $this -> listener = new TubeListener($this -> pheanstalk);
+        $this -> listener = new TubeListener();
         $this -> worker_num = $this -> listener -> getTubesCount();
         $this -> tubes = $this -> listener -> getTubes();
         $this -> bootstrapClass($loader, $this -> listener -> getJobs());  
