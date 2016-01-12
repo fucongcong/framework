@@ -118,6 +118,7 @@ class Bear
     	// });
     }
 
+    //这里现在是一个tube一个worker，到时候要改成一个所有的task_worker_num的总和
     public function startWorkers()
     {   
         //启动worker进程
@@ -141,6 +142,7 @@ class Bear
 
             $recv = $worker -> read();
             $jobs = $listener -> getJobs();
+            //这里要改掉的
             $task_num = 0;
             foreach ($jobs[$recv] as $class => $job) {
                 if ($task_num < $job['task_worker_num']) {
@@ -151,8 +153,8 @@ class Bear
             //这里还需要优化 目前定时器在一个进程的话还是会阻塞的
             for($i=0;$i<$task_num;$i++) {
 
-                swoole_timer_tick(500, function($timerId) use ($recv, $listener, $pheanstalk){
-                    
+                swoole_timer_tick(100, function($timerId) use ($recv, $listener, $pheanstalk){
+              
                     $recv = $listener -> getJob($recv, $pheanstalk);
                     $recv = unserialize($recv); 
                     if (is_object($recv['job'])) {
