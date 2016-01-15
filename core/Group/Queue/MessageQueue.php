@@ -25,7 +25,7 @@ class MessageQueue
  ----------------------------------------------------------
 \033[0m
 \033[31m 使用帮助: \033[0m
-\033[33m Usage: core/queue [start|restart|stop|status] \033[0m
+\033[33m Usage: app/queue [start|restart|stop] \033[0m
 ";
 
     public function __construct($argv, $loader)
