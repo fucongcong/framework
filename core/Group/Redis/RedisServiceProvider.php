@@ -22,6 +22,7 @@ class RedisServiceProvider extends ServiceProvider
 
             $config = \Config::get("database::redis");
 
+            //连接要做区别
             $redis -> pconnect($config['default']['host'], $config['default']['port']);
 
             if (isset($config['default']['auth'])){
