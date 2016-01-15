@@ -100,6 +100,13 @@ class Cron
         $this -> setPid();
     }
 
+    public function restart()
+    {
+        $this -> stop();
+        sleep(1);
+        $this -> start();
+    }
+
     /**
      * 将上一个进程杀死，并清除cron
      *
