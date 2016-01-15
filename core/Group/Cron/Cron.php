@@ -1,7 +1,11 @@
 <?php
 
+namespace Group\Cron;
+
 use Group\Cron\ParseCrontab;
 use Group\App\App;
+use Group\Cache\BootstrapClass;
+use swoole_process;
 
 class Cron
 {
@@ -13,23 +17,49 @@ class Cron
      */
     protected $tickTime;
 
+    protected $argv;
+
+    protected $loader;
+
+    protected $jobs;
+
+    protected $worker_num;
+
+    protected $workers;
+
+    protected $worker_pids;
+
+    protected $help = "
+\033[34m
+ ----------------------------------------------------------
+
+     -----        ----      ----      |     |   / ----
+    /          | /        |      |    |     |   |      |
+    |          |          |      |    |     |   | ----/
+    |   ----   |          |      |    |     |   |
+     -----|    |            ----       ----     |
+
+ ----------------------------------------------------------
+\033[0m
+\033[31m 使用帮助: \033[0m
+\033[33m Usage: app/cron [start|restart|stop] \033[0m
+";
     /**
      * 初始化环境
      *
      */
-    public function __construct()
+    public function __construct($argv, $loader)
     {
-        $loader = require __ROOT__.'/vendor/autoload.php';
-        $loader -> setUseIncludePath(true);
-
-        $app = new App();
-        $app -> initSelf();
-        $app -> doBootstrap($loader);
-        $app -> registerServices();
-
         $this -> cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
         $this -> cacheDir = $this -> cacheDir."/";
         $this -> tickTime = \Config::get('cron::tick_time') ? : 1000;
+        $this -> argv = $argv;
+        $this -> loader = $loader;
+        $this -> jobs = \Config::get('cron::job');
+        $this -> worker_num = count($this -> jobs);
+        $this -> class_cache = \Config::get("cron::class_cache"); 
+        $this -> log_dir = \Config::get("cron::log_dir"); 
+        \Log::$cache_dir = $this -> log_dir;
     }
 
     /**
@@ -38,23 +68,122 @@ class Cron
      */
     public function run()
     {   
+        $this -> checkArgv();
+
+        $this -> bootstrapClass();
+    }
+
+    public function start()
+    {
+        $this -> checkStatus();
+        \Log::info("定时服务启动", [], 'cron');
         //将主进程设置为守护进程
         swoole_process::daemon(true);
 
-        $this -> checkStatus();
+        //设置信号
+        $this -> setSignal();
 
-        $this -> setPid();
+        //启动N个work工作进程
+        $this -> startWorkers();
 
         swoole_timer_tick($this -> tickTime, function($timerId){
 
-            $jobs = \Config::get('cron::job');
-
-            foreach ($jobs as $job) {
+            foreach ($this -> jobs as $job) {
 
                 if (\FileCache::isExist($job['name'], $this -> cacheDir)) continue;
 
-                $this -> bindTick($job);
+                $this -> workers[$job['name']]['process'] -> write(json_encode($job));
+                //$this -> bindTick($job);
             }
+        });
+
+        $this -> setPid();
+    }
+
+    /**
+     * 将上一个进程杀死，并清除cron
+     *
+     */
+    public function stop()
+    {
+        $pid = $this -> getPid();
+
+        if (!empty($pid) && $pid) {
+            if (swoole_process::kill($pid, 0)) {
+                //杀掉worker进程
+                foreach (\FileCache::get('work_ids', $this -> cacheDir) as $work_id) {
+                    swoole_process::kill($work_id, SIGKILL);
+                }
+            }   
+        }
+    }
+
+    /**
+     * 设置信号监听
+     *
+     */
+    private function setSignal()
+    {   
+        //子进程结束时主进程收到的信号
+        swoole_process::signal(SIGCHLD, function ($signo) {
+            //kill掉所有worker进程 必须为false，非阻塞模式
+            static $worker_count = 0;
+            while($ret = swoole_process::wait(false)) {
+                $worker_count++;
+                \Log::info("PID={$ret['pid']}worker进程退出!", [], 'cron');
+                if ($worker_count >= $this -> worker_num){
+                    \Log::info("主进程退出!", [], 'cron');
+                    unlink($this -> log_dir."/work_ids");
+                    unlink($this -> log_dir."/pid");
+                    foreach ($this -> jobs as $job) {
+                        unlink($this -> cacheDir.$job['name']);
+                    }
+                    swoole_process::kill($this -> getPid(), SIGKILL); 
+                }
+            }   
+        });
+
+    }
+
+    /**
+     * 启动worker进程处理定时任务
+     *
+     */
+    private function startWorkers()
+    {   
+        //启动worker进程
+        for ($i = 0; $i < $this -> worker_num; $i++) { 
+            $process = new swoole_process(array($this, 'workerCallBack'), true);
+            $processPid = $process->start();
+            $this -> setWorkerPids($processPid);
+            $this -> workers[$this -> jobs[$i]['name']] = [
+                'process' => $process,
+                'job' => $this -> jobs[$i],
+            ];
+            \Log::info("工作worker{$processPid}启动", [], 'cron.work');    
+        }
+    }
+
+    /**
+     * 检查输入的参数与命令
+     *
+     */
+    protected function checkArgv()
+    {
+        $argv = $this -> argv;
+        if (!isset($argv[1])) die($this -> help);
+        if (!in_array($argv[1], ['start', 'restart', 'stop'])) die($this -> help);
+        $this -> $argv[1]();
+    }
+
+    public function workerCallBack(swoole_process $worker)
+    {   
+        swoole_event_add($worker -> pipe, function($pipe) use ($worker) { 
+            $recv = $worker -> read(); 
+            $recv = json_decode($recv, true);
+            if (!is_array($recv)) return;
+            $this -> bindTick($recv);
+                    
         });
     }
 
@@ -81,23 +210,25 @@ class Cron
         }, $job);
 
         \FileCache::set($job['name'], ['nextTime' => date('Y-m-d H:i:s', time() + intval($timer))], $this -> cacheDir);
+         \Log::info('定时任务启动'.$job['name'], [], 'cron.start');
+    }
+
+    private function checkStatus()
+    {
+        if ($this -> getPid()) {
+            exit('定时服务已启动！');
+        }
     }
 
     /**
-     * 将上一个进程杀死，并清除cron
+     * 设置worker进程的pid
      *
+     * @param pid int
      */
-    public function checkStatus()
+    private function setWorkerPids($pid)
     {
-        $pid = $this -> getPid();
-
-        if (!empty($pid) && $pid) {
-            $filesystem = new \Filesystem();
-            $filesystem -> remove($this -> cacheDir);
-            if (swoole_process::kill($pid, 0)) {
-                swoole_process::kill($pid, SIGTERM);
-            }   
-        }
+        $this -> worker_pids[] = $pid;
+        \FileCache::set('work_ids', $this -> worker_pids, $this -> cacheDir);
     }
 
     public function setPid()
@@ -118,5 +249,19 @@ class Cron
     {
         if (file_exists($this -> cacheDir."pid"))
         return file_get_contents($this -> cacheDir."pid");
+    }
+
+    /**
+     * 缓存类文件
+     *
+     */
+    private function bootstrapClass()
+    {
+        $classCache = new BootstrapClass($this -> loader, $this -> class_cache);
+        foreach ($this -> jobs as $job) {
+            $classCache -> setClass($job['command']); 
+        }
+        $classCache -> bootstrap();
+        require $this -> class_cache;
     }
 }

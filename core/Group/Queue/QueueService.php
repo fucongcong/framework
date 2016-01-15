@@ -29,12 +29,16 @@ class QueueService
 		$this -> pheanstalk = new Pheanstalk($this -> host, $this -> port);
 	}
 
-	public function put($tube, $data)
+	public function put($tube, $data, $priority = null, $delaytime = null, $lifetime = null)
 	{	
+		$priority ? : $this -> priority;
+		$delaytime ? : $this -> delaytime;
+		$lifetime ? : $this -> lifetime;
+
 		if(!$this -> pheanstalk -> getConnection() -> isServiceListening()) {
             throw new \Exception("beanstalkd服务没有启动", 1);
         }
         
-		return $this -> pheanstalk -> useTube($tube) -> put($data, $this -> priority, $this -> delaytime, $this -> lifetime);
+		return $this -> pheanstalk -> useTube($tube) -> put($data, $priority, $delaytime, $lifetime);
 	}
 }

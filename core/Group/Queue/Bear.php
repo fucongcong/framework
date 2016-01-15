@@ -41,7 +41,8 @@ class Bear
      *
      */
     public function start()
-    {	
+    {	 
+        $this -> checkStatus();
         \Log::info("异步队列服务启动", [], 'queue.bear');
         //将主进程设置为守护进程
         swoole_process::daemon(true);
@@ -128,6 +129,9 @@ class Bear
                 $worker_count++;
                 \Log::info("PID={$ret['pid']}worker进程退出!", [], 'queue.bear');
                 if ($worker_count >= $this -> worker_num){
+                    //删除pid文件
+                    unlink($this -> log_dir."/work_ids");
+                    unlink($this -> log_dir."/pid");
                     \Log::info("主进程退出!", [], 'queue.bear');
                     swoole_process::kill($this -> getPid(), SIGKILL); 
                 }
@@ -186,7 +190,7 @@ class Bear
                         }
                         //删除任务
                         $pheanstalk -> delete($recv['job']);
-                        \Log::info("jobId:".$recv['job'] -> getId()."任务完成".$recv['job'] -> getData(), [], 'queue.worker');
+                        //\Log::info("jobId:".$recv['job'] -> getId()."任务完成".$recv['job'] -> getData(), [], 'queue.worker');
                     }catch(\Exception $e){
                         \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData()], 'queue.worker');
                     }
@@ -284,5 +288,12 @@ class Bear
         }
 
         return $worker_num;
+    }
+
+    private function checkStatus()
+    {
+        if ($this -> getPid()) {
+            exit('队列服务已启动！');
+        }
     }
 }
