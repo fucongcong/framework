@@ -22,7 +22,12 @@ class RedisServiceProvider extends ServiceProvider
 
             $config = \Config::get("database::redis");
 
-            $redis -> pconnect($config['default']['host'], $config['default']['port']);
+            //是否需要持久化连接
+            if ($config['default']['connect'] == 'persistence') {
+                $redis -> pconnect($config['default']['host'], $config['default']['port']);
+            }else {
+                $redis -> connect($config['default']['host'], $config['default']['port']);
+            }
 
             if (isset($config['default']['auth'])){
                 $redis -> auth($config['default']['auth']);

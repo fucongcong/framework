@@ -23,11 +23,15 @@ class Cron
 
     protected $jobs;
 
-    protected $worker_num;
+    protected $workerNum;
 
     protected $workers;
 
-    protected $worker_pids;
+    protected $workerPids;
+
+    protected $classCache;
+
+    protected $logDir;
 
     protected $help = "
 \033[34m
@@ -56,10 +60,10 @@ class Cron
         $this -> argv = $argv;
         $this -> loader = $loader;
         $this -> jobs = \Config::get('cron::job');
-        $this -> worker_num = count($this -> jobs);
-        $this -> class_cache = \Config::get("cron::class_cache"); 
-        $this -> log_dir = \Config::get("cron::log_dir"); 
-        \Log::$cache_dir = $this -> log_dir;
+        $this -> workerNum = count($this -> jobs);
+        $this -> classCache = \Config::get("cron::class_cache"); 
+        $this -> logDir = \Config::get("cron::log_dir"); 
+        \Log::$cache_dir = $this -> logDir;
     }
 
     /**
@@ -138,10 +142,10 @@ class Cron
             while($ret = swoole_process::wait(false)) {
                 $worker_count++;
                 \Log::info("PID={$ret['pid']}worker进程退出!", [], 'cron');
-                if ($worker_count >= $this -> worker_num){
+                if ($worker_count >= $this -> workerNum){
                     \Log::info("主进程退出!", [], 'cron');
-                    unlink($this -> log_dir."/work_ids");
-                    unlink($this -> log_dir."/pid");
+                    unlink($this -> logDir."/work_ids");
+                    unlink($this -> logDir."/pid");
                     foreach ($this -> jobs as $job) {
                         unlink($this -> cacheDir.$job['name']);
                     }
@@ -159,7 +163,7 @@ class Cron
     private function startWorkers()
     {   
         //启动worker进程
-        for ($i = 0; $i < $this -> worker_num; $i++) { 
+        for ($i = 0; $i < $this -> workerNum; $i++) { 
             $process = new swoole_process(array($this, 'workerCallBack'), true);
             $processPid = $process->start();
             $this -> setWorkerPids($processPid);
@@ -234,8 +238,8 @@ class Cron
      */
     private function setWorkerPids($pid)
     {
-        $this -> worker_pids[] = $pid;
-        \FileCache::set('work_ids', $this -> worker_pids, $this -> cacheDir);
+        $this -> workerPids[] = $pid;
+        \FileCache::set('work_ids', $this -> workerPids, $this -> cacheDir);
     }
 
     public function setPid()
@@ -264,11 +268,11 @@ class Cron
      */
     private function bootstrapClass()
     {
-        $classCache = new BootstrapClass($this -> loader, $this -> class_cache);
+        $classCache = new BootstrapClass($this -> loader, $this -> classCache);
         foreach ($this -> jobs as $job) {
             $classCache -> setClass($job['command']); 
         }
         $classCache -> bootstrap();
-        require $this -> class_cache;
+        require $this -> classCache;
     }
 }

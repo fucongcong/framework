@@ -9,7 +9,7 @@ abstract class QueueJob
 	protected $jobData;
 
 	public function __construct($jobId, $jobData)
-	{
+	{	
 		$this -> jobId = $jobId;
 
 		$this -> jobData = $jobData;

@@ -9,15 +9,13 @@ use Group\Cache\BootstrapClass;
 
 class Bear
 {
-    protected $log_dir;
+    protected $logDir;
 
-    protected $class_cache;
+    protected $classCache;
 
-    protected $worker_num;
+    protected $workerNum;
 
-    protected $queue_jobs;
-
-    protected $worker_pids;
+    protected $workerPids;
 
     protected $workers;
 
@@ -32,7 +30,10 @@ class Bear
     protected $timer;
 
     public function __construct($loader)
-    {
+    {      
+        //防止socket超时的问题
+        ini_set('default_socket_timeout', -1);
+
         $this -> initParam($loader); 
     }
 
@@ -79,7 +80,7 @@ class Bear
         if (!empty($pid) && $pid) {
             if (swoole_process::kill($pid, 0)) {
                 //杀掉worker进程
-                foreach (\FileCache::get('work_ids', $this -> log_dir."/") as $work_id) {
+                foreach (\FileCache::get('work_ids', $this -> logDir."/") as $work_id) {
                     swoole_process::kill($work_id, SIGKILL);
                 }
             }   
@@ -93,8 +94,8 @@ class Bear
      */
     public function getPid()
     {
-    	if (file_exists($this -> log_dir."/pid"))
-        return file_get_contents($this -> log_dir."/pid");
+    	if (file_exists($this -> logDir."/pid"))
+        return file_get_contents($this -> logDir."/pid");
     }
 
     /**
@@ -104,7 +105,7 @@ class Bear
     public function setPid()
     {
         $pid = posix_getpid();
-        $parts = explode('/', $this -> log_dir."/pid");
+        $parts = explode('/', $this -> logDir."/pid");
         $file = array_pop($parts);
         $dir = '';
         foreach ($parts as $part) {
@@ -128,10 +129,10 @@ class Bear
             while($ret = swoole_process::wait(false)) {
                 $worker_count++;
                 \Log::info("PID={$ret['pid']}worker进程退出!", [], 'queue.bear');
-                if ($worker_count >= $this -> worker_num){
+                if ($worker_count >= $this -> workerNum){
                     //删除pid文件
-                    unlink($this -> log_dir."/work_ids");
-                    unlink($this -> log_dir."/pid");
+                    unlink($this -> logDir."/work_ids");
+                    unlink($this -> logDir."/pid");
                     \Log::info("主进程退出!", [], 'queue.bear');
                     swoole_process::kill($this -> getPid(), SIGKILL); 
                 }
@@ -151,7 +152,7 @@ class Bear
     private function startWorkers()
     {   
         //启动worker进程
-        for ($i = 0; $i < $this -> worker_num; $i++) { 
+        for ($i = 0; $i < $this -> workerNum; $i++) { 
             $process = new swoole_process(array($this, 'workerCallBack'), true);
             $processPid = $process->start();
             $this -> setWorkerPids($processPid);
@@ -188,11 +189,11 @@ class Bear
                            $handler = new $handerClass($recv['job'] -> getId(), $recv['job'] -> getData());
                            $handler -> handle();
                         }
-                        //删除任务
+                        //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
                         $pheanstalk -> delete($recv['job']);
                         //\Log::info("jobId:".$recv['job'] -> getId()."任务完成".$recv['job'] -> getData(), [], 'queue.worker');
                     }catch(\Exception $e){
-                        \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData()], 'queue.worker');
+                        \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData(), 'message' => $e -> getMessage()], 'queue.worker');
                     }
                 } 
             });
@@ -207,8 +208,8 @@ class Bear
      */
     private function setWorkerPids($pid)
     {
-        $this -> worker_pids[] = $pid;
-        \FileCache::set('work_ids', $this -> worker_pids, $this -> log_dir."/");
+        $this -> workerPids[] = $pid;
+        \FileCache::set('work_ids', $this -> workerPids, $this -> logDir."/");
     }
 
     /**
@@ -228,10 +229,10 @@ class Bear
      */
     private function initParam($loader)
     {
-    	$this -> log_dir = \Config::get("queue::log_dir"); 
-        \Log::$cache_dir = $this -> log_dir;
+    	$this -> logDir = \Config::get("queue::log_dir"); 
+        \Log::$cache_dir = $this -> logDir;
     	
-        $this -> class_cache = \Config::get("queue::class_cache"); 
+        $this -> classCache = \Config::get("queue::class_cache"); 
         $server = \Config::get("queue::server");
         
         $this -> server = $server;
@@ -244,7 +245,7 @@ class Bear
 
         //开始队列任务的监听
         $this -> listener = new TubeListener();
-        $this -> worker_num = $this -> setWorkNum($this -> listener -> getJobs());
+        $this -> workerNum = $this -> setWorkNum($this -> listener -> getJobs());
         $this -> tubes = $this -> listener -> getTubes();
         $this -> timer = \Config::get("queue::timer"); 
         $this -> bootstrapClass($loader, $this -> listener -> getJobs());  
@@ -258,14 +259,14 @@ class Bear
      */
     private function bootstrapClass($loader, $jobs)
     {
-        $classCache = new BootstrapClass($loader, $this -> class_cache);
+        $classCache = new BootstrapClass($loader, $this -> classCache);
         foreach ($jobs as $job) {
             foreach ($job as $handerClass => $value) {
                 $classCache -> setClass($handerClass);
             }  
         }
         $classCache -> bootstrap();
-        require $this -> class_cache;
+        require $this -> classCache;
     }
 
     /**
@@ -275,19 +276,19 @@ class Bear
      */
     private function setWorkNum($jobs)
     {
-        $worker_num = 0;
+        $workerNum = 0;
         foreach ($jobs as $job) {
-            $task_worker_num = 0;
+            $taskWorkerNum = 0;
             foreach ($job as $key => $value) {
-               if ($task_worker_num < $value['task_worker_num']) {
-                    $task_worker_num = $value['task_worker_num'];
+               if ($taskWorkerNum < $value['task_worker_num']) {
+                    $taskWorkerNum = $value['task_worker_num'];
                 }
             }
-            $worker_num += $task_worker_num;
+            $workerNum += $taskWorkerNum;
             
         }
 
-        return $worker_num;
+        return $workerNum;
     }
 
     private function checkStatus()
