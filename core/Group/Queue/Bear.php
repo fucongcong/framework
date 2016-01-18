@@ -189,7 +189,7 @@ class Bear
                            $handler = new $handerClass($recv['job'] -> getId(), $recv['job'] -> getData());
                            $handler -> handle();
                         }
-                        //删除任务
+                        //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
                         $pheanstalk -> delete($recv['job']);
                         //\Log::info("jobId:".$recv['job'] -> getId()."任务完成".$recv['job'] -> getData(), [], 'queue.worker');
                     }catch(\Exception $e){

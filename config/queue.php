@@ -24,7 +24,7 @@ return [
             'tube' => 'testjob1',//队列的名称
             'job'  => 'src\Web\Queue\TestJob',//需要执行的任务
             //处理当前队列的进程数
-            'task_worker_num' => 3,
+            'task_worker_num' => 10,
         ],
         [
             'tube' => 'testjob3',//队列的名称
