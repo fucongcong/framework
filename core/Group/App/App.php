@@ -78,11 +78,13 @@ class App
      * init appliaction
      *
      */
-    public function init($path, $loader)
+    public function init($path, $loader, $request)
     {
         $this -> initSelf();
 
-        $request = \Request::createFromGlobals();
+        //$request = \Request::createFromGlobals();
+        $request = new \Request($request -> get, $request -> post, [], $request -> cookie
+            , $request -> files, $request -> server);
 
         $this -> doBootstrap($loader);
 
@@ -187,7 +189,8 @@ class App
     {
         $response = $this -> container -> getResponse();
         $request = $this -> container -> getRequest();
-        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
+        return $response;
+        //\EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
     }
 
     public function initSelf()

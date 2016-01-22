@@ -3,30 +3,58 @@
 namespace Group;
 
 use Group\App\App;
+use swoole_http_server;
 
 class Kernal
 {
 	public function init($path, $loader)
 	{
-		$this -> fix_gpc_magic();
-
-		$app = new App();
+		$http = new swoole_http_server("127.0.0.1", 9777);
+		$http->set(array(
+			'reactor_num' => 4,
+		    'worker_num' => 25,    //worker process num
+		    'backlog' => 128,   //listen backlog
+		    'max_request' => 2000,
+	        'heartbeat_idle_time' => 30,
+    		'heartbeat_check_interval' => 10,
+		    'dispatch_mode'=>1, 
+		));
+		$http->on('request', function ($request, $response) use ($path, $loader) {
+			$request -> get = isset($request -> get) ? $request -> get : [];
+			$request -> post = isset($request -> post) ? $request -> post : [];
+			$request -> cookie = isset($request -> cookie) ? $request -> cookie : [];
+			$request -> files = isset($request -> files) ? $request -> files : [];
+			$request -> server = isset($request -> server) ? $request -> server : [];
+			$request -> server['REQUEST_URI'] = isset($request -> server['request_uri']) ? $request -> server['request_uri'] : '';
+			preg_match_all("/^(.+\.php)(\/.*)$/", $request -> server['REQUEST_URI'], $matches);
+			$request -> server['REQUEST_URI'] = isset($matches[2]) ? $matches[2][0] : '';
 		
-	   	$app -> init($path, $loader);
+			if ($request->server['request_uri'] == '/favicon.ico') {
+				$response->end();
+				return;
+			}
+			
+			$this -> fix_gpc_magic($request);
+			$app = new App();		
+		 	$app -> init($path, $loader, $request);
 
-	   	$app -> handleHttp();
+		 	$data = $app -> handleHttp();
+		 	$response -> status($data -> getStatusCode());
+		    $response -> end($data -> getContent());
+		    return;
+		});
+		$http->start();
 	}
 
-	public function fix_gpc_magic()
+	public function fix_gpc_magic($request)
 	{
 		static $fixed = false;
 		if (!$fixed && ini_get('magic_quotes_gpc')) {
 
-			array_walk($_GET, '_fix_gpc_magic');
-			array_walk($_POST, '_fix_gpc_magic');
-			array_walk($_COOKIE, '_fix_gpc_magic');
-			array_walk($_REQUEST, '_fix_gpc_magic');
-			array_walk($_FILES, '_fix_gpc_magic_files');
+			array_walk($request -> get, '_fix_gpc_magic');
+			array_walk($request -> post, '_fix_gpc_magic');
+			array_walk($request -> cookie, '_fix_gpc_magic');
+			array_walk($request -> files, '_fix_gpc_magic_files');
 
 		}
 		$fixed = true;
