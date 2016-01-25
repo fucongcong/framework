@@ -184,7 +184,8 @@ class Cron
         $argv = $this -> argv;
         if (!isset($argv[1])) die($this -> help);
         if (!in_array($argv[1], ['start', 'restart', 'stop'])) die($this -> help);
-        $this -> $argv[1]();
+        $function = $argv[1];
+        $this -> $function();
     }
 
     public function workerCallBack(swoole_process $worker)
