@@ -38,7 +38,7 @@ class Service extends ServiceProvider
 
         return $this -> app -> singleton(strtolower($serviceName), function() use ($serviceName) {
 
-            return new $serviceName($this -> app);
+            return new $serviceName();
 
         });
     }
