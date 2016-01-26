@@ -2,7 +2,7 @@
 return [
 
     //存储方式file|redis，当开启redis时，必须确保database的cache为redis选项
-    'driver' => 'redis',
+    'driver' => 'file',
 
     //当driver为file，可以指定存储路径
     'file' => 'runtime/sessions',

@@ -2,22 +2,19 @@
 
 namespace Group\Services;
 
-use ServiceProvider;
-
-class Service extends ServiceProvider
+class Service
 {
-    protected $className;
+    protected $serviceName;
 
-    //to do 单列
 	public function createDao($serviceName)
 	{
 		list($group, $serviceName) = explode(":", $serviceName);
 
 		$class = $serviceName."DaoImpl";
 
-		$className = "src\\Services\\".$group."\\Dao\\Impl\\".$class;
+		$this -> serviceName = "src\\Services\\".$group."\\Dao\\Impl\\".$class;
 
-		return new $className;
+		return $this -> register();
 	}
 
     //需要支持不同目录
@@ -36,7 +33,7 @@ class Service extends ServiceProvider
     {
         $serviceName = $this -> serviceName;
 
-        return $this -> app -> singleton(strtolower($serviceName), function() use ($serviceName) {
+        return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
 
             return new $serviceName();
 
