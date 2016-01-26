@@ -60,6 +60,10 @@ class App
 
     protected $serviceProviders = [];
 
+    protected $bootstraps = [
+        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response'
+    ];
+
     //to do
     protected $instances = [
         'container'         => '\Container',
@@ -82,9 +86,9 @@ class App
     {
         $this -> initSelf();
 
-        $request = \Request::createFromGlobals();
-
         $this -> doBootstrap($loader);
+
+        $request = \Request::createFromGlobals();
 
         $this -> registerServices();
        
@@ -218,6 +222,10 @@ class App
         $bootstrapClass = new BootstrapClass($loader);
         foreach ($this -> serviceProviders as $serviceProvider) {
             $bootstrapClass -> setClass($serviceProvider);
+        }
+        foreach ($this -> bootstraps as $bootstrap) {
+            $bootstrap = isset($this -> aliases[$bootstrap]) ? $this -> aliases[$bootstrap] : $bootstrap;
+            $bootstrapClass -> setClass($bootstrap);
         }
         $bootstrapClass -> bootstrap();
     }

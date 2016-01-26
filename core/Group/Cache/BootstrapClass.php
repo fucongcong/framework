@@ -23,7 +23,6 @@ class BootstrapClass
     public function setClass($class) 
     {
         $file = $this -> loader -> findFile($class);
-       
         $this -> classes[$class] = $file;
     }
 
