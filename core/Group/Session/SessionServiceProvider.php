@@ -24,10 +24,15 @@ class SessionServiceProvider extends ServiceProvider
         $this -> app -> singleton('session', function () {
 
             $storage = new NativeSessionStorage($this -> getOptions(), $this -> getHandler(), new MetadataBag());
-
+            $this -> checkUserHandler();
             $session = new SfSession($storage, new AttributeBag('_group_attributes'), new FlashBag());
 
-            if(!$session -> isStarted()) $session -> start();
+            if(!$session -> isStarted()) {
+                try{
+                    $session -> start();
+                }catch(\Exception $e){
+                }
+            }
 
             return new SessionService($session);
         });
@@ -64,6 +69,22 @@ class SessionServiceProvider extends ServiceProvider
         $handler = new RedisSessionHandler($this -> app -> singleton('redis'));
 
         return $handler;
+    }
+
+    private function checkUserHandler()
+    {   
+        $driver = $this -> checkConfig();
+
+        switch ($driver) {
+            case 'redis':
+                $config = \Config::get("database::redis");  
+                ini_set('session.save_path', "tcp://".$config['default']['host'].":".$config['default']['port']);
+                ini_set('session.save_handler', 'redis'); 
+                break;
+            default:
+                ini_set('session.save_handler', 'files');
+                break;
+        }            
     }
 
     /**

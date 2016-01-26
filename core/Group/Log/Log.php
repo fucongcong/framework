@@ -19,7 +19,7 @@ class Log
         'emergency' => Logger::EMERGENCY,
     ];
 
-    public static $cache_dir = "runtime/logs/";
+    public static $cache_dir = "runtime/logs";
 
     public static function debug($message, array $context, $model = 'web.app')
     {
@@ -70,8 +70,10 @@ class Log
     {
         $logger = new Logger($model);
         $env = \Container::getInstance() -> getEnvironment();
+        $path = \Container::getInstance() -> getAppPath();
+        $cache_dir = static::$cache_dir;
 
-        $logger->pushHandler(new StreamHandler(static::$cache_dir.'/'.$env.'.log', self::$levels[$level]));
+        $logger->pushHandler(new StreamHandler($path.$cache_dir.'/'.$env.'.log', self::$levels[$level]));
         $logger->pushHandler(new FirePHPHandler());
 
         return $logger->$level($message, $context);
