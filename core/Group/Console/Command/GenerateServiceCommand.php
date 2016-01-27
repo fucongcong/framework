@@ -33,11 +33,11 @@ class GenerateServiceCommand extends Command
             die;
         }
 
-        $this -> filesystem = new Filesystem();
-        $this -> filesystem -> mkdir($dir."/".$serviceName."/Dao");
-        $this -> filesystem -> mkdir($dir."/".$serviceName."/Dao/Impl");
-        $this -> filesystem -> mkdir($dir."/".$serviceName."/Impl");
-        $this -> filesystem -> mkdir($dir."/".$serviceName."/Rely");
+        $filesystem = new Filesystem();
+        $filesystem -> mkdir($dir."/".$serviceName."/Dao");
+        $filesystem -> mkdir($dir."/".$serviceName."/Dao/Impl");
+        $filesystem -> mkdir($dir."/".$serviceName."/Impl");
+        $filesystem -> mkdir($dir."/".$serviceName."/Rely");
 
         $this -> outPut('开始创建模板...');
         $data = $this -> getFile("Service.tpl", $serviceName);
