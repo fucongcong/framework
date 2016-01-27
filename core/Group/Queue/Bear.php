@@ -294,7 +294,9 @@ class Bear
     private function checkStatus()
     {
         if ($this -> getPid()) {
-            exit('队列服务已启动！');
+            if (swoole_process::kill($this -> getPid(), 0)) {
+                exit('队列服务已启动！');
+            }
         }
     }
 }

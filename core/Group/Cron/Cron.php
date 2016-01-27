@@ -228,7 +228,9 @@ class Cron
     private function checkStatus()
     {
         if ($this -> getPid()) {
-            exit('定时服务已启动！');
+            if (swoole_process::kill($this -> getPid(), 0)) {
+                exit('定时服务已启动！');
+            }
         }
     }
 
