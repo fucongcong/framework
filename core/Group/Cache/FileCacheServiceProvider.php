@@ -15,9 +15,7 @@ class FileCacheServiceProvider extends ServiceProvider
     public function register()
     {
         $this -> app -> singleton('localFileCache', function () {
-
             return new LocalFileCacheService();
-
         });
     }
 }

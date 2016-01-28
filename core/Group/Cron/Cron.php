@@ -90,10 +90,8 @@ class Cron
         //启动N个work工作进程
         $this -> startWorkers();
 
-        swoole_timer_tick($this -> tickTime, function($timerId){
-
+        swoole_timer_tick($this -> tickTime, function($timerId) {
             foreach ($this -> jobs as $job) {
-
                 if (\FileCache::isExist($job['name'], $this -> cacheDir)) continue;
 
                 $this -> workers[$job['name']]['process'] -> write(json_encode($job));
@@ -166,11 +164,14 @@ class Cron
         for ($i = 0; $i < $this -> workerNum; $i++) { 
             $process = new swoole_process(array($this, 'workerCallBack'), true);
             $processPid = $process->start();
+
             $this -> setWorkerPids($processPid);
+
             $this -> workers[$this -> jobs[$i]['name']] = [
                 'process' => $process,
                 'job' => $this -> jobs[$i],
             ];
+
             \Log::info("工作worker{$processPid}启动", [], 'cron.work');    
         }
     }
@@ -183,7 +184,9 @@ class Cron
     {
         $argv = $this -> argv;
         if (!isset($argv[1])) die($this -> help);
+
         if (!in_array($argv[1], ['start', 'restart', 'stop'])) die($this -> help);
+
         $function = $argv[1];
         $this -> $function();
     }
@@ -194,6 +197,7 @@ class Cron
             $recv = $worker -> read(); 
             $recv = json_decode($recv, true);
             if (!is_array($recv)) return;
+
             $this -> bindTick($recv);
                     
         });
@@ -213,8 +217,7 @@ class Cron
 
         $job['timer'] = $timer;
 
-        swoole_timer_tick(intval($timer * 1000), function($timerId, $job){
-
+        swoole_timer_tick(intval($timer * 1000), function($timerId, $job) {
             call_user_func_array([new $job['command'], 'handle'], []);
 
             \FileCache::set($job['name'], ['nextTime' => date('Y-m-d H:i:s', time() + intval($job['timer']))], $this -> cacheDir);
@@ -276,6 +279,7 @@ class Cron
             $classCache -> setClass($job['command']); 
         }
         $classCache -> bootstrap();
+        
         require $this -> classCache;
     }
 }

@@ -29,12 +29,9 @@ class SqlRollBackCommand extends Command
     {   
         $files = [];
         if (is_dir($sqlDir)) {
-
             $dir = opendir($sqlDir);
-            while (($file = readdir($dir)) !== false)
-            {
+            while (($file = readdir($dir)) !== false) {
                 $file = explode(".", $file);
-
                 $fileName = $file[0];
 
                 if ($fileName && isset($file[1]) && $file[1] == "php") {

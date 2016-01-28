@@ -81,7 +81,7 @@ class Bear
             if (swoole_process::kill($pid, 0)) {
                 //杀掉worker进程
                 foreach (\FileCache::get('work_ids', $this -> logDir."/") as $work_id) {
-                    swoole_process::kill($work_id, SIGKILL);
+                    swoole_process::kill($work_id, SIGTERM);
                 }
             }   
         }
@@ -124,6 +124,7 @@ class Bear
     {	
         //子进程结束时主进程收到的信号
         swoole_process::signal(SIGCHLD, function ($signo) {
+
             //kill掉所有worker进程 必须为false，非阻塞模式
             static $worker_count = 0;
             while($ret = swoole_process::wait(false)) {
