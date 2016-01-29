@@ -61,7 +61,6 @@ return ".$data.";";
     public function isExist($cacheName, $cache_dir = false)
     {
         $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-
         $dir = $cache_dir.$cacheName;
 
         return file_exists($dir);

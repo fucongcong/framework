@@ -19,9 +19,7 @@ class RedisServiceProvider extends ServiceProvider
             if (\Config::get("database::cache") != 'redis') return;
 
             $redis = new Redis;
-
             $config = \Config::get("database::redis");
-
             //是否需要持久化连接
             if ($config['default']['connect'] == 'persistence') {
                 $redis -> pconnect($config['default']['host'], $config['default']['port']);

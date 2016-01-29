@@ -27,7 +27,7 @@ class SessionServiceProvider extends ServiceProvider
             $this -> checkUserHandler();
             $session = new SfSession($storage, new AttributeBag('_group_attributes'), new FlashBag());
 
-            if(!$session -> isStarted()) {
+            if (!$session -> isStarted()) {
                 try{
                     $session -> start();
                 }catch(\Exception $e){

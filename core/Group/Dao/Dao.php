@@ -14,7 +14,6 @@ class Dao
 	public function __construct()
 	{
 		$pdo = \Config::get('database::pdo');
-
 		$this -> config = $pdo;
 	}
 
@@ -61,9 +60,7 @@ class Dao
 		$connections = [];
 
 		if (isset($config['read'])) {
-
 			foreach ($config['read'] as $name => $db) {
-
 				$connections[] = $this -> getRead($name);
 			}
 		}
@@ -82,9 +79,7 @@ class Dao
 		$connections = [];
 
 		if (isset($config['write'])) {
-
 			foreach ($config['write'] as $name => $db) {
-
 				$connections[] = $this -> getWrite($name);
 			}
 		}
@@ -131,7 +126,6 @@ class Dao
 	protected function getConnection()
 	{
 		if (self::$connection) {
-
 		    return self::$connection;
 		}
 
@@ -148,7 +142,6 @@ class Dao
 		$connections = new ConnectionLocator;
 
 		if (isset($config['default'])) {
-
 			$connections -> setDefault(function () use ($config) {
 			    return new ExtendedPdo(
 						$config['default']['database_driver'].':host='.$config['default']['database_host'].';dbname='.$config['default']['database_name'].';port='.$config['default']['database_port'].';charset='.$config['default']['database_charset'],
@@ -159,7 +152,6 @@ class Dao
 		}
 
 		if (isset($config['write'])) {
-
 			foreach ($config['write'] as $name => $db) {
 				$connections -> setWrite($name, function () use ($db) {
 				    return new ExtendedPdo(
@@ -172,7 +164,6 @@ class Dao
 		}
 
 		if (isset($config['read'])) {
-
 			foreach ($config['read'] as $name => $db) {
 				$connections -> setRead($name, function () use ($db) {
 				    return new ExtendedPdo(

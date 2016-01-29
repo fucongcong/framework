@@ -11,9 +11,7 @@ class Kernal
 		$this -> fix_gpc_magic();
 
 		$app = new App();
-		
 	   	$app -> init($path, $loader);
-
 	   	$app -> handleHttp();
 	}
 
@@ -21,7 +19,6 @@ class Kernal
 	{
 		static $fixed = false;
 		if (!$fixed && ini_get('magic_quotes_gpc')) {
-
 			array_walk($_GET, '_fix_gpc_magic');
 			array_walk($_POST, '_fix_gpc_magic');
 			array_walk($_COOKIE, '_fix_gpc_magic');
@@ -45,7 +42,6 @@ class Kernal
 	private static function _fix_gpc_magic_files(&$item, $key)
 	{
 		if ($key != 'tmp_name') {
-
 			if (is_array($item)) {
 			  array_walk($item, '_fix_gpc_magic_files');
 			}
