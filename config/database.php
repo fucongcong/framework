@@ -21,79 +21,79 @@ return
             "database_charset" => "utf8",
         ],
 
-        // 'write' => [
+        'write' => [
 
-        //     'master1' => [
+            'master1' => [
 
-        //         "database_driver" => "mysql",
+                "database_driver" => "mysql",
 
-        //         "database_host" => "127.0.0.1",
+                "database_host" => "127.0.0.1",
 
-        //         "database_port" => "3306",
+                "database_port" => "3306",
 
-        //         "database_name" => "Group1",
+                "database_name" => "Group1",
 
-        //         "database_user" => "root",
+                "database_user" => "root",
 
-        //         "database_password" => "123",
+                "database_password" => "123",
 
-        //         "database_charset" => "utf8",
-        //     ],
+                "database_charset" => "utf8",
+            ],
 
-        //     'master2' => [
+            'master2' => [
 
-        //         "database_driver" => "mysql",
+                "database_driver" => "mysql",
 
-        //         "database_host" => "127.0.0.1",
+                "database_host" => "127.0.0.1",
 
-        //         "database_port" => "3306",
+                "database_port" => "3306",
 
-        //         "database_name" => "Group2",
+                "database_name" => "Group2",
 
-        //         "database_user" => "root",
+                "database_user" => "root",
 
-        //         "database_password" => "123",
+                "database_password" => "123",
 
-        //         "database_charset" => "utf8",
-        //     ],
-        // ],
+                "database_charset" => "utf8",
+            ],
+        ],
 
-        // 'read' => [
+        'read' => [
 
-        //     'slave1' => [
+            'slave1' => [
 
-        //         "database_driver" => "mysql",
+                "database_driver" => "mysql",
 
-        //         "database_host" => "127.0.0.1",
+                "database_host" => "127.0.0.1",
 
-        //         "database_port" => "3306",
+                "database_port" => "3306",
 
-        //         "database_name" => "Group3",
+                "database_name" => "Group3",
 
-        //         "database_user" => "root",
+                "database_user" => "root",
 
-        //         "database_password" => "123",
+                "database_password" => "123",
 
-        //         "database_charset" => "utf8",
-        //     ],
+                "database_charset" => "utf8",
+            ],
 
-        //     'slave2' =>  [
+            'slave2' =>  [
 
-        //         "database_driver" => "mysql",
+                "database_driver" => "mysql",
 
-        //         "database_host" => "127.0.0.1",
+                "database_host" => "127.0.0.1",
 
-        //         "database_port" => "3306",
+                "database_port" => "3306",
 
-        //         "database_name" => "Group4",
+                "database_name" => "Group4",
 
-        //         "database_user" => "root",
+                "database_user" => "root",
 
-        //         "database_password" => "123",
+                "database_password" => "123",
 
-        //         "database_charset" => "utf8",
-        //     ],
-        // ],
+                "database_charset" => "utf8",
+            ],
+        ],
     ],
 
 

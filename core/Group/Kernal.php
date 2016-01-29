@@ -27,8 +27,9 @@ class Kernal
 			$request -> server = isset($request -> server) ? $request -> server : [];
 			$request -> server['REQUEST_URI'] = isset($request -> server['request_uri']) ? $request -> server['request_uri'] : '';
 			preg_match_all("/^(.+\.php)(\/.*)$/", $request -> server['REQUEST_URI'], $matches);
+	
 			$request -> server['REQUEST_URI'] = isset($matches[2]) ? $matches[2][0] : '';
-		
+			
 			if ($request->server['request_uri'] == '/favicon.ico') {
 				$response->end();
 				return;

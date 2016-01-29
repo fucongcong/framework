@@ -35,16 +35,12 @@ class KernalInitListener extends \Listener
         $listeners = array_merge(\Config::get('listener::services'), $listeners);
 
         foreach ($listeners as $listener) {
-
             if (!class_exists($listener['listener'])) {
-
                 throw new NotFoundException("Class ".$listener['listener']." not found !");
             }
 
             $lis = new $listener['listener'];
-
             if (!$lis instanceof Listener) {
-
                 throw new \RuntimeException("Class ".$listener['listener']." must instanceof Listener !");
             }
 

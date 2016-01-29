@@ -35,7 +35,6 @@ class EventDispatcherService implements EventDispatcherContract
         $this -> setEvents($eventName);
 
         if (isset($this -> listeners[$eventName])) {
-
             $this -> doDispatch($eventName, $event);
         }
 
@@ -108,7 +107,6 @@ class EventDispatcherService implements EventDispatcherContract
     public function getListeners($eventName = null)
     {
         if (isset($eventName)) {
-
             return isset($this -> sorted[$eventName]) ? $this -> sorted[$eventName] : null;
         }
 
@@ -124,7 +122,6 @@ class EventDispatcherService implements EventDispatcherContract
     public function hasListeners($eventName = null)
     {
         if (isset($eventName) && isset($this -> sorted[$eventName])) {
-
             return  empty($this -> sorted[$eventName]) ? false : true;
         }
 
@@ -139,19 +136,14 @@ class EventDispatcherService implements EventDispatcherContract
     public function addSubscriber(EventSubscriberInterface $subscriber)
     {
         foreach ($subscriber -> getSubscribedEvents() as $eventName => $params) {
-
             if (is_string($params)) {
-
                 $this -> addListener($eventName, array($subscriber, $params));
 
             } elseif (is_string($params[0])) {
-
                 $this -> addListener($eventName, array($subscriber, $params[0]), isset($params[1]) ? $params[1] : 0);
 
             } else {
-
                 foreach ($params as $listener) {
-
                     $this -> addListener($eventName, array($subscriber, $listener[0]), isset($listener[1]) ? $listener[1] : 0);
                 }
             }
@@ -166,15 +158,11 @@ class EventDispatcherService implements EventDispatcherContract
     public function removeSubscriber(EventSubscriberInterface $subscriber)
     {
         foreach ($subscriber -> getSubscribedEvents() as $eventName => $params) {
-
             if (is_array($params) && is_array($params[0])) {
-
                 foreach ($params as $listener) {
                     $this -> removeListener($eventName, array($subscriber, $listener[0]));
                 }
-
             } else {
-
                 $this -> removeListener($eventName, array($subscriber, is_string($params) ? $params : $params[0]));
             }
         }
@@ -191,14 +179,10 @@ class EventDispatcherService implements EventDispatcherContract
         $listeners = $this -> sorted[$eventName];
 
         foreach ($listeners as $listener) {
-
             if (is_callable($listener, false)) {
-
                 call_user_func($listener, $event);
             }
-
             if ($listener instanceof Listener) {
-
                 call_user_func_array([$listener, $listener -> getMethod()], [$event]);
             }
         }

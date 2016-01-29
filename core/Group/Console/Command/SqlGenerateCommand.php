@@ -12,8 +12,8 @@ class SqlGenerateCommand extends Command
     {
         date_default_timezone_set(Config::get('app::timezone'));
         $dir = __ROOT__."app";
-        $this -> filesystem = new Filesystem();
-        $this -> filesystem -> mkdir($dir."/sql");
+        $filesystem = new Filesystem();
+        $filesystem -> mkdir($dir."/sql");
 
         $name = "Sql".date('YmdHis', time());
         $data = $this -> getFile("sql.tpl", $name);

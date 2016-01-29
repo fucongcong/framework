@@ -32,9 +32,9 @@ class GenerateControllerCommand extends Command
             die;
         }
 
-        $this -> filesystem = new Filesystem();
-        $this -> filesystem -> mkdir($dir."/Controller/".$controllerName);
-        $this -> filesystem -> mkdir($dir."/Views/".$controllerName);
+        $filesystem = new Filesystem();
+        $filesystem -> mkdir($dir."/Controller/".$controllerName);
+        $filesystem -> mkdir($dir."/Views/".$controllerName);
 
         $this -> outPut('开始创建模板...');
         $data = $this -> getFile("Controller.tpl", $controllerName);

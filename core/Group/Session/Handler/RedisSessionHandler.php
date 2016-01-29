@@ -4,7 +4,7 @@ namespace Group\Session\Handler;
 
 use Group\Redis\RedisHelper;
 
-class RedisSessionHandler implements \SessionHandlerInterface
+class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInterface 
 {
     /**
      * @var \Redis Redis driver.
@@ -26,7 +26,7 @@ class RedisSessionHandler implements \SessionHandlerInterface
     {
         $this -> prefix = \Config::get('session::prex');
         $this -> ttl = \Config::get('session::lifetime');
-        $this -> redis = $redis;
+        $this -> redis = $redis;   
     }
 
     /**

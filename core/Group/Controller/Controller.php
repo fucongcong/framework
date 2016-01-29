@@ -32,7 +32,6 @@ class Controller implements ControllerContract
 		$loader = new \Twig_Loader_Filesystem(\Config::get('view::path'));
 
 		if (\Config::get('view::cache')) {
-
 			$env = array(
 		    	'cache' => \Config::get('view::cache_dir')
 			);

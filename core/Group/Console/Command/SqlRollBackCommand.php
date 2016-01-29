@@ -3,8 +3,9 @@
 namespace Group\Console\Command;
 
 use Group\Console\Command as Command;
+use Group\Console\Command\SqlCleanCommand as SqlCleanCommand;
 
-class SqlMigrateCommand extends Command
+class SqlRollBackCommand extends Command
 {
     protected $fileList = [];
 
@@ -19,44 +20,49 @@ class SqlMigrateCommand extends Command
 
         $this -> ListSql($sqlDir);
 
-        \FileCache::set("sql.lock", $this -> fileList, $sqlDir);
+        //清除lock
+        $clean = new SqlCleanCommand;
+        $clean -> init();
     }
 
     private function ListSql($sqlDir)
-    {
+    {   
+        $files = [];
         if (is_dir($sqlDir)) {
             $dir = opendir($sqlDir);
-
             while (($file = readdir($dir)) !== false) {
                 $file = explode(".", $file);
                 $fileName = $file[0];
 
                 if ($fileName && isset($file[1]) && $file[1] == "php") {
-                    $this -> filterLockFile($fileName);
+                    $files[] = $fileName;     
                 }
             }
             closedir($dir);
         }
+
+        krsort($files);
+        foreach ($files as $fileName) {
+            $this -> filterLockFile($fileName);
+        }
+
     }
 
     private function filterLockFile($file)
     {
         $fileList = $this -> fileList;
 
-        if (in_array($file, $fileList)) return;
+        if (!in_array($file, $fileList)) return;
 
         $migrateClass = "\\app\\sql\\".$file;
         $sqlMigrate = new $migrateClass;
-        $sqlMigrate -> run();
+        $sqlMigrate -> back();
         $sqlArr = $sqlMigrate -> getSqlArr();
 
-        $this -> startMigrate($sqlArr);
-
-        $fileList[] = $file;
-        $this -> fileList = $fileList;
+        $this -> startRollBack($sqlArr);
     }
 
-    private function startMigrate($sqlArr)
+    private function startRollBack($sqlArr)
     {
         $dao = new \Dao();
         foreach ($sqlArr as $sql) {

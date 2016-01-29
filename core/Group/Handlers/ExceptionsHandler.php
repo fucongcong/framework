@@ -66,7 +66,6 @@ class ExceptionsHandler
     public function handleError($level, $message, $file = '', $line = 0, $context = [])
     {
         if (error_reporting() & $level) {
-
             $error = [
                 'message' => $message,
                 'file'    => $file,
@@ -87,7 +86,6 @@ class ExceptionsHandler
                     $this -> record($error, 'warning');
                     break;
             }
-
             return true;
         }
 
@@ -153,7 +151,6 @@ class ExceptionsHandler
     public function handleShutdown()
     {
         if ($e = error_get_last()) {
-
             if ($this -> isFatal($e['type'])) {
                 $this -> record($e);
                 $e['trace'] = '';

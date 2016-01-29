@@ -23,7 +23,6 @@ class BootstrapClass
     public function setClass($class) 
     {
         $file = $this -> loader -> findFile($class);
-       
         $this -> classes[$class] = $file;
     }
 
@@ -59,8 +58,7 @@ class BootstrapClass
      */
     public static function getInstance(){
 
-        if (!(self::$instance instanceof self)){
-
+        if (!(self::$instance instanceof self)) {
             self::$instance = new self;
         }
 

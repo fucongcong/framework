@@ -60,6 +60,10 @@ class App
 
     protected $serviceProviders = [];
 
+    protected $bootstraps = [
+        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response'
+    ];
+
     //to do
     protected $instances = [
         'container'         => '\Container',
@@ -110,9 +114,7 @@ class App
     public function aliasLoader()
     {
         $aliases = Config::get('app::aliases');
-
         $this -> aliases = array_merge($aliases, $this -> aliases);
-
         AliasLoaderHandler::getInstance($this -> aliases) -> register();
 
     }
@@ -126,7 +128,6 @@ class App
     public function singleton($name, $callable = null)
     {
         if (!isset($this -> singletons[$name]) && $callable) {
-
             $this -> singletons[$name] = call_user_func($callable);
         }
 
@@ -140,7 +141,6 @@ class App
     public function doSingle()
     {
         foreach ($this -> singles as $alias => $class) {
-
             $this -> singletons[$alias] = new $class();
         }
     }
@@ -148,7 +148,6 @@ class App
     public function doSingleInstance()
     {
         foreach ($this -> instances as $alias => $class) {
-
             $this -> singletons[$alias] = $class::getInstance();
         }
     }
@@ -160,7 +159,6 @@ class App
     public function registerServices()
     {   
         foreach ($this -> serviceProviders as $provider) {
-
             $provider = new $provider(self::$instance);
             $provider -> register();
         }
@@ -174,7 +172,6 @@ class App
     public static function getInstance()
     {
         if (!(self::$instance instanceof self)){
-
             self::$instance = new self;
         }
 
@@ -222,6 +219,10 @@ class App
         foreach ($this -> serviceProviders as $serviceProvider) {
             $bootstrapClass -> setClass($serviceProvider);
         }
+        foreach ($this -> bootstraps as $bootstrap) {
+            $bootstrap = isset($this -> aliases[$bootstrap]) ? $this -> aliases[$bootstrap] : $bootstrap;
+            $bootstrapClass -> setClass($bootstrap);
+        }
         $bootstrapClass -> bootstrap();
     }
 
@@ -232,8 +233,6 @@ class App
     public function setServiceProviders()
     {
         $providers = Config::get('app::serviceProviders');
-
         $this -> serviceProviders = array_merge($providers, $this -> serviceProviders);
-
     }
 }
