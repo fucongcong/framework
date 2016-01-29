@@ -57,24 +57,20 @@ Class Router implements RouterContract
 		$routing = $this -> getRouting();
 
 		if (isset($routing[$requestUri])) {
-
 			$this -> controller($routing[$requestUri]);
 			return;
 		}
 
 		foreach ($routing as $routeKey => $route) {
-
 			preg_match_all('/{(.*?)}/', $routeKey, $matches);
 
 			$config = "";
 
 			if ($matches[0]) {
-
 				$config = $this -> pregUrl($matches, $routeKey, $routing);
 			}
 
 			if ($config) {
-
 				$this -> controller($config);
 				return;
 			}
@@ -97,13 +93,11 @@ Class Router implements RouterContract
         $countKeyPreg = explode("/", $routeKey);
 
         if (count($countKey)!= count($countKeyPreg)) {
-
             return false;
         }
 
 		$route = $routeKey;
 		foreach ($matches[0] as $key => $match) {
-
 			$regex = str_replace($match, "(\S+)", $routeKey);
 			$routeKey = $regex;
 
@@ -114,15 +108,12 @@ Class Router implements RouterContract
 		}
 
 		foreach ($matches[1] as $key => $match) {
-
 			$filterParameters[] = $match;
-
 		}
 
 		$this -> route -> setParametersName($filterParameters);
 
 		if (preg_match_all('/^'.$regex.'$/', $this -> route -> getUri(), $values)) {
-
 			$config = $routing[$route];
 			$config['parameters'] = $this -> mergeParameters($filterParameters, $values);
 			return  $config;
@@ -139,24 +130,19 @@ Class Router implements RouterContract
 	public function controller($config)
 	{	
 		list($group, $subGroup, $controller, $action) = explode(':', $config['controller']);
-
 		$className = 'src\\'.$group.'\\Controller\\'.$subGroup.'\\'.$controller.'Controller';
-
 		$action = $action.'Action';
 
 		$this -> route -> setAction($action);
-
 		$this -> route -> setParameters(isset($config['parameters']) ? $config['parameters'] : array());
 
         $response = $this -> container -> doAction($className, $action, isset($config['parameters']) ? $config['parameters'] : array(), $this -> container -> getRequest());
-
         $this -> container -> setResponse($response);
 	}
 
 	protected function mergeParameters($parameters, $values)
 	{
 		foreach ($parameters as $key => $parameter) {
-
 			$parameterValue[$parameter] = $values[$key+1][0];
 		}
 
@@ -174,7 +160,6 @@ Class Router implements RouterContract
 	protected function checkMethods()
 	{
 		if ($this -> container -> getEnvironment() == "prod") {
-
 			return $this -> getMethodsCache();
 		}
 
@@ -192,7 +177,6 @@ Class Router implements RouterContract
 	public function setRoute($methods, $uri, $method)
 	{
 		$this -> route = \Route::getInstance();
-
 		$this -> route -> setMethods($methods);
 		$this -> route -> setCurrentMethod($method);
 		$this -> route -> setUri($uri);
@@ -203,12 +187,10 @@ Class Router implements RouterContract
 		$file = 'route/routing_'.$this -> route -> getCurrentMethod().'.php';
 
 		if(\FileCache::isExist($file)) {
-
 			return \FileCache::get($file);
 		}
 
 		$config = $this -> createMethodsCache();
-
 		\FileCache::set($file, $config);
 
 		return $config;
@@ -226,11 +208,9 @@ Class Router implements RouterContract
 		$config = array();
 
 		foreach ($routing as $key => $route) {
-
 				$route['alias'] = $key;
 
 				if(!isset($route['methods'])) {
-
 					$config[$key] = $route;
 					continue;
 				}

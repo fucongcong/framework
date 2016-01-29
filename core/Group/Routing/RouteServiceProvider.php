@@ -15,7 +15,6 @@ class RouteServiceProvider extends ServiceProvider
     public function register()
     {
         $this -> app -> singleton('route', function () {
-
             return RouteService::getInstance();
         });
     }

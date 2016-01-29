@@ -53,9 +53,7 @@ class Container implements ContainerContract
 	public function buildMoudle($class)
 	{
 		if (!class_exists($class)) {
-
 			throw new NotFoundException("Class ".$class." not found !");
-
 		}
 
 		$reflector = new ReflectionClass($class);
@@ -76,15 +74,13 @@ class Container implements ContainerContract
 		$reflector = $this -> buildMoudle($class);
 
 		if (!$reflector -> hasMethod($action)) {
-
 			throw new NotFoundException("Class ".$class." exist ,But the Action ".$action." not found");
 		}
 
 		$instanc = $reflector -> newInstanceArgs(array(App::getInstance()));
 		$method = $reflector -> getmethod($action);
         $args = [];
-        foreach ($method -> getParameters() as $arg)
-        {
+        foreach ($method -> getParameters() as $arg) {
             $paramName = $arg ->getName();
             if (isset($parameters[$paramName])) $args[$paramName] = $parameters[$paramName];
             if (!empty($arg -> getClass()) && $arg -> getClass() -> getName() == 'Group\Http\Request') $args[$paramName] = $request;
@@ -101,7 +97,6 @@ class Container implements ContainerContract
 	public static function getInstance()
     {
 		if (!(self::$instance instanceof self)){
-
 			self::$instance = new self;
 		}
 
