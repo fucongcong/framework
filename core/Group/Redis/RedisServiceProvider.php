@@ -27,7 +27,7 @@ class RedisServiceProvider extends ServiceProvider
                 $redis -> connect($config['default']['host'], $config['default']['port']);
             }
 
-            if (isset($config['default']['auth'])){
+            if (isset($config['default']['auth'])) {
                 $redis -> auth($config['default']['auth']);
             }
 
@@ -36,5 +36,4 @@ class RedisServiceProvider extends ServiceProvider
             return $redis;
         });
     }
-
 }
