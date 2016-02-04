@@ -4,6 +4,7 @@ namespace Group\Twig;
 
 use Twig_Extension;
 use Route;
+use Group\Routing\Router;
 
 class WebExtension extends Twig_Extension
 {
@@ -18,6 +19,7 @@ class WebExtension extends Twig_Extension
 			'asset' => new \Twig_Function_Method($this, 'getPublic') ,
 			'url'   => new \Twig_Function_Method($this, 'getUrl') ,
 			'dump'  => new \Twig_Function_Method($this, 'dump') ,
+			'render'  => new \Twig_Function_Method($this, 'render') ,
 		);
 	}
 
@@ -50,6 +52,13 @@ class WebExtension extends Twig_Extension
 	public function dump($var)
 	{
 		return var_dump($var);
+	}
+
+	public function render($controller, $params)
+	{	
+		$config['controller'] = $controller;
+		$config['parameters'] = $params;
+		return \App::getInstance() -> router -> getTpl($config);
 	}
 
 	public function getName()

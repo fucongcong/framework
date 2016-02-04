@@ -22,7 +22,7 @@ class App
 
     public $container;
 
-    protected $router;
+    public $router;
 
     /**
      * array aliases
@@ -102,6 +102,7 @@ class App
         $handler -> bootstrap($this);
 
         $this -> router = new Router($this -> container);
+        self::getInstance() -> router = $this -> router;
         $this -> router -> match();
     }
 

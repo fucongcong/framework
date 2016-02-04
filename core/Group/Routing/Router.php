@@ -7,6 +7,7 @@ use Group\Contracts\Routing\Router as RouterContract;
 use App;
 use Group\Events\KernalEvent;
 use Group\Events\HttpEvent;
+use Response;
 
 Class Router implements RouterContract
 {
@@ -129,6 +130,17 @@ Class Router implements RouterContract
 	 */
 	public function controller($config)
 	{	
+		$tplData = $this -> getTpl($config);
+
+		if ($tplData instanceof Response) {
+			$this -> container -> setResponse($tplData);
+		} else {
+			$this -> container -> setResponse(new Response($tplData));
+		}
+	}
+
+	public function getTpl($config)
+	{	
 		list($group, $subGroup, $controller, $action) = explode(':', $config['controller']);
 		$className = 'src\\'.$group.'\\Controller\\'.$subGroup.'\\'.$controller.'Controller';
 		$action = $action.'Action';
@@ -136,8 +148,7 @@ Class Router implements RouterContract
 		$this -> route -> setAction($action);
 		$this -> route -> setParameters(isset($config['parameters']) ? $config['parameters'] : array());
 
-        $response = $this -> container -> doAction($className, $action, isset($config['parameters']) ? $config['parameters'] : array(), $this -> container -> getRequest());
-        $this -> container -> setResponse($response);
+		return $this -> container -> doAction($className, $action, isset($config['parameters']) ? $config['parameters'] : array(), $this -> container -> getRequest());
 	}
 
 	protected function mergeParameters($parameters, $values)
