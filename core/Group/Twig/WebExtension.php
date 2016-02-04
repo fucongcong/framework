@@ -16,12 +16,19 @@ class WebExtension extends Twig_Extension
  	public function getFunctions()
 	{
 		return array(
-			'asset' => new \Twig_Function_Method($this, 'getPublic') ,
-			'url'   => new \Twig_Function_Method($this, 'getUrl') ,
-			'dump'  => new \Twig_Function_Method($this, 'dump') ,
-			'render'  => new \Twig_Function_Method($this, 'render') ,
+			'asset' => new \Twig_Function_Method($this, 'getPublic'),
+			'url'   => new \Twig_Function_Method($this, 'getUrl'),
+			'dump'  => new \Twig_Function_Method($this, 'dump'),
+			'render'  => new \Twig_Function_Method($this, 'render'),
 		);
 	}
+
+    public function getFilters ()
+    {
+        return array(
+            'smart_time' => new \Twig_Filter_Method($this, 'smarttimeFilter'),
+        );
+    }
 
     /**
 	 * 获取asset目录下得文件路径
@@ -40,7 +47,7 @@ class WebExtension extends Twig_Extension
 	 */
 	public function getUrl($url, $params = [])
 	{
-		Route::deParse($url, $params);
+		return Route::deParse($url, $params);
 	}
 
     /**
@@ -60,6 +67,39 @@ class WebExtension extends Twig_Extension
 		$config['parameters'] = $params;
 		return \App::getInstance() -> router -> getTpl($config);
 	}
+
+    public function smarttimeFilter($time) {
+        $diff = time() - $time;
+        if ($diff < 0) {
+            return '未来';
+        }
+
+        if ($diff == 0) {
+            return '刚刚';
+        }
+
+        if ($diff < 60) {
+            return $diff . '秒前';
+        }
+
+        if ($diff < 3600) {
+            return round($diff / 60) . '分钟前';
+        }
+
+        if ($diff < 86400) {
+            return round($diff / 3600) . '小时前';
+        }
+
+        if ($diff < 2592000) {
+            return round($diff / 86400) . '天前';
+        }
+
+        if ($diff < 31536000) {
+            return date('m-d', $time);
+        }
+
+        return date('Y-m-d', $time);
+    }
 
 	public function getName()
 	{
