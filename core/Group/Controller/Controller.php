@@ -24,7 +24,7 @@ class Controller implements ControllerContract
 	 */
 	public function render($tpl, $array = array())
 	{
-		return new \Response($this -> twigInit() -> render($tpl, $array));
+		return $this -> twigInit() -> render($tpl, $array);
 	}
 
 	public function twigInit()

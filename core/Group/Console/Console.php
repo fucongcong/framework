@@ -32,7 +32,7 @@ class Console
  ----------------------------------------------------------
 \033[0m
 \033[31m 使用帮助: \033[0m
-\033[33m Usage: core/console [options] [args...] \033[0m
+\033[33m Usage: app/console [options] [args...] \033[0m
 
 \033[32m generate:service name \033[0m      生成一个自定义service
 \033[32m generate:controller  name \033[0m   生成一个自定义controller
