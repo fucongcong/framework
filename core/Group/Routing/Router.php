@@ -89,8 +89,12 @@ Class Router implements RouterContract
 	 * @return  array|bool false
 	 */
 	public function pregUrl($matches, $routeKey, $routing)
-	{
-        $countKey = explode("/", $this -> route -> getUri());
+	{	
+		$requestUri = $this -> route -> getUri();
+		if (substr($requestUri, -1) == "/") {
+			$requestUri = substr($requestUri, 0, -1);
+		}
+        $countKey = explode("/", $requestUri);
         $countKeyPreg = explode("/", $routeKey);
 
         if (count($countKey)!= count($countKeyPreg)) {
