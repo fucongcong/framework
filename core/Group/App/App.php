@@ -96,10 +96,11 @@ class App
 
         $this -> container = $this -> singleton('container');
         $this -> container -> setAppPath($path);
-        $this -> container -> setRequest($request);
-
+        
         $handler = new ExceptionsHandler();
         $handler -> bootstrap($this);
+
+        $this -> container -> setRequest($request);
 
         $this -> router = new Router($this -> container);
         self::getInstance() -> router = $this -> router;

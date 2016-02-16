@@ -5,6 +5,7 @@ namespace Group\Twig;
 use Twig_Extension;
 use Route;
 use Group\Routing\Router;
+use Group\Session\CsrfSessionService;
 
 class WebExtension extends Twig_Extension
 {
@@ -19,7 +20,8 @@ class WebExtension extends Twig_Extension
 			'asset' => new \Twig_Function_Method($this, 'getPublic'),
 			'url'   => new \Twig_Function_Method($this, 'getUrl'),
 			'dump'  => new \Twig_Function_Method($this, 'dump'),
-			'render'  => new \Twig_Function_Method($this, 'render'),
+			'render'  => new \Twig_Function_Method($this, 'render', array('is_safe' => array('html'))),
+			'csrf_token'  => new \Twig_Function_Method($this, 'getCsrfToken'),
 		);
 	}
 
@@ -66,6 +68,12 @@ class WebExtension extends Twig_Extension
 		$config['controller'] = $controller;
 		$config['parameters'] = $params;
 		return \App::getInstance() -> router -> getTpl($config);
+	}
+
+	public function getCsrfToken()
+	{
+		$csrfProvider = new CsrfSessionService();
+		return $csrfProvider -> generateCsrfToken();
 	}
 
     public function smarttimeFilter($time) {
