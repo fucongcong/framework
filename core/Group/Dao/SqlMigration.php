@@ -10,9 +10,9 @@ abstract class SqlMigration
      * run the sql
      *
      */
-    abstract function run();
+    abstract public function run();
 
-    abstract function back();
+    abstract public function back();
 
     /**
      * add sql

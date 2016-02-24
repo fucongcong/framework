@@ -209,7 +209,7 @@ class App
     {   
         $this -> setServiceProviders();
 
-        if (Config::get('app::environment') == "prod" && file_exists("runtime/cache/bootstrap.class.cache")) {
+        if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
             require "runtime/cache/bootstrap.class.cache";
             return;
         }
