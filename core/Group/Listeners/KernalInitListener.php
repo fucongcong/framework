@@ -16,6 +16,11 @@ class KernalInitListener extends \Listener
     {
         $listeners = [
             [
+                'eventName' => KernalEvent::REQUEST,
+                'listener'  => 'Group\Listeners\KernalRequestListener',
+                'priority'  => 0,
+            ],
+            [
                 'eventName' => KernalEvent::RESPONSE,
                 'listener'  => 'Group\Listeners\KernalResponseListener',
                 'priority'  => 0,
