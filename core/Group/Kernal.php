@@ -10,16 +10,16 @@ class Kernal
 	public function init($path, $loader)
 	{
 		$http = new swoole_http_server("127.0.0.1", 9777);
-		$http->set(array(
+		$http -> set(array(
 			'reactor_num' => 4,
 		    'worker_num' => 25,    //worker process num
 		    'backlog' => 128,   //listen backlog
 		    'max_request' => 2000,
 	        'heartbeat_idle_time' => 30,
     		'heartbeat_check_interval' => 10,
-		    'dispatch_mode'=>1, 
+		    'dispatch_mode' => 1, 
 		));
-		$http->on('request', function ($request, $response) use ($path, $loader) {
+		$http -> on('request', function ($request, $response) use ($path, $loader) {
 			$request -> get = isset($request -> get) ? $request -> get : [];
 			$request -> post = isset($request -> post) ? $request -> post : [];
 			$request -> cookie = isset($request -> cookie) ? $request -> cookie : [];
@@ -44,7 +44,7 @@ class Kernal
 		    $response -> end($data -> getContent());
 		    return;
 		});
-		$http->start();
+		$http -> start();
 	}
 
 	public function fix_gpc_magic($request)
