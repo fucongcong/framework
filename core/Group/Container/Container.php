@@ -184,7 +184,7 @@ class Container implements ContainerContract
      * 设置response
      *
      */
-    public function setResponse(\Response $response)
+    public function setResponse($response)
     {
         $this -> response = $response;
     }

@@ -90,6 +90,11 @@ class Controller implements ControllerContract
 		return \Session::getFlashBag() -> all();
 	}
 
+	public function redirect($url, $status = 302)
+	{
+		return new \RedirectResponse($url, $status);
+	}
+
 	public function __call($method, $parameters)
 	{
 		throw new NotFoundException("Method [$method] does not exist.");

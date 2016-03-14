@@ -43,6 +43,7 @@ class App
         'Request'           => 'Group\Http\Request',
         'Response'          => 'Group\Http\Response',
         'JsonResponse'      => 'Group\Http\JsonResponse',
+        'RedirectResponse'  => 'Group\Http\RedirectResponse',
         'Service'           => 'Group\Services\Service',
         'ServiceProvider'   => 'Group\Services\ServiceProvider',
         'Session'           => 'Group\Session\Session',

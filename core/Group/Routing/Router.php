@@ -136,7 +136,7 @@ Class Router implements RouterContract
 	{	
 		$tplData = $this -> getTpl($config);
 
-		if ($tplData instanceof Response) {
+		if ($tplData instanceof Response || $tplData instanceof \RedirectResponse || $tplData instanceof \JsonResponse) {
 			$this -> container -> setResponse($tplData);
 		} else {
 			$this -> container -> setResponse(new Response($tplData));

@@ -8,7 +8,7 @@ final class HttpEvent extends \Event
 
     protected $response;
 
-    public function __construct(\Request $request = null, \Response $response = null)
+    public function __construct(\Request $request = null, $response = null)
     {	
     	$this -> request = $request;
         $this -> response = $response;
