@@ -2,9 +2,7 @@
 
 namespace Group\Session\Handler;
 
-use Group\Redis\RedisHelper;
-
-class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInterface
+class MySqlSessionHandler extends \SessionHandler implements \SessionHandlerInterface
 {
     /**
      * @var \Redis Redis driver.

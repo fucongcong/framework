@@ -90,9 +90,9 @@ class Controller implements ControllerContract
 		return \Session::getFlashBag() -> all();
 	}
 
-	public function redirect($url)
+	public function redirect($url, $status = 302)
 	{
-		return new \RedirectResponse($url);
+		return new \RedirectResponse($url, $status);
 	}
 
 	public function __call($method, $parameters)

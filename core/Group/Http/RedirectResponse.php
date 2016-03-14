@@ -2,7 +2,7 @@
 
 namespace Group\Http;
 
-use Symfony\Component\HttpFoundation\JsonResponse as SfRedirectResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse as SfRedirectResponse;
 
 class RedirectResponse extends SfRedirectResponse
 {
