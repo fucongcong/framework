@@ -17,7 +17,7 @@ class Kernal
 		    'max_request' => 2000,
 	        'heartbeat_idle_time' => 30,
     		'heartbeat_check_interval' => 10,
-		    'dispatch_mode' => 1, 
+		    'dispatch_mode' => 3, 
 		));
 		$http -> on('request', function ($request, $response) use ($path, $loader) {
 			$request -> get = isset($request -> get) ? $request -> get : [];
