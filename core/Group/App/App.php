@@ -43,6 +43,7 @@ class App
         'Request'           => 'Group\Http\Request',
         'Response'          => 'Group\Http\Response',
         'JsonResponse'      => 'Group\Http\JsonResponse',
+        'RedirectResponse'  => 'Group\Http\RedirectResponse',
         'Service'           => 'Group\Services\Service',
         'ServiceProvider'   => 'Group\Services\ServiceProvider',
         'Session'           => 'Group\Session\Session',
@@ -209,7 +210,7 @@ class App
     {   
         $this -> setServiceProviders();
 
-        if (Config::get('app::environment') == "prod" && file_exists("runtime/cache/bootstrap.class.cache")) {
+        if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
             require "runtime/cache/bootstrap.class.cache";
             return;
         }

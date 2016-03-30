@@ -77,7 +77,7 @@ interface Container
      * 设置response
      *
      */
-    public function setResponse(\Response $response);
+    public function setResponse($response);
 
     /**
      * 获取设置的response
