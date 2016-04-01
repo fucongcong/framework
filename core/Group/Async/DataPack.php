@@ -2,8 +2,8 @@
 
 namespace Group\Async;
 
-class DataPack {
-
+class DataPack 
+{
 	public static function pack($cmd = '', $data = [])
 	{
 		return json_encode(['cmd' => $cmd, 'data' => $data]);

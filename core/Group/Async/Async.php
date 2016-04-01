@@ -53,7 +53,7 @@ class Async
         $log = explode("/", $log);
         \FileCache::set(array_pop($log), '', implode("/", $log)."/");
         $server = new Server($config[$argv[1]], $argv[1]);
-        $server -> start();
+        $server -> initConfig($config[$argv[1]]);
         die;
     }
 }
