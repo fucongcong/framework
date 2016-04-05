@@ -26,9 +26,11 @@ class Server
         $this -> serv -> on('Task', [$this, 'onTask']);
         $this -> serv -> on('Finish', [$this, 'onFinish']);
 
-        $this -> serv -> start();
+        $this -> initConfig($config);
 
         $this -> servName = $servName;
+        
+        $this -> serv -> start();
 	}
 
     public function onStart(swoole_server $serv)
@@ -81,10 +83,10 @@ class Server
             $config = $this -> config;
             foreach($data as $one){
                 list($cmd, $one) = \Group\Async\DataPack::unpack($one);
-                
+           
                 if (isset($config['onWork'][$cmd])) {
                     $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one);
-
+    
                     $handler -> handle();
                 }
             }

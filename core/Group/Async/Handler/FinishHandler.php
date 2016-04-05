@@ -10,6 +10,10 @@ abstract class FinishHandler
 
 	protected $data;
 
+	protected $cache;
+
+	protected $database;
+
 	public function __construct($serv, $fd, $data)
 	{
 		$this -> serv = $serv;
@@ -37,5 +41,25 @@ abstract class FinishHandler
 	public function getFd()
 	{
 		return $this -> fd;
+	}
+
+	public function setCache(obj $cache)
+	{
+		$this -> cache = $cache;
+	}
+
+	public function getCache()
+	{
+		return $this -> cache;
+	}
+
+	public function setDatabase(obj $database)
+	{
+		$this -> database = $database;
+	}
+
+	public function getDatabase()
+	{
+		return $this -> database;
 	}
 }
