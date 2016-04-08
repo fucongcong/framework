@@ -56,8 +56,7 @@ class Controller implements ControllerContract
 	 */
 	public function createService($serviceName)
 	{
-		$service = new \Service($this -> app);
-		return $service -> createService($serviceName);
+		return $this -> app -> singleton('service') -> createService($serviceName);
 	}
 
 	/**
