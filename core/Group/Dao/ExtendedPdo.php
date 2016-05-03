@@ -24,14 +24,14 @@ class ExtendedPdo extends Aura_ExtendedPdo
      */
     public function perform($statement, array $values = array())
     {	
-    	for($i = 0; $i<2; $i++) {
+    	for($i = 0; $i < 2; $i++) {
 	        try {
 	        	$sth = $this->prepareWithValues($statement, $values);
 	        	$this->beginProfile(__FUNCTION__);
 	        	$sth->execute();
 	        	break;
 	        } catch (\Exception $e) {
-	        	if ($sth ->errorCode() == "HY000" && php_sapi_name() == 'cli') {
+	        	if ($sth->errorCode() == "HY000" && php_sapi_name() == 'cli') {
 	        		$this->pdo = null;
 	        		$this->connect();
 	        		continue;
