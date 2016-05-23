@@ -5,7 +5,7 @@ return [
 
     //当server类型是swoole 需要指定host,port
     'host' => '127.0.0.1',
-    'port' => 9776,
+    'port' => 9777,
 
 
     // prod|dev
