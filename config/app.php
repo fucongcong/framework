@@ -3,6 +3,11 @@ return [
     //normal|swoole
     'server' => 'swoole',
 
+    //当server类型是swoole 需要指定host,port
+    'host' => '127.0.0.1',
+    'port' => 9776,
+
+
     // prod|dev
     'environment' => 'dev',
 

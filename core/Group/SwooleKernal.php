@@ -8,8 +8,10 @@ use swoole_http_server;
 class SwooleKernal
 {
 	public function init($path, $loader)
-	{
-		$http = new swoole_http_server("127.0.0.1", 9777);
+	{	
+		$host = \Group\Config\Config::get('app::host') ? : "127.0.0.1";
+		$port = \Group\Config\Config::get('app::port') ? : 9777;
+		$http = new swoole_http_server($host, $port);
 		$http -> set(array(
 			'reactor_num' => 4,
 		    'worker_num' => 25,    //worker process num
@@ -19,6 +21,7 @@ class SwooleKernal
     		'heartbeat_check_interval' => 10,
 		    'dispatch_mode' => 3, 
 		));
+
 		$http -> on('request', function ($request, $response) use ($path, $loader) {
 			$request -> get = isset($request -> get) ? $request -> get : [];
 			$request -> post = isset($request -> post) ? $request -> post : [];
@@ -39,7 +42,7 @@ class SwooleKernal
 			$app = new App();		
 		 	$app -> initSwoole($path, $loader, $request);
 
-		 	$data = $app -> handleHttp();
+		 	$data = $app -> handleSwooleHttp();
 		 	$response -> status($data -> getStatusCode());
 		    $response -> end($data -> getContent());
 		    return;

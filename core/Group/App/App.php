@@ -83,6 +83,35 @@ class App
      * init appliaction
      *
      */
+    public function init($path, $loader)
+    {
+        $this -> initSelf();
+
+        $this -> doBootstrap($loader);
+
+        $request = \Request::createFromGlobals();
+
+        $this -> registerServices();
+       
+        \EventDispatcher::dispatch(KernalEvent::INIT);
+
+        $this -> container = $this -> singleton('container');
+        $this -> container -> setAppPath($path);
+        
+        $handler = new ExceptionsHandler();
+        $handler -> bootstrap($this);
+
+        $this -> container -> setRequest($request);
+
+        $this -> router = new Router($this -> container);
+        self::getInstance() -> router = $this -> router;
+        $this -> router -> match();
+    }
+
+    /**
+     * init appliaction
+     *
+     */
     public function initSwoole($path, $loader, $request)
     {
         $this -> initSelf();
@@ -186,6 +215,13 @@ class App
      *
      */
     public function handleHttp()
+    {
+        $response = $this -> container -> getResponse();
+        $request = $this -> container -> getRequest();
+        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
+    }
+
+    public function handleSwooleHttp()
     {
         $response = $this -> container -> getResponse();
         $request = $this -> container -> getRequest();
