@@ -1,5 +1,7 @@
 <?php
 return [
+    //normal|swoole
+    'server' => 'swoole',
 
     // prod|dev
     'environment' => 'dev',

@@ -5,7 +5,7 @@ namespace Group;
 use Group\App\App;
 use swoole_http_server;
 
-class Kernal
+class SwooleKernal
 {
 	public function init($path, $loader)
 	{
@@ -37,7 +37,7 @@ class Kernal
 			
 			$this -> fix_gpc_magic($request);
 			$app = new App();		
-		 	$app -> init($path, $loader, $request);
+		 	$app -> initSwoole($path, $loader, $request);
 
 		 	$data = $app -> handleHttp();
 		 	$response -> status($data -> getStatusCode());

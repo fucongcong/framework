@@ -83,7 +83,7 @@ class App
      * init appliaction
      *
      */
-    public function init($path, $loader, $request)
+    public function initSwoole($path, $loader, $request)
     {
         $this -> initSelf();
 
