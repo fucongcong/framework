@@ -97,6 +97,7 @@ class Cron
             foreach ($this -> jobs as $job) {
                 $workers = $this -> table -> get('workers');
                 $workers = json_decode($workers['workers'], true);
+                //这里可以优化 如果用redis等等持久化的缓存来存的话  就可以做到对子进程的管理了，比如重新跑脚本，现在swoole table只能用于当前进程
                 if (isset($workers[$job['name']]['nextTime'])) continue;
 
                 $this -> workers[$job['name']]['process'] -> write(json_encode($job));
@@ -187,6 +188,7 @@ class Cron
             ];
 
             $workers = $this -> table -> get('workers');
+            $workers = json_decode($workers['workers'], true);
             $workers[$this -> jobs[$i]['name']] = [
                 'job' => $this -> jobs[$i],
                 'pid' => $processPid,

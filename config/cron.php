@@ -25,11 +25,11 @@ return [
         //     'command' => 'src\Web\Cron\TestCache',
         // ],
 
-        // [
-        //     'name' => 'testSql',
-        //     'time' => '* * * * *',//定时规则 分 小时 天 周 月
-        //     'command' => 'src\Web\Cron\TestSql',
-        // ],
+        [
+            'name' => 'testSql',
+            'time' => '* * * * *',//定时规则 分 小时 天 周 月
+            'command' => 'src\Web\Cron\Test',
+        ],
 
         // [
         //     'name' => 'testSql2',
