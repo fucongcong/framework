@@ -6,6 +6,7 @@ use Group\Cron\ParseCrontab;
 use Group\App\App;
 use Group\Cache\BootstrapClass;
 use swoole_process;
+use swoole_table;
 
 class Cron
 {
@@ -33,6 +34,8 @@ class Cron
 
     protected $logDir;
 
+    protected $table;
+
     protected $help = "
 \033[34m
  ----------------------------------------------------------
@@ -46,7 +49,7 @@ class Cron
  ----------------------------------------------------------
 \033[0m
 \033[31m 使用帮助: \033[0m
-\033[33m Usage: app/cron [start|restart|stop] \033[0m
+\033[33m Usage: app/cron [start|restart|stop|status] \033[0m
 ";
     /**
      * 初始化环境
@@ -92,7 +95,9 @@ class Cron
 
         swoole_timer_tick($this -> tickTime, function($timerId) {
             foreach ($this -> jobs as $job) {
-                if (\FileCache::isExist($job['name'], $this -> cacheDir)) continue;
+                $workers = $this -> table -> get('workers');
+                $workers = json_decode($workers['workers'], true);
+                if (isset($workers[$job['name']]['nextTime'])) continue;
 
                 $this -> workers[$job['name']]['process'] -> write(json_encode($job));
                 //$this -> bindTick($job);
@@ -100,6 +105,11 @@ class Cron
         });
 
         $this -> setPid();
+    }
+
+    public function status()
+    {
+
     }
 
     public function restart()
@@ -159,7 +169,11 @@ class Cron
      *
      */
     private function startWorkers()
-    {   
+    {      
+        $this -> table = new swoole_table(1024);
+        $this -> table -> create();
+        $this -> table -> column('workers', swoole_table::TYPE_STRING, 1024 * 20);
+        $this -> table -> set('jobNum', array('count' => 0));
         //启动worker进程
         for ($i = 0; $i < $this -> workerNum; $i++) { 
             $process = new swoole_process(array($this, 'workerCallBack'), true);
@@ -171,6 +185,14 @@ class Cron
                 'process' => $process,
                 'job' => $this -> jobs[$i],
             ];
+
+            $workers = $this -> table -> get('workers');
+            $workers[$this -> jobs[$i]['name']] = [
+                'job' => $this -> jobs[$i],
+                'pid' => $processPid,
+                'startTime' => date('Y-m-d H:i:s', time()),
+            ];
+            $this -> table -> set('workers', ['workers' => json_encode($workers)]);
 
             \Log::info("工作worker{$processPid}启动", [], 'cron.work');    
         }
@@ -185,7 +207,7 @@ class Cron
         $argv = $this -> argv;
         if (!isset($argv[1])) die($this -> help);
 
-        if (!in_array($argv[1], ['start', 'restart', 'stop'])) die($this -> help);
+        if (!in_array($argv[1], ['start', 'restart', 'stop', 'status'])) die($this -> help);
 
         $function = $argv[1];
         $this -> $function();
@@ -198,8 +220,7 @@ class Cron
             $recv = json_decode($recv, true);
             if (!is_array($recv)) return;
 
-            $this -> bindTick($recv);
-                    
+            $this -> bindTick($recv);         
         });
     }
 
@@ -220,12 +241,24 @@ class Cron
         swoole_timer_tick(intval($timer * 1000), function($timerId, $job) {
             call_user_func_array([new $job['command'], 'handle'], []);
 
-            \FileCache::set($job['name'], ['nextTime' => date('Y-m-d H:i:s', time() + intval($job['timer']))], $this -> cacheDir);
+            $workers = $this -> table -> get('workers');
+            $workers = json_decode($workers['workers'], true);
+            $workers[$job['name']]['startTime'] = date('Y-m-d H:i:s', time());
+            $workers[$job['name']]['nextTime'] = date('Y-m-d H:i:s', time() + intval($job['timer']));
+            $this -> table -> set('workers', ['workers' => json_encode($workers)]);
+
+            \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
 
         }, $job);
 
-        \FileCache::set($job['name'], ['nextTime' => date('Y-m-d H:i:s', time() + intval($timer))], $this -> cacheDir);
-         \Log::info('定时任务启动'.$job['name'], [], 'cron.start');
+        $workers = $this -> table -> get('workers');
+        $workers = json_decode($workers['workers'], true);
+        $workers[$job['name']]['startTime'] = date('Y-m-d H:i:s', time());
+        $workers[$job['name']]['nextTime'] = date('Y-m-d H:i:s', time() + intval($job['timer']));
+        $this -> table -> set('workers', ['workers' => json_encode($workers)]);
+
+        \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
+        \Log::info('定时任务启动'.$job['name'], [], 'cron.start');
     }
 
     private function checkStatus()
