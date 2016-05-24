@@ -1,11 +1,9 @@
 <?php
 return [
-    //normal|swoole
-    'server' => 'swoole',
 
-    //当server类型是swoole 需要指定host,port
-    'host' => '127.0.0.1',
-    'port' => 9777,
+    //当使用swoole http server 时，需要指定host,port
+    'swoole_host' => '127.0.0.1',
+    'swoole_port' => 9777,
 
 
     // prod|dev

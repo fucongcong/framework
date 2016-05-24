@@ -9,8 +9,8 @@ class SwooleKernal
 {
 	public function init($path, $loader)
 	{	
-		$host = \Group\Config\Config::get('app::host') ? : "127.0.0.1";
-		$port = \Group\Config\Config::get('app::port') ? : 9777;
+		$host = \Group\Config\Config::get('app::swoole_host') ? : "127.0.0.1";
+		$port = \Group\Config\Config::get('app::swoole_port') ? : 9777;
 		$http = new swoole_http_server($host, $port);
 		$http -> set(array(
 			'reactor_num' => 4,
