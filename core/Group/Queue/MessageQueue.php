@@ -1,6 +1,6 @@
 <?php
 /*
-beanstalkd -l 127.0.0.1 -p 11300
+beanstalkd -l 127.0.0.1 -p 11300 -b /
 */
 namespace Group\Queue;
 
