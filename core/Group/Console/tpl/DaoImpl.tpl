@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Services\{{name}}\Dao\Impl;
+namespace src\Dao\{{name}}\Impl;
 
 use Dao;
 use src\Services\{{name}}\Dao\{{name}}Dao;
