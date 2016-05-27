@@ -10,7 +10,7 @@ class Service
 	{
 		list($group, $serviceName) = explode(":", $serviceName);
 		$class = $serviceName."DaoImpl";
-		$serviceName = "src\\Services\\".$group."\\Dao\\Impl\\".$class;
+		$serviceName = "src\\Dao\\".$group."\\Impl\\".$class;
 
         return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
             return new $serviceName();

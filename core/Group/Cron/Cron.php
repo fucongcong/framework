@@ -196,7 +196,9 @@ class Cron
             ];
             $this -> table -> set('workers', ['workers' => json_encode($workers)]);
 
-            \Log::info("工作worker{$processPid}启动", [], 'cron.work');    
+            \Log::info("工作worker{$processPid}启动", [], 'cron.work');
+
+            call_user_func_array([new $this -> jobs[$i]['command'], 'handle'], []);
         }
     }
 
@@ -236,7 +238,7 @@ class Cron
 
         if (is_null($timer)) return;
 
-        call_user_func_array([new $job['command'], 'handle'], []);
+        //call_user_func_array([new $job['command'], 'handle'], []);
 
         $job['timer'] = $timer;
 
