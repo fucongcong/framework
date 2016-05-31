@@ -3,6 +3,8 @@ return [
     
     'cache_dir' => 'runtime/rpc',
 
+    'current_server' => 'tcp',
+     
     'server' => [
         //连接类型
         'tcp' => [

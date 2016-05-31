@@ -54,7 +54,8 @@ class RpcKernal
         $app -> initSelf();
         $app -> doBootstrap($loader);
         $app -> registerServices();
-
+        $app -> singleton('container') -> setAppPath(__ROOT__);
+        
         $classMap = new Group\Common\ClassMap();
         $classes = $classMap -> doSearch();
 

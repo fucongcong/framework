@@ -37,6 +37,7 @@ return [
         'Group\Routing\RouteServiceProvider',
         'Group\EventDispatcher\EventDispatcherServiceProvider',
         'Group\Queue\QueueServiceProvider',
+        'Group\Rpc\RpcServiceProvider',
     ],
 
     //需要实例化的单例
