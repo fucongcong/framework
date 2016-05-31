@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Services\{{name}}\Dao;
+namespace src\Dao\{{name}};
 
 interface {{name}}Dao
 {

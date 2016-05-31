@@ -49,7 +49,7 @@ class Cron
  ----------------------------------------------------------
 \033[0m
 \033[31m 使用帮助: \033[0m
-\033[33m Usage: app/cron [start|restart|stop|status] \033[0m
+\033[33m Usage: app/cron [start|restart|stop|status|exec (cron name)] \033[0m
 ";
     /**
      * 初始化环境
@@ -108,8 +108,11 @@ class Cron
     }
 
     public function status()
-    {
-
+    {   
+        if (!$this -> getPid()) {
+            exit("cron服务未启动\n");
+        }
+        print_r(\FileCache::get('cronAdmin', $this -> cacheDir));
     }
 
     public function restart()
@@ -210,10 +213,26 @@ class Cron
         $argv = $this -> argv;
         if (!isset($argv[1])) die($this -> help);
 
-        if (!in_array($argv[1], ['start', 'restart', 'stop', 'status'])) die($this -> help);
+        if (!in_array($argv[1], ['start', 'restart', 'stop', 'status', 'exec'])) die($this -> help);
 
         $function = $argv[1];
         $this -> $function();
+    }
+
+    public function exec()
+    {   
+        $argv = $this -> argv;
+        $jobName = isset($argv[2]) ? $argv[2] :'';
+        foreach ($this -> jobs as $job) {
+            if ($job['name'] == $jobName) {
+                call_user_func_array([new $job['command'], 'handle'], []);
+                exit("{$jobName}执行完成\n");
+            }
+
+            continue;
+        }
+
+        exit("job不存在\n");
     }
 
     public function workerCallBack(swoole_process $worker)
