@@ -58,7 +58,6 @@ class Cron
     public function __construct($argv, $loader)
     {
         $this -> cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
-        $this -> cacheDir = $this -> cacheDir."/";
         $this -> tickTime = \Config::get('cron::tick_time') ? : 1000;
         $this -> argv = $argv;
         $this -> loader = $loader;
