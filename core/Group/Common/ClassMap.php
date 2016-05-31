@@ -18,9 +18,7 @@ Class ClassMap
         $data = array();
 
         foreach ($this->dir as $key => $value) {
-
             $data = $this->searchClass($value, $data);
-
         }
 
         return $data;
@@ -29,7 +27,6 @@ Class ClassMap
     private  function searchClass($fileDir, $data=[])
     {
         if (is_dir(__ROOT__.$fileDir)) {
-
             $dir = opendir(__ROOT__.$fileDir);
 
             while (($file = readdir($dir)) !== false)
@@ -41,7 +38,6 @@ Class ClassMap
                 if ($fileName && isset($file[1]) && $file[1] ="php" && substr($fileName, -4) == "Impl") {
 
                     $model = explode("/", $fileDir);
-
                     $model = $model[2];
 
 
@@ -49,18 +45,14 @@ Class ClassMap
                     $class = str_replace("/", "\\", $class);
 
                     if (!class_exists($class)) {
-
                         throw new NotFoundException("Class ".$class." not found !");
-
                     }
 
                     $name = substr($fileName, 0, -4);
-
                     $data[] = [$class, $model."_".$name];
 
 
                 }else if ($fileName) {
-
                     $data = $this->searchClass($fileDir."/".$fileName, $data);
                 }
             }

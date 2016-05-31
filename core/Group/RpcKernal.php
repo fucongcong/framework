@@ -57,6 +57,7 @@ class RpcKernal
         $classMap = new Group\Common\ClassMap();
         $classes = $classMap -> doSearch();
 
+        \FileCache::set('services', $classes, $this -> cacheDir);
         $this -> addClass($classes, $this -> server);
     }
 
