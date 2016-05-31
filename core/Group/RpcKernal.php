@@ -29,16 +29,8 @@ class RpcKernal
         $server = $server[$server_type];
         $server = $server_type."://".$server['host'].":".$server['port']."/";
         $server = new HproseSwooleServer($server);
-        $server -> set(array(
-            'reactor_num' => 4,
-            'worker_num' => 25,    //worker process num
-            'backlog' => 128,   //listen backlog
-            'max_request' => 2000,
-            'heartbeat_idle_time' => 30,
-            'heartbeat_check_interval' => 10,
-            'dispatch_mode' => 3, 
-        ));
-        
+        $server -> set($this -> config['setting']);
+
         $this -> server = $server;
         $server->server->on('WorkerStart', array($this, 'blindClass'));
         $server->start();
