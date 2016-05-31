@@ -26,6 +26,7 @@
         "symfony/http-foundation": "~2.7.0",
         "mtdowling/cron-expression":"~1.0",
         "phpunit/phpunit": "4.*",
-        "pda/pheanstalk":"~3.1.0"
+        "pda/pheanstalk":"~3.1.0",
+        "hprose/hprose": "dev-master"
     }
 }

@@ -11,16 +11,10 @@ class SwooleKernal
 	{	
 		$host = \Group\Config\Config::get('app::swoole_host') ? : "127.0.0.1";
 		$port = \Group\Config\Config::get('app::swoole_port') ? : 9777;
+		$setting = \Group\Config\Config::get('app::swoole_setting');
+		
 		$http = new swoole_http_server($host, $port);
-		$http -> set(array(
-			'reactor_num' => 4,
-		    'worker_num' => 25,    //worker process num
-		    'backlog' => 128,   //listen backlog
-		    'max_request' => 2000,
-	        'heartbeat_idle_time' => 30,
-    		'heartbeat_check_interval' => 10,
-		    'dispatch_mode' => 3, 
-		));
+		$http -> set($setting);
 
 		$http -> on('request', function ($request, $response) use ($path, $loader) {
 			$request -> get = isset($request -> get) ? $request -> get : [];

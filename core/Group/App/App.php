@@ -42,6 +42,7 @@ class App
         'Route'             => 'Group\Routing\Route',
         'Request'           => 'Group\Http\Request',
         'Response'          => 'Group\Http\Response',
+        'Rpc'               => 'Group\Rpc\Rpc',
         'JsonResponse'      => 'Group\Http\JsonResponse',
         'RedirectResponse'  => 'Group\Http\RedirectResponse',
         'Service'           => 'Group\Services\Service',
@@ -62,7 +63,7 @@ class App
     protected $serviceProviders = [];
 
     protected $bootstraps = [
-        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response'
+        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
     ];
 
     //to do
