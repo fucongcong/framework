@@ -65,12 +65,12 @@ class RpcKernal
 
     public function checkStatus()
     {   
-        $pid = file_get_contents($this -> cacheDir."/pid");
         $args = getopt('s:');
         if(isset($args['s'])) {
 
             switch ($args['s']) {
                 case 'reload':
+                    $pid = file_get_contents($this -> cacheDir."/pid");
                     echo "当前进程".$pid."\n";
                     echo "热重启中\n";
                     if ($pid) {
