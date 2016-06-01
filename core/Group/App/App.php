@@ -42,6 +42,7 @@ class App
         'Route'             => 'Group\Routing\Route',
         'Request'           => 'Group\Http\Request',
         'Response'          => 'Group\Http\Response',
+        'Rpc'               => 'Group\Rpc\Rpc',
         'JsonResponse'      => 'Group\Http\JsonResponse',
         'RedirectResponse'  => 'Group\Http\RedirectResponse',
         'Service'           => 'Group\Services\Service',
@@ -62,7 +63,7 @@ class App
     protected $serviceProviders = [];
 
     protected $bootstraps = [
-        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response'
+        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
     ];
 
     //to do
@@ -90,6 +91,37 @@ class App
         $this -> doBootstrap($loader);
 
         $request = \Request::createFromGlobals();
+
+        $this -> registerServices();
+       
+        \EventDispatcher::dispatch(KernalEvent::INIT);
+
+        $this -> container = $this -> singleton('container');
+        $this -> container -> setAppPath($path);
+        
+        $handler = new ExceptionsHandler();
+        $handler -> bootstrap($this);
+
+        $this -> container -> setRequest($request);
+
+        $this -> router = new Router($this -> container);
+        self::getInstance() -> router = $this -> router;
+        $this -> router -> match();
+    }
+
+    /**
+     * init appliaction
+     *
+     */
+    public function initSwoole($path, $loader, $request)
+    {
+        $this -> initSelf();
+
+        //$request = \Request::createFromGlobals();
+        $request = new \Request($request -> get, $request -> post, [], $request -> cookie
+            , $request -> files, $request -> server);
+
+        $this -> doBootstrap($loader);
 
         $this -> registerServices();
        
@@ -188,6 +220,14 @@ class App
         $response = $this -> container -> getResponse();
         $request = $this -> container -> getRequest();
         \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
+    }
+
+    public function handleSwooleHttp()
+    {
+        $response = $this -> container -> getResponse();
+        $request = $this -> container -> getRequest();
+        return $response;
+        //\EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
     }
 
     public function initSelf()

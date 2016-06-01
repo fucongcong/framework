@@ -16,7 +16,7 @@ class LocalFileCacheService
     public function get($cacheName, $cache_dir = false)
     {
         $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-        $dir = $cache_dir.$cacheName;
+        $dir = $cache_dir."/".$cacheName;
 
         return include $dir;
     }
@@ -31,7 +31,7 @@ class LocalFileCacheService
     public function set($cacheName, $data, $cache_dir = false)
     {
         $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-        $dir = $cache_dir.$cacheName;
+        $dir = $cache_dir."/".$cacheName;
 
         if (is_array($data)) {
             $data = var_export($data, true);

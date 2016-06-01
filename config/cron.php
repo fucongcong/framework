@@ -21,14 +21,20 @@ return [
 
         [
             'name' => 'testCache',
-            'time' => '24 */2 * * *',//定时规则 分 小时 天 周 月
+            'time' => '25 */2 * * *',//定时规则 分 小时 天 周 月
             'command' => 'src\Web\Cron\TestCache',
         ],
 
         [
             'name' => 'testSql',
-            'time' => '*/2 * * * *',//定时规则 分 小时 天 周 月
-            'command' => 'src\Web\Cron\TestSql',
+            'time' => '45 */2 * * *',//定时规则 分 小时 天 周 月
+            'command' => 'src\Web\Cron\testSql',
+        ],
+
+        [
+            'name' => 'testSql2',
+            'time' => '*/3 * * * *',//定时规则 分 小时 天 周 月
+            'command' => 'src\Web\Cron\TestSql2',
         ],
 
     ],

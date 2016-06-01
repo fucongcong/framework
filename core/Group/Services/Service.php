@@ -4,15 +4,17 @@ namespace Group\Services;
 
 class Service
 {
-    protected $serviceName;
+    // protected $serviceName;
 
 	public function createDao($serviceName)
 	{
 		list($group, $serviceName) = explode(":", $serviceName);
 		$class = $serviceName."DaoImpl";
-		$this -> serviceName = "src\\Services\\".$group."\\Dao\\Impl\\".$class;
+		$serviceName = "src\\Dao\\".$group."\\Impl\\".$class;
 
-		return $this -> register();
+        return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
+            return new $serviceName();
+        });
 	}
 
     //需要支持不同目录
@@ -20,17 +22,19 @@ class Service
     {
         list($group, $serviceName) = explode(":", $serviceName);
         $class = $serviceName."ServiceImpl";
-        $this -> serviceName = "src\\Services\\".$group."\\Impl\\".$class;
-
-        return $this -> register();
-    }
-
-    public function register()
-    {
-        $serviceName = $this -> serviceName;
+        $serviceName = "src\\Services\\".$group."\\Impl\\".$class;
 
         return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
             return new $serviceName();
         });
     }
+
+    // public function register()
+    // {
+    //     $serviceName = $this -> serviceName;
+
+    //     return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
+    //         return new $serviceName();
+    //     });
+    // }
 }
