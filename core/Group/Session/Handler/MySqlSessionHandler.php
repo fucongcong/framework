@@ -7,7 +7,7 @@ class MySqlSessionHandler extends \SessionHandler implements \SessionHandlerInte
     /**
      * @var \Redis Redis driver.
      */
-    private $redis;
+    private $mysql;
 
     /**
      * @var int Time to live in seconds
