@@ -60,7 +60,13 @@ class App
      */
     protected $singles = [];
 
-    protected $serviceProviders = [];
+    protected $serviceProviders = [
+        'Group\Services\ServiceRegister',
+        'Group\Routing\RouteServiceProvider',
+        'Group\EventDispatcher\EventDispatcherServiceProvider',
+        'Group\Cache\CacheServiceProvider',
+        'Group\Cache\FileCacheServiceProvider',
+    ];
 
     protected $bootstraps = [
         'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'

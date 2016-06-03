@@ -30,13 +30,8 @@ return [
 
     //系统会提前加载服务
     'serviceProviders' => [
-        'Group\Services\ServiceRegister',
         'Group\Redis\RedisServiceProvider',
-        'Group\Cache\CacheServiceProvider',
-        'Group\Cache\FileCacheServiceProvider',
         'Group\Session\SessionServiceProvider',
-        'Group\Routing\RouteServiceProvider',
-        'Group\EventDispatcher\EventDispatcherServiceProvider',
         'Group\Queue\QueueServiceProvider',
         //'Group\Rpc\RpcServiceProvider',  开启后提供rpc服务  需要安装swoole
     ],
