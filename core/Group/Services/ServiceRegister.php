@@ -2,10 +2,7 @@
 
 namespace Group\Services;
 
-use ServiceProvider;
-use Service;
-
-class ServiceRegister extends ServiceProvider
+class ServiceRegister extends \ServiceProvider
 {
 	/**
      * Register the service provider.
@@ -15,7 +12,7 @@ class ServiceRegister extends ServiceProvider
     public function register()
     {
 		$this -> app -> singleton('service', function () {
-            return new Service();
+            return new \Service();
         });
     }
 }
