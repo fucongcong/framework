@@ -32,14 +32,12 @@ Class ClassMap
             while (($file = readdir($dir)) !== false)
             {
                 $file = explode(".", $file);
-
                 $fileName = $file[0];
 
                 if ($fileName && isset($file[1]) && $file[1] ="php" && substr($fileName, -4) == "Impl") {
 
                     $model = explode("/", $fileDir);
                     $model = $model[2];
-
 
                     $class = $fileDir."/".$fileName;
                     $class = str_replace("/", "\\", $class);
@@ -50,7 +48,6 @@ Class ClassMap
 
                     $name = substr($fileName, 0, -4);
                     $data[] = [$class, $model."_".$name];
-
 
                 }else if ($fileName) {
                     $data = $this->searchClass($fileDir."/".$fileName, $data);

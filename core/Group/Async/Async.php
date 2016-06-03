@@ -47,11 +47,14 @@ class Async
     {
         $argv = $this -> argv;
         if (!isset($argv[1])) return;
+
         $config = \Config::get("async::server");
         if (!isset($config[$argv[1]])) return;
+
         $log = isset($config[$argv[1]]['config']['log_file']) ? $config[$argv[1]]['config']['log_file'] : 'runtime/async/default.log';
         $log = explode("/", $log);
         \FileCache::set(array_pop($log), '', implode("/", $log)."/");
+        
         $server = new Server($config[$argv[1]], $argv[1]);
         die;
     }

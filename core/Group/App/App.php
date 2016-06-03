@@ -72,7 +72,7 @@ class App
     ];
 
     public function __construct()
-    {
+    {   
         $this -> aliasLoader();
 
         $this -> doSingle();

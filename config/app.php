@@ -30,6 +30,7 @@ return [
 
     //系统会提前加载服务
     'serviceProviders' => [
+        'Group\Services\ServiceRegister',
         'Group\Redis\RedisServiceProvider',
         'Group\Cache\CacheServiceProvider',
         'Group\Cache\FileCacheServiceProvider',

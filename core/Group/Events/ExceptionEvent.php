@@ -31,7 +31,7 @@ final class ExceptionEvent extends \Event
 }.title {font-size: 16px;}h3{color:#a94442;}p {color:#3c763d;}</style><div class=\"container\"><div class=\"content\" style=\"color:#8a6d3b\">
 <h2>啊哦！出错了:</h2> </div> <br><div class=\"content\"><h3>错误文件名:</h3><p>{$error['file']}</p></div><br><div class=\"content\">
 <h3>line:{$error['line']}</h3></div><br><div class=\"content\"><h3>错误信息:</h3> <p>{$error['message']}</p></div> <br><div class=\"content\"><h3>Trace:</h3><p>{$error['trace']}</p></div><br><div class=\"content\">
-<p style=\"color:#31708f\">power by group framework</p></div></div>";
+<p style=\"color:#31708f\">power by group framework @author:fucongcong;email:cc@xitongxue.com. </p></div></div>";
 
     	return $str;
     }

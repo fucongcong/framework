@@ -2,7 +2,7 @@
 
 namespace Group\Dao;
 
-use Aura\Sql\ExtendedPdo;
+use Group\Dao\ExtendedPdo;
 use Aura\Sql\ConnectionLocator;
 
 class Dao
