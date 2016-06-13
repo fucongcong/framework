@@ -143,7 +143,7 @@ class App
         
         if ($this -> container -> isDebug()) {
             $debugbar = new \Group\Debug\DebugBar();
-            $this -> singletons['debugbar'] = $debugbar;
+            self::getInstance() -> singletons['debugbar'] = $debugbar;
         }
 
         $handler = new ExceptionsHandler();
