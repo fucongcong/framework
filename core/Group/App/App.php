@@ -105,6 +105,11 @@ class App
         $this -> container = $this -> singleton('container');
         $this -> container -> setAppPath($path);
         
+        if ($this -> container -> isDebug()) {
+            $debugbar = new \DebugBar\StandardDebugBar();
+            self::getInstance() -> singletons['debugbar'] = $debugbar;
+        }
+
         $handler = new ExceptionsHandler();
         $handler -> bootstrap($this);
 
@@ -136,6 +141,11 @@ class App
         $this -> container = $this -> singleton('container');
         $this -> container -> setAppPath($path);
         
+        if ($this -> container -> isDebug()) {
+            $debugbar = new \DebugBar\StandardDebugBar();
+            $this -> singletons['debugbar'] = $debugbar;
+        }
+
         $handler = new ExceptionsHandler();
         $handler -> bootstrap($this);
 

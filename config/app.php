@@ -17,6 +17,9 @@ return [
     // prod|dev
     'environment' => 'dev',
 
+    //只有在dev环境下才生效。
+    'debug' => true,
+
     //zh|en|fr...
     'locale' => 'zh',
 
