@@ -106,7 +106,7 @@ class App
         $this -> container -> setAppPath($path);
         
         if ($this -> container -> isDebug()) {
-            $debugbar = new \DebugBar\StandardDebugBar();
+            $debugbar = new \Group\Debug\DebugBar();
             self::getInstance() -> singletons['debugbar'] = $debugbar;
         }
 
@@ -142,7 +142,7 @@ class App
         $this -> container -> setAppPath($path);
         
         if ($this -> container -> isDebug()) {
-            $debugbar = new \DebugBar\StandardDebugBar();
+            $debugbar = new \Group\Debug\DebugBar();
             $this -> singletons['debugbar'] = $debugbar;
         }
 

@@ -30,7 +30,7 @@ class Controller implements ControllerContract
 				$this -> app -> singleton('debugbar') -> getCollector('view') -> setData($array);
 			} else {
 				$array['模板地址'] = $tpl;
-				$this -> app -> singleton('debugbar') -> addCollector(new \Group\Collector\VarCollector($array));
+				$this -> app -> singleton('debugbar') -> addCollector(new \Group\Debug\Collector\VarCollector($array));
 			}
 		}
 		

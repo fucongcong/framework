@@ -1,6 +1,6 @@
 <?php
 
-namespace Group\Collector;
+namespace Group\Debug\Collector;
 
 class VarCollector extends \DebugBar\DataCollector\ConfigCollector
 {
