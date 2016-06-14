@@ -19,7 +19,6 @@ interface Controller
      * @param  string  $serviceName
      * @return class
      */
-    //to do 单列 可以扩展为模块
     public function createService($serviceName);
 
     /**
@@ -35,4 +34,10 @@ interface Controller
      * @return Group\Container\Container
      */
     public function getContainer();
+
+    public function setFlashMessage($type, $message);
+
+    public function getFlashMessage();
+
+    public function redirect($url, $status = 302);
 }

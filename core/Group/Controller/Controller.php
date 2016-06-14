@@ -23,29 +23,48 @@ class Controller implements ControllerContract
 	 * @return response
 	 */
 	public function render($tpl, $array = array())
-	{
+	{	
+		if ($this -> getContainer() -> isDebug()) {
+			if ($this -> app -> singleton('debugbar') -> hasCollector('view')) {
+				$array['模板地址'] = $tpl;
+				$this -> app -> singleton('debugbar') -> getCollector('view') -> setData($array);
+			} else {
+				$array['模板地址'] = $tpl;
+				$this -> app -> singleton('debugbar') -> addCollector(new \Group\Debug\Collector\VarCollector($array));
+			}
+		}
+		
 		return $this -> twigInit() -> render($tpl, $array);
 	}
 
 	public function twigInit()
 	{
-		$loader = new \Twig_Loader_Filesystem(\Config::get('view::path'));
+		return $this -> app -> singleton('twig', function() {
+			$loader = new \Twig_Loader_Filesystem(\Config::get('view::path'));
 
-		if (\Config::get('view::cache')) {
-			$env = array(
-		    	'cache' => \Config::get('view::cache_dir')
-			);
-		}
+			if (\Config::get('view::cache')) {
+				$env = array(
+			    	'cache' => \Config::get('view::cache_dir')
+				);
+			}
 
-		$twig = new \Twig_Environment($loader, isset($env) ? $env : array());
-		$twig -> addExtension(new WebExtension());
-		$extensions = \Config::get('view::extensions');
-		foreach ($extensions as $extension) {
-			if($this -> getContainer() -> buildMoudle($extension) -> isSubclassOf('Twig_Extension'))
-				$twig -> addExtension(new $extension);
-		}
+			$twig = new \Twig_Environment($loader, isset($env) ? $env : array());
 
-		return $twig;
+			//开启twig的cache后默认不显示twig数据收集。这里有一点小bug
+			if ($this -> getContainer() -> isDebug() && empty($env)) {
+				$twig = new \DebugBar\Bridge\Twig\TraceableTwigEnvironment($twig);
+				$this -> app -> singleton('debugbar') -> addCollector(new \DebugBar\Bridge\Twig\TwigCollector($twig));
+			}
+			
+			$twig -> addExtension(new WebExtension());
+			$extensions = \Config::get('view::extensions');
+			foreach ($extensions as $extension) {
+				if($this -> getContainer() -> buildMoudle($extension) -> isSubclassOf('Twig_Extension'))
+					$twig -> addExtension(new $extension);
+			}
+
+			return $twig;
+		});
 	}
 
 	/**

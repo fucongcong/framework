@@ -34,7 +34,7 @@ Class ClassMap
                 $file = explode(".", $file);
                 $fileName = $file[0];
 
-                if ($fileName && isset($file[1]) && $file[1] ="php" && substr($fileName, -4) == "Impl") {
+                if ($fileName && isset($file[1]) && $file[1] =="php" && substr($fileName, -4) == "Impl") {
 
                     $model = explode("/", $fileDir);
                     $model = $model[2];

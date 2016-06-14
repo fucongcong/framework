@@ -35,6 +35,8 @@ class Container implements ContainerContract
      */
     protected $request;
 
+    protected $debug = false;
+
     public function __construct()
     {
         $this -> setTimezone();
@@ -42,6 +44,8 @@ class Container implements ContainerContract
         $this -> setEnvironment();
 
         $this -> setLocale();
+
+        $this -> needDebug();
     }
 
 	/**
@@ -222,5 +226,17 @@ class Container implements ContainerContract
     public function runningInConsole()
     {
         return php_sapi_name() == 'cli';
+    }
+
+    private function needDebug()
+    {
+        if (\Config::get('app::environment') == "dev" && \Config::get('app::debug')) {
+            $this -> debug = true;
+        }
+    }
+
+    public function isDebug()
+    {
+        return $this -> debug;
     }
 }
