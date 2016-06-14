@@ -78,7 +78,7 @@ class App
     ];
 
     public function __construct()
-    {   
+    { 
         $this -> aliasLoader();
 
         $this -> doSingle();
@@ -248,7 +248,9 @@ class App
 
     public function initSelf()
     {
-        self::$instance = new self;
+        if (!(self::$instance instanceof self)){
+            self::$instance = new self;
+        }
     }
 
     public function rmSingletons($name)
