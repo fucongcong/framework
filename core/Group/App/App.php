@@ -248,9 +248,7 @@ class App
 
     public function initSelf()
     {
-        if (!(self::$instance instanceof self)){
-            self::$instance = new self;
-        }
+        self::$instance = $this;
     }
 
     public function rmSingletons($name)

@@ -50,7 +50,7 @@ class RpcKernal
         $loader = require __ROOT__.'/vendor/autoload.php';
         $loader->setUseIncludePath(true);
 
-        $app = \Group\App\App::getInstance();
+        $app = new \Group\App\App();
         $app -> initSelf();
         $app -> doBootstrap($loader);
         $app -> registerServices();

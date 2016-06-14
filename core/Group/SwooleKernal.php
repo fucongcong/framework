@@ -33,7 +33,7 @@ class SwooleKernal
 			}
 			
 			$this -> fix_gpc_magic($request);
-			$app = App::getInstance();		
+			$app = new App();		
 		 	$app -> initSwoole($path, $loader, $request);
 
 		 	$data = $app -> handleSwooleHttp();

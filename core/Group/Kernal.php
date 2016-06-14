@@ -10,7 +10,7 @@ class Kernal
     {
         $this -> fix_gpc_magic();
 
-        $app = App::getInstance();
+        $app = new App();
         $app -> init($path, $loader);
         $app -> handleHttp();
     }
