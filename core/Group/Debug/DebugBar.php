@@ -11,5 +11,6 @@ class DebugBar extends \DebugBar\DebugBar
         $this -> addCollector(new \DebugBar\DataCollector\RequestDataCollector());
         $this -> addCollector(new \DebugBar\DataCollector\TimeDataCollector());
         $this -> addCollector(new \DebugBar\DataCollector\MemoryCollector());
+        $this -> addCollector(new \Group\Debug\Collector\SqlCollector());
     }
 }

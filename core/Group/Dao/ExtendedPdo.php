@@ -5,7 +5,27 @@ namespace Group\Dao;
 use Aura\Sql\ExtendedPdo as Aura_ExtendedPdo;
 
 class ExtendedPdo extends Aura_ExtendedPdo
-{
+{   
+    protected $debug = false;
+
+    public function __construct($dsn,
+        $username = null,
+        $password = null,
+        array $options = array(),
+        array $attributes = array())
+    {
+        parent::__construct($dsn,
+        $username,
+        $password,
+        $options,
+        $attributes);
+
+        if (\App::getInstance() -> singleton('container') -> isDebug()) {
+            $this -> setProfiler(new \Aura\Sql\Profiler);
+            $this->getProfiler()->setActive(true);
+            $this -> debug = true;
+        }
+    }
     /**
      * 此处增加了断线重连机制，为了支持async
      *
@@ -39,6 +59,7 @@ class ExtendedPdo extends Aura_ExtendedPdo
 	        }
     	}
         $this->endProfile($statement, $values);
+
         return $sth;
     }
 
@@ -155,5 +176,42 @@ class ExtendedPdo extends Aura_ExtendedPdo
         $result = $this->pdo->commit();
         $this->endProfile();
         return $result;
+    }
+
+    /**
+     *
+     * Ends and records a profile entry.
+     *
+     * @param string $statement The statement being profiled, if any.
+     *
+     * @param array $values The values bound to the statement, if any.
+     *
+     * @return null
+     *
+     */
+    protected function endProfile($statement = null, array $values = array())
+    {
+        // is there a profiler in place?
+        if ($this->profiler) {
+            // add an entry to the profiler
+            $this->profiler->addProfile(
+                microtime(true) - $this->profile['time'],
+                $this->profile['function'],
+                $statement,
+                $values
+            );
+        }
+
+        
+        if ($this -> debug) {
+            \App::getInstance() -> singleton('debugbar') -> getCollector('sql') -> setData([
+                microtime(true) - $this->profile['time'],
+                $this->profile['function'],
+                $statement,
+                $values]);
+        }
+
+        // clear the starting profile info
+        $this->profile = array();
     }
 }

@@ -23,7 +23,7 @@ abstract class ServiceMap
         $map = static::getMap();
         $object = \App::getInstance() -> singleton($map);
 
-        if (!is_object($object)) throw new \RuntimeException($map.'can not be loaded , check your service provider config!');
+        if (!is_object($object)) throw new \RuntimeException($map.' can not be loaded , check your service provider config!');
 
         return call_user_func_array([$object, $method], $parameters);
     }
