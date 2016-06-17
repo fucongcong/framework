@@ -35,7 +35,7 @@ class Console
 \033[33m Usage: app/console [options] [args...] \033[0m
 
 \033[32m generate:service name \033[0m      生成一个自定义service
-\033[32m generate:controller  name \033[0m   生成一个自定义controller
+\033[32m generate:controller  name|groupname:name \033[0m   生成一个自定义controller(默认存放在src/Web,如果想要指定分组 groupname:name)
 \033[32m sql:generate\033[0m                生成一个sql执行模板(存放于app/sql)
 \033[32m sql:clean\033[0m                清除lock文件,您可以再次执行migrate脚本中的命令
 \033[32m sql:migrate   [default|write|read|all]\033[0m \033[33m[name]\033[0m  参数可不填，执行sql模板(默认会向default服务器执行.\033[33m第二个参数只有当第一个参数为write|read时，才会生效,如果不填，默认为write|read下面所有服务器\033[0m)

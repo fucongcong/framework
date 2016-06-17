@@ -1,4 +1,4 @@
-{% extends 'Web/Views/layout.html.twig' %}
+{% extends '{{group}}/Views/layout.html.twig' %}
 
 {% block title %}title{% endblock %}
 
