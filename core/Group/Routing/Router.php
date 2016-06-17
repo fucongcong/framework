@@ -217,8 +217,8 @@ Class Router implements RouterContract
 	 * @return  array
 	 */
 	private function createMethodsCache()
-	{
-		$routing = include 'src/Web/routing.php';
+	{	
+		$routing = $this -> getRoutingConfig();
 
 		$config = array();
 
@@ -240,5 +240,20 @@ Class Router implements RouterContract
 		$config = ArrayToolkit::index($config, 'pattern');
 
 		return $config;
+	}
+
+	private function getRoutingConfig()
+	{
+		$sources = \Config::get('routing::source');
+
+		$routings = [];
+		foreach ($sources as $source) {
+			$routing = include_once "src/{$source}/routing.php";
+			if ($routing) {
+				$routings = array_merge($routings, $routing);
+			}
+		}
+	
+		return $routings;
 	}
 }
