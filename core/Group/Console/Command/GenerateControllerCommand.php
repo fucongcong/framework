@@ -51,7 +51,18 @@ class GenerateControllerCommand extends Command
         $data = $this -> getFile("view.tpl", $controllerName, $group);
         file_put_contents ($dir."/Views/".$controllerName."/"."index.html.twig", $data);
 
+        $data = $this -> getFile("routing.tpl", $controllerName, $group);
+        if (!file_exists($dir."/routing.php")) {
+            $this -> outPut('正在生成路由配置文件...');
+            file_put_contents ($dir."/routing.php", $data);
+        }
+
         $this -> outPut('初始化'.$controllerName.'Controller完成');
+
+        $source = \Config::get('routing::source');
+        if (!in_array($group, $source)) {
+            $this -> outPut('请配置config/routing.php,添加新的分组');
+        }
     }
 
     private function getFile($tpl, $controllerName, $group)
