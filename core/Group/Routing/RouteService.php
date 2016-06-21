@@ -44,6 +44,13 @@ Class RouteService implements RouteContract
     protected $currentMethod;
 
     /**
+     * routing
+     *
+     * @var array
+     */
+    protected $routing;
+
+    /**
      * the parameters
      *
      * @var array
@@ -192,6 +199,16 @@ Class RouteService implements RouteContract
         return $this -> currentMethod ;
     }
 
+    public function setRouting($routing)
+    {
+        $this -> routing = $routing;
+    }
+
+    public function getRouting()
+    {
+        return $this -> routing ;
+    }
+    
     /**
      * 根据别名反解析路由
      *
@@ -199,8 +216,7 @@ Class RouteService implements RouteContract
      */
     public function deParse($alias, $parameters = [])
     {
-        //to do
-        $routing = include 'src/Web/routing.php';
+        $routing = $this -> routing;
 
         if(!isset($routing[$alias])) return false;
 

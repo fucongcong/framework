@@ -35,7 +35,7 @@ class SqlCollector extends \DebugBar\DataCollector\ConfigCollector
         $data = array();
 
         foreach ($this->data as $k => $v) {
-            $data[$v[1].$k] = "执行时间:".$v[0]." SQL语句:".$v[2]." 详情:".$this->getDataFormatter()->formatVar($v);
+            $data[$k.":".$v[1]] = "执行时间:".$v[0]." SQL语句:".$v[2]." 详情:".$this->getDataFormatter()->formatVar($v);
         }
         return $data;
     }

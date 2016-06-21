@@ -195,6 +195,7 @@ Class Router implements RouterContract
 		$this -> route -> setMethods($methods);
 		$this -> route -> setCurrentMethod($method);
 		$this -> route -> setUri($uri);
+		$this -> route -> setRouting($this -> getRoutingConfig());
 	}
 
 	private function getMethodsCache()
@@ -218,7 +219,7 @@ Class Router implements RouterContract
 	 */
 	private function createMethodsCache()
 	{	
-		$routing = $this -> getRoutingConfig();
+		$routing = $this -> route -> getRouting();
 
 		$config = array();
 
@@ -243,7 +244,15 @@ Class Router implements RouterContract
 	}
 
 	private function getRoutingConfig()
-	{
+	{	
+		$file = 'route/routing.php';
+
+		if ($this -> container -> getEnvironment() == "prod") {
+			if(\FileCache::isExist($file)) {
+				return \FileCache::get($file);
+			}
+		}
+
 		$sources = \Config::get('routing::source');
 
 		$routings = [];
@@ -252,7 +261,9 @@ Class Router implements RouterContract
 			if ($routing) {
 				$routings = array_merge($routings, $routing);
 			}
-		}
+		}	
+	
+		\FileCache::set($file, $routings);
 	
 		return $routings;
 	}
