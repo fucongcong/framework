@@ -174,8 +174,8 @@ class Cron
     private function startWorkers()
     {      
         $this -> table = new swoole_table(1024);
-        $this -> table -> create();
         $this -> table -> column('workers', swoole_table::TYPE_STRING, 1024 * 20);
+        $this -> table -> create();
         $this -> table -> set('jobNum', array('count' => 0));
         //启动worker进程
         for ($i = 0; $i < $this -> workerNum; $i++) { 
@@ -200,7 +200,7 @@ class Cron
 
             \Log::info("工作worker{$processPid}启动", [], 'cron.work');
 
-            call_user_func_array([new $this -> jobs[$i]['command'], 'handle'], []);
+            //call_user_func_array([new $this -> jobs[$i]['command'], 'handle'], []);
         }
     }
 
@@ -256,8 +256,6 @@ class Cron
 
         if (is_null($timer)) return;
 
-        //call_user_func_array([new $job['command'], 'handle'], []);
-
         $job['timer'] = $timer;
 
         swoole_timer_tick(intval($timer * 1000), function($timerId, $job) {
@@ -272,6 +270,8 @@ class Cron
             \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
 
         }, $job);
+
+        call_user_func_array([new $job['command'], 'handle'], []);
 
         $workers = $this -> table -> get('workers');
         $workers = json_decode($workers['workers'], true);
