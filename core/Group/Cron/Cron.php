@@ -36,7 +36,7 @@ class Cron
 
     protected $table;
 
-    protected $maxNum;
+    protected $max_handle;
 
     protected $daemon = false;
 
@@ -69,7 +69,7 @@ class Cron
         $this -> workerNum = count($this -> jobs);
         $this -> classCache = \Config::get("cron::class_cache"); 
         $this -> logDir = \Config::get("cron::log_dir");
-        $this -> maxNum = \Config::get("cron::maxNum");
+        $this -> max_handle = \Config::get("cron::max_handle");
         $this -> daemon = \Config::get("cron::daemon") ? : false;
         \Log::$cache_dir = $this -> logDir;
     }
@@ -264,7 +264,7 @@ class Cron
 
             //计数
             $count = $this -> table -> incr($job['name'].'_maxNum', $job['name']."_count");
-            if ($count && $count >= $this->maxNum) {
+            if ($count && $count >= $this->max_handle) {
                 //计数超过上限 重启该任务
                 \Log::info('计数超过上限'.$job['name'], [$count], 'cron.count');
                 $this->restartJob($timerId, $job);
