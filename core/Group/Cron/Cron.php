@@ -36,6 +36,10 @@ class Cron
 
     protected $table;
 
+    protected $maxNum;
+
+    protected $daemon = false;
+
     protected $help = "
 \033[34m
  ----------------------------------------------------------
@@ -64,7 +68,9 @@ class Cron
         $this -> jobs = \Config::get('cron::job');
         $this -> workerNum = count($this -> jobs);
         $this -> classCache = \Config::get("cron::class_cache"); 
-        $this -> logDir = \Config::get("cron::log_dir"); 
+        $this -> logDir = \Config::get("cron::log_dir");
+        $this -> maxNum = \Config::get("cron::maxNum");
+        $this -> daemon = \Config::get("cron::daemon") ? : false;
         \Log::$cache_dir = $this -> logDir;
     }
 
@@ -84,7 +90,7 @@ class Cron
         $this -> checkStatus();
         \Log::info("定时服务启动", [], 'cron');
         //将主进程设置为守护进程
-        swoole_process::daemon(true);
+        if ($this->daemon) swoole_process::daemon(true);
 
         //设置信号
         $this -> setSignal();
@@ -93,14 +99,18 @@ class Cron
         $this -> startWorkers();
 
         swoole_timer_tick($this -> tickTime, function($timerId) {
-            foreach ($this -> jobs as $job) {
+            foreach ($this -> jobs as $key => $job) {
                 $workers = $this -> table -> get('workers');
                 $workers = json_decode($workers['workers'], true);
                 //这里可以优化 如果用redis等等持久化的缓存来存的话  就可以做到对子进程的管理了，比如重新跑脚本，现在swoole table只能用于当前进程
                 if (isset($workers[$job['name']]['nextTime'])) continue;
 
+                if (empty($workers[$job['name']])) {
+                    $this->newProcess($key);
+                    $this -> workerNum++;
+                }
+
                 $this -> workers[$job['name']]['process'] -> write(json_encode($job));
-                //$this -> bindTick($job);
             }
         });
 
@@ -175,32 +185,15 @@ class Cron
     {      
         $this -> table = new swoole_table(1024);
         $this -> table -> column('workers', swoole_table::TYPE_STRING, 1024 * 20);
+
+        foreach ($this -> jobs as $job) {
+            $this -> table -> column($job['name']."_count", swoole_table::TYPE_INT);
+        }
         $this -> table -> create();
-        $this -> table -> set('jobNum', array('count' => 0));
+
         //启动worker进程
-        for ($i = 0; $i < $this -> workerNum; $i++) { 
-            $process = new swoole_process(array($this, 'workerCallBack'), true);
-            $processPid = $process->start();
-
-            $this -> setWorkerPids($processPid);
-
-            $this -> workers[$this -> jobs[$i]['name']] = [
-                'process' => $process,
-                'job' => $this -> jobs[$i],
-            ];
-
-            $workers = $this -> table -> get('workers');
-            $workers = json_decode($workers['workers'], true);
-            $workers[$this -> jobs[$i]['name']] = [
-                'job' => $this -> jobs[$i],
-                'pid' => $processPid,
-                'startTime' => date('Y-m-d H:i:s', time()),
-            ];
-            $this -> table -> set('workers', ['workers' => json_encode($workers)]);
-
-            \Log::info("工作worker{$processPid}启动", [], 'cron.work');
-
-            //call_user_func_array([new $this -> jobs[$i]['command'], 'handle'], []);
+        for ($i = 0; $i < $this -> workerNum; $i++) {
+            $this->newProcess($i);
         }
     }
 
@@ -269,18 +262,17 @@ class Cron
 
             \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
 
+            //计数
+            $count = $this -> table -> incr($job['name'].'_maxNum', $job['name']."_count");
+            if ($count && $count >= $this->maxNum) {
+                //计数超过上限 重启该任务
+                \Log::info('计数超过上限'.$job['name'], [$count], 'cron.count');
+                $this->restartJob($timerId, $job);
+            }
+
         }, $job);
 
-        call_user_func_array([new $job['command'], 'handle'], []);
-
-        $workers = $this -> table -> get('workers');
-        $workers = json_decode($workers['workers'], true);
-        $workers[$job['name']]['startTime'] = date('Y-m-d H:i:s', time());
-        $workers[$job['name']]['nextTime'] = date('Y-m-d H:i:s', time() + intval($job['timer']));
-        $this -> table -> set('workers', ['workers' => json_encode($workers)]);
-
-        \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
-        \Log::info('定时任务启动'.$job['name'], [], 'cron.start');
+        $this -> jobStart($job);
     }
 
     private function checkStatus()
@@ -321,6 +313,69 @@ class Cron
     {
         if (file_exists($this -> cacheDir."pid"))
         return file_get_contents($this -> cacheDir."pid");
+    }
+
+    private function jobStart($job)
+    {   
+        //先执行一次任务
+        call_user_func_array([new $job['command'], 'handle'], []);
+
+        $workers = $this -> table -> get('workers');
+        $workers = json_decode($workers['workers'], true);
+        $workers[$job['name']]['startTime'] = date('Y-m-d H:i:s', time());
+        $workers[$job['name']]['nextTime'] = date('Y-m-d H:i:s', time() + intval($job['timer']));
+        $this -> table -> set('workers', ['workers' => json_encode($workers)]);
+
+        \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
+        \Log::info('定时任务启动'.$job['name'], [], 'cron.start');
+
+        //开启计数
+        $count = $this -> table -> set($job['name'].'_maxNum', [$job['name']."_count" => 0]);
+        $count = $this -> table -> incr($job['name'].'_maxNum', $job['name']."_count");
+    }
+
+    private function restartJob($timerId, $job)
+    {   
+        //清除该计数器
+        swoole_timer_clear($timerId);
+
+        foreach ($this->jobs as $key => $one) {
+            if ($one['name'] == $job['name']) {
+                $workers = $this -> table -> get('workers');
+                $workers = json_decode($workers['workers'], true);
+                $workers[$job['name']] = [];
+                $this -> table -> set('workers', ['workers' => json_encode($workers)]);
+                break;
+            }
+        }
+
+        swoole_process::kill($job['workId'], SIGKILL);
+    }
+
+    private function newProcess($i)
+    {
+        $process = new swoole_process(array($this, 'workerCallBack'), true);
+        $processPid = $process->start();
+
+        $this -> setWorkerPids($processPid);
+
+        $this -> jobs[$i]['workId'] = $processPid;
+        $this -> workers[$this -> jobs[$i]['name']] = [
+            'process' => $process,
+            'job' => $this -> jobs[$i],
+        ];
+
+        $workers = $this -> table -> get('workers');
+        $workers = json_decode($workers['workers'], true);
+        $workers[$this -> jobs[$i]['name']] = [
+            'job' => $this -> jobs[$i],
+            'pid' => $processPid,
+            'process' => $process,
+            'startTime' => date('Y-m-d H:i:s', time()),
+        ];
+        $this -> table -> set('workers', ['workers' => json_encode($workers)]);
+
+        \Log::info("工作worker{$processPid}启动", [], 'cron.work');
     }
 
     /**
