@@ -1,7 +1,7 @@
 <?php
 return [
     //false时,重启注意清除cache
-    'daemon' => false,
+    'daemon' => true,
 
     'cache_dir' => 'runtime/cron',
 
