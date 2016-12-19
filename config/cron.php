@@ -1,6 +1,6 @@
 <?php
 return [
-    
+    //false时,重启注意清除cache
     'daemon' => false,
 
     'cache_dir' => 'runtime/cron',
@@ -14,7 +14,7 @@ return [
     'tick_time' => 1000,
 
     //每个定时任务执行到达该上限时，该子进程会自动重启，释放内存
-    'max_handle' => 2,
+    'max_handle' => 5,
 
     'job' => [
 
