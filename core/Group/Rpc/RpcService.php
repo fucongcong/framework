@@ -9,8 +9,8 @@ class RpcService
     public function __construct()
     {   
         $path = \Container::getInstance() -> getAppPath();
-        require_once $path.'core/Group/Plugin/rpc/src/Hprose.php';
 
+        new \Group\Plugin\Hprose();
         $type = \Config::get('rpc::current_server');
         $server = \Config::get('rpc::server');
         $host = $server[$type]['host'];
