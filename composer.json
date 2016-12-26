@@ -28,6 +28,6 @@
         "phpunit/phpunit": "4.*",
         "pda/pheanstalk":"~3.1.0",
         "maximebf/debugbar": ">=1.0.0",
-        "hprose/hprose": "v1.5.6"
+        "hprose/hprose-swoole": "dev-master"
     }
 }
