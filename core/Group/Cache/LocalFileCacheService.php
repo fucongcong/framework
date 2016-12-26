@@ -4,7 +4,7 @@ namespace Group\Cache;
 
 class LocalFileCacheService
 {
-    protected static $cache_dir = "runtime/cache/";
+    protected static $cache_dir = "runtime/cache";
 
     /**
      * 获取cache
@@ -61,7 +61,7 @@ return ".$data.";";
     public function isExist($cacheName, $cache_dir = false)
     {
         $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-        $dir = $cache_dir.$cacheName;
+        $dir = $cache_dir."/".$cacheName;
 
         return file_exists($dir);
 
