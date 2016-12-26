@@ -203,7 +203,7 @@ class ExtendedPdo extends Aura_ExtendedPdo
         }
 
         
-        if ($this -> debug) {
+        if ($this -> debug && !\App::getInstance() -> singleton('container') ->runningInConsole()) {
             \App::getInstance() -> singleton('debugbar') -> getCollector('sql') -> setData([
                 microtime(true) - $this->profile['time'],
                 $this->profile['function'],

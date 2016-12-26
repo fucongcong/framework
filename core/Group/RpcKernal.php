@@ -10,6 +10,8 @@ class RpcKernal
 
     protected $config;
 
+    protected $daemon;
+
     public function __construct($server_type)
     {
         $this -> server_type = $server_type;
@@ -18,17 +20,18 @@ class RpcKernal
     }
 
     public function init()
-    {
+    {      
         $this -> checkStatus();
 
         $pid = posix_getpid();
+        $this->mkDir($this -> cacheDir."/pid");
         file_put_contents($this -> cacheDir."/pid", $pid);
 
         $server_type = $this -> server_type;
         $server = $this -> config['server'];
         $server = $server[$server_type];
         $server = $server_type."://".$server['host'].":".$server['port']."/";
-        $server = new HproseSwooleServer($server);
+        $server = new \Hprose\Swoole\Server($server, SWOOLE_PROCESS);
         $server -> set($this -> config['setting']);
 
         $this -> server = $server;
@@ -67,7 +70,6 @@ class RpcKernal
     {   
         $args = getopt('s:');
         if(isset($args['s'])) {
-
             switch ($args['s']) {
                 case 'reload':
                     $pid = file_get_contents($this -> cacheDir."/pid");
@@ -85,6 +87,18 @@ class RpcKernal
                     break;
             }
             exit;
+        }
+    }
+
+    private function mkDir($dir)
+    {
+        $parts = explode('/', $dir);
+        $file = array_pop($parts);
+        $dir = '';
+        foreach ($parts as $part) {
+            if (!is_dir($dir .= "$part/")) {
+                 mkdir($dir);
+            }
         }
     }
 }
