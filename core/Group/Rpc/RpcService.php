@@ -10,7 +10,7 @@ class RpcService
     {   
         $path = \Container::getInstance() -> getAppPath();
 
-        new \Group\Plugin\Hprose();
+        new \Group\Plugin\Rpc\Hprose();
         $type = \Config::get('rpc::current_server');
         $server = \Config::get('rpc::server');
         $host = $server[$type]['host'];

@@ -1,6 +1,6 @@
 <?php
 
-namespace Group\Plugin;
+namespace Group\Plugin\Rpc;
 /**********************************************************\
 |                                                          |
 |                          hprose                          |
