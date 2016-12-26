@@ -22,6 +22,7 @@ class RpcKernal
         $this -> checkStatus();
 
         $pid = posix_getpid();
+        $this->mkDir($this -> cacheDir."/pid");
         file_put_contents($this -> cacheDir."/pid", $pid);
 
         $server_type = $this -> server_type;
@@ -85,6 +86,18 @@ class RpcKernal
                     break;
             }
             exit;
+        }
+    }
+
+    private function mkDir($dir)
+    {
+        $parts = explode('/', $dir);
+        $file = array_pop($parts);
+        $dir = '';
+        foreach ($parts as $part) {
+            if (!is_dir($dir .= "$part/")) {
+                 mkdir($dir);
+            }
         }
     }
 }
