@@ -108,7 +108,7 @@ class Server
             list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data);
             $config = $this -> config;
             if (isset($config['onTask'][$cmd])) {
-                $handler = new $config['onTask'][$cmd]['handler']($serv, $fd, $fromId, ['data' => $one, 'info' => $info]);
+                $handler = new $config['onTask'][$cmd]['handler']($serv, $fd, $fromId, ['data' => $one, 'info' => $info, 'cmd' => $cmd]);
                 return $handler -> handle();
             }
         } catch (\Exception $e) {
