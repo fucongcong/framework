@@ -17,20 +17,24 @@ abstract class WorkHandler
 	protected $database;
 
 	protected $table;
+
+	protected $cmd;
 	
-	public function __construct($serv, $fd, $fromId, $data, $table)
+	public function __construct($serv, $fd, $fromId, $data, $cmd, $table)
 	{
 		$this -> serv = $serv;
 		$this -> fd = $fd;
 		$this -> fromId = $fromId;
 		$this -> data = $data;
 		$this -> table = $table;
+		$this -> cmd = $cmd;
 	}
 
 	abstract public function handle();
 
-	public function task($cmd, $data)
+	public function task($data, $cmd = null)
 	{	
+		$cmd = empty($cmd) ? $this -> cmd : $cmd;
 		//update count
 		$count = $this -> table -> get($this -> fd);
 		$count['count'] = $count['count'] + 1;

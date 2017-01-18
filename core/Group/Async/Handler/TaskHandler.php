@@ -65,4 +65,9 @@ abstract class TaskHandler
 	{
 		return $this -> database;
 	}
+
+	public function finish($data)
+	{
+		return \Group\Async\DataPack::pack($this -> data['cmd'], $data, $this -> data['info']);
+	}
 }

@@ -93,7 +93,7 @@ class Server
            
                 if (isset($config['onWork'][$cmd])) {
                     $this -> task_res[$fd] = [];
-                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one, $this -> table);
+                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one, $cmd, $this -> table);
                     $handler -> handle();
                 }
             }
@@ -108,7 +108,7 @@ class Server
             list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data);
             $config = $this -> config;
             if (isset($config['onTask'][$cmd])) {
-                $handler = new $config['onTask'][$cmd]['handler']($serv, $fd, $fromId, ['data' => $one, 'info' => $info]);
+                $handler = new $config['onTask'][$cmd]['handler']($serv, $fd, $fromId, ['data' => $one, 'info' => $info, 'cmd' => $cmd]);
                 return $handler -> handle();
             }
         } catch (\Exception $e) {
@@ -124,8 +124,13 @@ class Server
             $config = $this -> config;
             if (isset($config['onTask'][$cmd])) {
                 $this -> updateTaskCount($info['fd'], -1);
-                $handler = new $config['onTask'][$cmd]['onFinish']($serv, $info['fd'], $one, $this -> table);
-                $return = $handler -> handle();
+                if (!isset($config['onTask'][$cmd]['onFinish'])) {
+                    $return = $one;
+                } else {
+                    $handler = new $config['onTask'][$cmd]['onFinish']($serv, $info['fd'], $one, $this -> table);
+                    $return = $handler -> handle();
+                }
+                
                 if ($return) $this -> task_res[$info['fd']][] = $return;
 
                 //返回数据
