@@ -4,6 +4,7 @@ namespace Group\Async\Server;
 
 use swoole_server;
 use Group\Common\ArrayToolkit;
+use swoole_table;
 
 class Server 
 {
@@ -12,6 +13,10 @@ class Server
     protected $servName;
 
     protected $config;
+
+    protected $table;
+
+    protected $task_res;
 
 	public function __construct($config =[], $servName)
 	{
@@ -57,6 +62,8 @@ class Server
         }
         // 判定是否为Task Worker进程
         if ($workerId >= $serv -> setting['worker_num']) {
+        } else {
+            $this -> createTaskTable();
         }
     }
 
@@ -82,11 +89,11 @@ class Server
         try {
             $config = $this -> config;
             foreach($data as $one){
-                list($cmd, $one) = \Group\Async\DataPack::unpack($one);
+                list($cmd, $one, $info) = \Group\Async\DataPack::unpack($one);
            
                 if (isset($config['onWork'][$cmd])) {
-                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one);
-    
+                    $this -> task_res[$fd] = [];
+                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one, $this -> table);
                     $handler -> handle();
                 }
             }
@@ -95,13 +102,13 @@ class Server
         }
     }
 
-    public function onTask(swoole_server $serv, $taskId, $fromId, $data)
+    public function onTask(swoole_server $serv, $fd, $fromId, $data)
     {
         try {
-            list($cmd, $one) = \Group\Async\DataPack::unpack($data);
+            list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data);
             $config = $this -> config;
             if (isset($config['onTask'][$cmd])) {
-                $handler = new $config['onTask'][$cmd]['handler']($serv, $taskId, $fromId, $one);
+                $handler = new $config['onTask'][$cmd]['handler']($serv, $fd, $fromId, ['data' => $one, 'info' => $info]);
                 return $handler -> handle();
             }
         } catch (\Exception $e) {
@@ -110,17 +117,38 @@ class Server
         return null;
     }
 
-    public function onFinish(swoole_server $serv, $taskId, $data)
-    {   
+    public function onFinish(swoole_server $serv, $fd, $data)
+    {
         try {
-            list($cmd, $one) = \Group\Async\DataPack::unpack($data);
+            list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data);
             $config = $this -> config;
             if (isset($config['onTask'][$cmd])) {
-                $handler = new $config['onTask'][$cmd]['onFinish']($serv, $taskId, $one);
-                $handler -> handle();
+                $this -> updateTaskCount($info['fd'], -1);
+                $handler = new $config['onTask'][$cmd]['onFinish']($serv, $info['fd'], $one, $this -> table);
+                $return = $handler -> handle();
+                if ($return) $this -> task_res[$info['fd']][] = $return;
+
+                //返回数据
+                $task_count = $this -> getTaskCount($info['fd']);
+                if ( $task_count <= 0 ) { 
+                    $this -> sendData($serv, $info['fd'], $this -> task_res[$info['fd']]);
+                }
             }
         } catch (\Exception $e) {
             echo $e -> getMessage();
+        }
+    }
+
+    private function sendData(swoole_server $serv, $fd, $data){
+        $fdinfo = $serv->connection_info($fd);
+        if($fdinfo){
+            //如果这个时候客户端还连接者的话说明需要返回返回的信息,
+            //如果客户端已经关闭了的话说明不需要server返回数据
+            //判断下data的类型
+            if (is_array($data)){
+                $data = json_encode($data);
+            }
+            $serv -> send($fd, $data . $serv -> setting['package_eof']);
         }
     }
 
@@ -129,5 +157,23 @@ class Server
         $config['onWork'] = ArrayToolkit::index($config['onWork'], 'cmd');
         $config['onTask'] = ArrayToolkit::index($config['onTask'], 'cmd');
         $this -> config = $config;
+    }
+
+    private function createTaskTable()
+    {
+        $this -> table = new swoole_table(1024);
+        $this -> table -> column("count", swoole_table::TYPE_INT);
+        $this -> table -> create();
+    }
+
+    private function updateTaskCount($fd, $incr = 1){
+        $count = $this -> table -> get($fd);
+        $count['count'] = $count['count'] + $incr;
+        $this -> table -> set($fd, $count);
+    }
+
+    private function getTaskCount($fd){
+        $task_count = $this -> table -> get($fd);
+        return $task_count['count'];
     }
 }

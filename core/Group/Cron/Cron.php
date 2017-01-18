@@ -292,8 +292,6 @@ class Cron
                 $this->restartJob($timerId, $job);
             }
 
-            call_user_func_array([new $job['command'], 'handle'], []);
-
             $workers = $this -> table -> get('workers');
             $workers = json_decode($workers['workers'], true);
             $workers[$job['name']]['timerId'] = $timerId;
@@ -302,6 +300,8 @@ class Cron
             $this -> table -> set('workers', ['workers' => json_encode($workers)]);
 
             \FileCache::set('cronAdmin', ['workers' => $workers], $this -> cacheDir);
+
+            call_user_func_array([new $job['command'], 'handle'], []);
 
         }, $job);
 
@@ -367,9 +367,6 @@ class Cron
 
     private function jobStart($job)
     {   
-        //先执行一次任务
-        call_user_func_array([new $job['command'], 'handle'], []);
-
         $workers = $this -> table -> get('workers');
         $workers = json_decode($workers['workers'], true);
         $workers[$job['name']]['startTime'] = date('Y-m-d H:i:s', time());
@@ -382,6 +379,9 @@ class Cron
         //开启计数
         $this -> table -> set($job['name'].'_maxNum', [$job['name']."_count" => 0]);
         $this -> table -> incr($job['name'].'_maxNum', $job['name']."_count");
+
+        //先执行一次任务
+        call_user_func_array([new $job['command'], 'handle'], []);
     }
 
     private function restartJob($timerId = 0, $job)
