@@ -32,15 +32,16 @@ abstract class WorkHandler
 
 	abstract public function handle();
 
-	public function task($data)
+	public function task($data, $cmd = null)
 	{	
+		$cmd = empty($cmd) ? $this -> cmd : $cmd;
 		//update count
 		$count = $this -> table -> get($this -> fd);
 		$count['count'] = $count['count'] + 1;
 		$this -> table -> set($this -> fd, $count);
 
 		//投递task
-		$data = \Group\Async\DataPack::pack($this -> cmd, $data, ['fd' => $this -> fd]);
+		$data = \Group\Async\DataPack::pack($cmd, $data, ['fd' => $this -> fd]);
 		$this -> serv -> task($data);
 	}
 
