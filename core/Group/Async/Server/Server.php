@@ -124,8 +124,13 @@ class Server
             $config = $this -> config;
             if (isset($config['onTask'][$cmd])) {
                 $this -> updateTaskCount($info['fd'], -1);
-                $handler = new $config['onTask'][$cmd]['onFinish']($serv, $info['fd'], $one, $this -> table);
-                $return = $handler -> handle();
+                if (!isset($config['onTask'][$cmd]['onFinish'])) {
+                    $return = $one;
+                } else {
+                    $handler = new $config['onTask'][$cmd]['onFinish']($serv, $info['fd'], $one, $this -> table);
+                    $return = $handler -> handle();
+                }
+                
                 if ($return) $this -> task_res[$info['fd']][] = $return;
 
                 //返回数据
