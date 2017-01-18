@@ -14,17 +14,27 @@ abstract class FinishHandler
 
 	protected $database;
 
-	public function __construct($serv, $fd, $data)
+	protected $table;
+
+	public function __construct($serv, $fd, $data, $table)
 	{
 		$this -> serv = $serv;
 		$this -> fd = $fd;
 		$this -> data = $data;
+		$this -> table = $table;
 	}
 
 	abstract public function handle();
 
-	public function task($data)
-	{
+	public function task($cmd, $data)
+	{	
+		//update count
+		$count = $this -> table -> get($this -> fd);
+		$count['count'] = $count['count'] + 1;
+		$this -> table -> set($this -> fd, $count);
+
+		//投递task
+		$data = \Group\Async\DataPack::pack($cmd, $data, ['fd' => $this -> fd]);
 		$this -> serv -> task($data);
 	}
 

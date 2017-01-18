@@ -6,7 +6,7 @@ abstract class TaskHandler
 {	
 	protected $serv;
 
-	protected $taskId;
+	protected $fd;
 
 	protected $fromId;
 
@@ -16,10 +16,10 @@ abstract class TaskHandler
 
 	protected $database;
 	
-	public function __construct($serv, $taskId, $fromId, $data)
+	public function __construct($serv, $fd, $fromId, $data)
 	{
 		$this -> serv = $serv;
-		$this -> taskId = $taskId;
+		$this -> fd = $fd;
 		$this -> fromId = $fromId;
 		$this -> data = $data;
 	}
@@ -36,9 +36,9 @@ abstract class TaskHandler
 		return $this -> serv;
 	}
 
-	public function getTaskId()
+	public function getFd()
 	{
-		return $this -> taskId;
+		return $this -> fd;
 	}
 
 	public function getfromId()
