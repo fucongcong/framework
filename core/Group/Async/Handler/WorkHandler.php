@@ -17,19 +17,22 @@ abstract class WorkHandler
 	protected $database;
 
 	protected $table;
+
+	protected $cmd;
 	
-	public function __construct($serv, $fd, $fromId, $data, $table)
+	public function __construct($serv, $fd, $fromId, $data, $cmd, $table)
 	{
 		$this -> serv = $serv;
 		$this -> fd = $fd;
 		$this -> fromId = $fromId;
 		$this -> data = $data;
 		$this -> table = $table;
+		$this -> cmd = $cmd;
 	}
 
 	abstract public function handle();
 
-	public function task($cmd, $data)
+	public function task($data)
 	{	
 		//update count
 		$count = $this -> table -> get($this -> fd);
@@ -37,7 +40,7 @@ abstract class WorkHandler
 		$this -> table -> set($this -> fd, $count);
 
 		//投递task
-		$data = \Group\Async\DataPack::pack($cmd, $data, ['fd' => $this -> fd]);
+		$data = \Group\Async\DataPack::pack($this -> cmd, $data, ['fd' => $this -> fd]);
 		$this -> serv -> task($data);
 	}
 

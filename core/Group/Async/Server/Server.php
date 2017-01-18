@@ -93,7 +93,7 @@ class Server
            
                 if (isset($config['onWork'][$cmd])) {
                     $this -> task_res[$fd] = [];
-                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one, $this -> table);
+                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one, $cmd, $this -> table);
                     $handler -> handle();
                 }
             }
