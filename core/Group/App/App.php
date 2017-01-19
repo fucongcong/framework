@@ -52,6 +52,7 @@ class App
         'Log'               => 'Group\Log\Log',
         'Listener'          => 'Group\Listeners\Listener',
         'Queue'             => 'Group\Queue\Queue',
+        'Async'             => 'Group\Async\Client\Client',
     ];
 
     /**
@@ -66,6 +67,7 @@ class App
         'Group\EventDispatcher\EventDispatcherServiceProvider',
         'Group\Cache\CacheServiceProvider',
         'Group\Cache\FileCacheServiceProvider',
+        'Group\Async\AsyncServiceProvider',
     ];
 
     protected $bootstraps = [
