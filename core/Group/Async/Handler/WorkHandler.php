@@ -84,4 +84,9 @@ abstract class WorkHandler
 	{
 		return $this -> database;
 	}
+
+	public function createService($serviceName)
+	{
+		return \App::getInstance() -> singleton('service') -> createService($serviceName);
+	}
 }
