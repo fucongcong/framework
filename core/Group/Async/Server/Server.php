@@ -19,7 +19,7 @@ class Server
     protected $task_res;
 
 	public function __construct($config =[], $servName)
-	{
+	{  
         $this -> serv = new swoole_server($config['serv'], $config['port']);
         $this -> serv -> set($config['config']);
 
@@ -49,8 +49,13 @@ class Server
     public function onWorkerStart(swoole_server $serv, $workerId)
     {
         opcache_reset();
-        // $loader = require __ROOT__.'/vendor/autoload.php';
-        // $loader->setUseIncludePath(true);
+        $loader = require __ROOT__.'/vendor/autoload.php';
+        $loader->setUseIncludePath(true);
+        $app = new \Group\App\App();
+        $app -> initSelf();
+        $app -> doBootstrap($loader);
+        $app -> registerServices();
+        $app -> singleton('container') -> setAppPath(__ROOT__);
 
         //设置不同进程名字,方便grep管理
         if (PHP_OS !== 'Darwin') {

@@ -93,7 +93,7 @@ class App
      *
      */
     public function init($path, $loader)
-    {
+    {   
         $this -> initSelf();
 
         $this -> doBootstrap($loader);
