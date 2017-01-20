@@ -70,4 +70,9 @@ abstract class TaskHandler
 	{
 		return \Group\Async\DataPack::pack($this -> data['cmd'], $data, $this -> data['info']);
 	}
+
+	public function createService($serviceName)
+	{
+		return \App::getInstance() -> singleton('service') -> createService($serviceName);
+	}
 }

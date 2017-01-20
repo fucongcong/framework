@@ -72,4 +72,9 @@ abstract class FinishHandler
 	{
 		return $this -> database;
 	}
+
+	public function createService($serviceName)
+	{
+		return \App::getInstance() -> singleton('service') -> createService($serviceName);
+	}
 }
