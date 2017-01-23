@@ -77,7 +77,7 @@ class Cron
      *
      */
     public function run()
-    {   
+    {
         $this->checkArgv();
 
         $this->bootstrapClass();
@@ -115,7 +115,7 @@ class Cron
     }
 
     public function status()
-    {   
+    {
         if (!$this->getPid()) {
             exit("cron服务未启动\n");
         }
@@ -143,7 +143,7 @@ class Cron
                 foreach (\FileCache::get('work_ids', $this->cacheDir) as $work_id) {
                     swoole_process::kill($work_id, SIGKILL);
                 }
-            }   
+            }
         }
     }
 
@@ -152,7 +152,7 @@ class Cron
      *
      */
     private function setSignal()
-    {   
+    {
         //子进程结束时主进程收到的信号
         swoole_process::signal(SIGCHLD, function ($signo) {
             //kill掉所有worker进程 必须为false，非阻塞模式
@@ -180,7 +180,7 @@ class Cron
      *
      */
     private function startWorkers()
-    {      
+    {
         $this->table = new swoole_table(1024);
         $this->table->column('workers', swoole_table::TYPE_STRING, 1024 * 20);
         $this->table->column("workers_num", swoole_table::TYPE_INT);
@@ -214,7 +214,7 @@ class Cron
     }
 
     public function exec()
-    {   
+    {
         $argv = $this->argv;
         $jobName = isset($argv[2]) ? $argv[2] :'';
         foreach ($this->jobs as $job) {
@@ -230,7 +230,7 @@ class Cron
     }
 
     public function rejob()
-    {   
+    {
         $argv = $this->argv;
         $jobName = isset($argv[2]) ? $argv[2] :'';
         foreach ($this->jobs as $job) {
@@ -240,7 +240,7 @@ class Cron
                     $processPid = $workers['workers'][$jobName]['pid'];
                     exec("kill -USR1 {$processPid}");
                     exit("{$jobName}重启完成\n");
-                }  
+                }
             }
             continue;
         }
@@ -255,7 +255,7 @@ class Cron
             $recv = json_decode($recv, true);
             if (!is_array($recv)) return;
 
-            $this->bindTick($recv);         
+            $this->bindTick($recv);
         });
 
         //接受重启的信号
@@ -323,14 +323,14 @@ class Cron
      * @param pid int
      */
     private function setWorkerPids($pid)
-    {   
+    {
         if (!\FileCache::isExist('work_ids', $this->cacheDir)) {
             \FileCache::set('work_ids', [$pid => $pid], $this->cacheDir);
         } else {
             $workerPids = \FileCache::get('work_ids', $this->cacheDir);
             $workerPids[$pid] = $pid;
             \FileCache::set('work_ids', $workerPids, $this->cacheDir);
-        }        
+        }
     }
 
     /**
@@ -339,7 +339,7 @@ class Cron
      * @param pid int
      */
     private function removeWorkerPids($pid)
-    {   
+    {
         $workerPids = \FileCache::get('work_ids', $this->cacheDir);
         unset($workerPids[$pid]);
         \FileCache::set('work_ids', $workerPids, $this->cacheDir);
@@ -366,7 +366,7 @@ class Cron
     }
 
     private function jobStart($job)
-    {   
+    {
         $workers = $this->table->get('workers');
         $workers = json_decode($workers['workers'], true);
         $workers[$job['name']]['startTime'] = date('Y-m-d H:i:s', time());
@@ -385,7 +385,7 @@ class Cron
     }
 
     private function restartJob($timerId = 0, $job)
-    {   
+    {
         foreach ($this->jobs as $key => $one) {
             if ($one['name'] == $job['name']) {
                 //清除该计数器
