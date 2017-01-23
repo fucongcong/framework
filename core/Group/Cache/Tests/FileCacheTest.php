@@ -13,7 +13,7 @@ class FileCacheTest extends Test
         //指定路径
         FileCache::set('test.php', ['testdfata' => 'datadata'], 'runtime/cache/test/');
 
-        $this -> assertEquals(['testdfata' => 'datadata'], FileCache::get('test.php'));
-        $this -> assertEquals(['testdfata' => 'datadata'], FileCache::get('test.php', 'runtime/cache/test/'));
+        $this->assertEquals(['testdfata' => 'datadata'], FileCache::get('test.php'));
+        $this->assertEquals(['testdfata' => 'datadata'], FileCache::get('test.php', 'runtime/cache/test/'));
     }
 }

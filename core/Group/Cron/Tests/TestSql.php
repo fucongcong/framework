@@ -9,7 +9,7 @@ class TestSql
         $dao = new \Dao();
         $date = time();
         $sql = "INSERT INTO `Group`.`groups` (`id`, `title`) VALUES (NULL, {$date});";
-        $dao -> querySql($sql, 'default');
+        $dao->querySql($sql, 'default');
     }
 
 }

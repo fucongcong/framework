@@ -11,7 +11,7 @@ class ServiceRegister extends \ServiceProvider
      */
     public function register()
     {
-		$this -> app -> singleton('service', function () {
+		$this->app->singleton('service', function () {
             return new \Service();
         });
     }

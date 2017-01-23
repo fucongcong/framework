@@ -19,7 +19,7 @@ class Config implements ConfigContract
      */
     public static function get($configName)
     {
-        return  self::getInstance() -> read($configName);
+        return  self::getInstance()->read($configName);
     }
 
     /**
@@ -31,7 +31,7 @@ class Config implements ConfigContract
      */
     public static function set($key, $subKey, $value)
     {
-        self::getInstance() -> setCustom($key, $subKey, $value);
+        self::getInstance()->setCustom($key, $subKey, $value);
     }
 
     /**
@@ -45,7 +45,7 @@ class Config implements ConfigContract
         $configName = explode('::', $configName);
 
         if (count($configName) == 2) {
-            $config = $this -> checkConfig($configName[0]);
+            $config = $this->checkConfig($configName[0]);
             return $config[$configName[0]][$configName[1]];
         }
 
@@ -60,12 +60,12 @@ class Config implements ConfigContract
      */
     public function setConfig($config)
     {
-        $this -> config = array_merge($this -> config, $config);
+        $this->config = array_merge($this->config, $config);
     }
 
     public function setCustom($key, $subKey, $value)
     {
-        $this -> config[$key][$subKey] = $value;
+        $this->config[$key][$subKey] = $value;
     }
 
     /**
@@ -75,7 +75,7 @@ class Config implements ConfigContract
      */
     public function getConfig()
     {
-        return $this -> config;
+        return $this->config;
     }
 
     /**
@@ -94,13 +94,13 @@ class Config implements ConfigContract
 
     private function checkConfig($key)
     {
-        $config = $this -> config;
+        $config = $this->config;
 
         if (!isset($config[$key])) {
             $app = require("config/".$key.".php");
-            $this -> config = array_merge($this -> config, [$key => $app]);
+            $this->config = array_merge($this->config, [$key => $app]);
         }
 
-        return $this -> config;
+        return $this->config;
     }
 }

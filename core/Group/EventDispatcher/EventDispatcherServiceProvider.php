@@ -16,9 +16,9 @@ class EventDispatcherServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this -> app -> singleton('eventDispatcher', function () {
+        $this->app->singleton('eventDispatcher', function () {
             $eventDispatcher = new EventDispatcherService();
-            $eventDispatcher -> addListener(KernalEvent::INIT, new KernalInitListener());
+            $eventDispatcher->addListener(KernalEvent::INIT, new KernalInitListener());
             
             return $eventDispatcher;
         });

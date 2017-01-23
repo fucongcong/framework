@@ -34,8 +34,8 @@ class VarCollector extends \DebugBar\DataCollector\ConfigCollector
     public function collect()
     {
         $data = array();
-        if ($this -> data) {
-            $this -> data = $this -> data[0];
+        if ($this->data) {
+            $this->data = $this->data[0];
         }
         foreach ($this->data as $k => $v) {
             if (!is_string($v)) {

@@ -15,8 +15,8 @@ class NotFoundListener extends \Listener
     public function onNotFound(\Event $event)
     {   
     	$controller = new \Controller(\App::getInstance());
-        $page = $controller -> twigInit() -> render(\Config::get('view::notfound_page'));
+        $page = $controller->twigInit()->render(\Config::get('view::notfound_page'));
         $response = new \Response($page, 404);
-        \Container::getInstance() -> setResponse($response);
+        \Container::getInstance()->setResponse($response);
     }
 }

@@ -14,9 +14,9 @@ class EventSubscriberTest extends Test
 
         EventDispatcher::addSubscriber($subscriber);
 
-        $this -> assertTrue(EventDispatcher::hasListeners('test.start'));
-        $this -> assertTrue(EventDispatcher::hasListeners('test.stop'));
-        $this -> assertTrue(EventDispatcher::hasListeners('test.doing'));
+        $this->assertTrue(EventDispatcher::hasListeners('test.start'));
+        $this->assertTrue(EventDispatcher::hasListeners('test.stop'));
+        $this->assertTrue(EventDispatcher::hasListeners('test.doing'));
 
         EventDispatcher::dispatch('test.start');
         EventDispatcher::dispatch('test.stop');
@@ -31,14 +31,14 @@ class EventSubscriberTest extends Test
 
         EventDispatcher::addSubscriber($subscriber);
 
-        $this -> assertTrue(EventDispatcher::hasListeners('test.start'));
-        $this -> assertTrue(EventDispatcher::hasListeners('test.stop'));
-        $this -> assertTrue(EventDispatcher::hasListeners('test.doing'));
+        $this->assertTrue(EventDispatcher::hasListeners('test.start'));
+        $this->assertTrue(EventDispatcher::hasListeners('test.stop'));
+        $this->assertTrue(EventDispatcher::hasListeners('test.doing'));
 
         EventDispatcher::removeSubscriber($subscriber);
 
-        $this -> assertFalse(EventDispatcher::hasListeners('test.start'));
-        $this -> assertFalse(EventDispatcher::hasListeners('test.stop'));
-        $this -> assertFalse(EventDispatcher::hasListeners('test.doing'));
+        $this->assertFalse(EventDispatcher::hasListeners('test.start'));
+        $this->assertFalse(EventDispatcher::hasListeners('test.stop'));
+        $this->assertFalse(EventDispatcher::hasListeners('test.doing'));
     }
 }

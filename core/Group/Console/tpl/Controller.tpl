@@ -8,7 +8,7 @@ class {{name}}Controller extends Controller
 {
     public function indexAction()
     {
-        return $this -> render('{{group}}/Views/{{name}}/index.html.twig');
+        return $this->render('{{group}}/Views/{{name}}/index.html.twig');
     }
 
 }

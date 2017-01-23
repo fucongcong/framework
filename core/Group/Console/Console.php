@@ -44,9 +44,9 @@ class Console
 
     public function __construct($argv)
     {
-        $this -> argv = $argv;
+        $this->argv = $argv;
 
-        $this -> mergeConfig();
+        $this->mergeConfig();
     }
 
     /**
@@ -55,8 +55,8 @@ class Console
      */
     public function run()
     {
-        $this -> checkArgv();
-        die($this -> help);
+        $this->checkArgv();
+        die($this->help);
     }
 
     /**
@@ -65,18 +65,18 @@ class Console
      */
     protected function checkArgv()
     {
-        $argv = $this -> argv;
+        $argv = $this->argv;
         if (!isset($argv[1])) return;
-        $options = $this -> options;
+        $options = $this->options;
         if (!isset($options[$argv[1]])) {
 
-            $this -> help = "\033[31m错误的命令！\033[0m\n";
+            $this->help = "\033[31m错误的命令！\033[0m\n";
             return;
         }
 
         $command = new $options[$argv[1]];
-        $command -> setArgv($argv);
-        $command -> init();
+        $command->setArgv($argv);
+        $command->init();
         die;
     }
 
@@ -90,7 +90,7 @@ class Console
             $helps .= "\033[32m ".$command."\033[0m                                        ".$option['help']."\n";
         }
 
-        $this -> options = array_merge($this -> options, $options);
-        $this -> help = $this -> help.$helps;
+        $this->options = array_merge($this->options, $options);
+        $this->help = $this->help.$helps;
     }
 }

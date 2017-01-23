@@ -39,13 +39,13 @@ class Container implements ContainerContract
 
     public function __construct()
     {
-        $this -> setTimezone();
+        $this->setTimezone();
 
-        $this -> setEnvironment();
+        $this->setEnvironment();
 
-        $this -> setLocale();
+        $this->setLocale();
 
-        $this -> needDebug();
+        $this->needDebug();
     }
 
 	/**
@@ -75,22 +75,22 @@ class Container implements ContainerContract
      */
 	public function doAction($class, $action, array $parameters, \Request $request)
 	{
-		$reflector = $this -> buildMoudle($class);
+		$reflector = $this->buildMoudle($class);
 
-		if (!$reflector -> hasMethod($action)) {
+		if (!$reflector->hasMethod($action)) {
 			throw new NotFoundException("Class ".$class." exist ,But the Action ".$action." not found");
 		}
 
-		$instanc = $reflector -> newInstanceArgs(array(App::getInstance()));
-		$method = $reflector -> getmethod($action);
+		$instanc = $reflector->newInstanceArgs(array(App::getInstance()));
+		$method = $reflector->getmethod($action);
         $args = [];
-        foreach ($method -> getParameters() as $arg) {
+        foreach ($method->getParameters() as $arg) {
             $paramName = $arg ->getName();
             if (isset($parameters[$paramName])) $args[$paramName] = $parameters[$paramName];
-            if (!empty($arg -> getClass()) && $arg -> getClass() -> getName() == 'Group\Http\Request') $args[$paramName] = $request;
+            if (!empty($arg->getClass()) && $arg->getClass()->getName() == 'Group\Http\Request') $args[$paramName] = $request;
         }
 
-		return $method -> invokeArgs($instanc, $args);
+		return $method->invokeArgs($instanc, $args);
 	}
 
     /**
@@ -113,8 +113,8 @@ class Container implements ContainerContract
      */
     public function setTimezone()
     {
-        $this -> timezone = \Config::get('app::timezone');
-        date_default_timezone_set($this -> getTimezone());
+        $this->timezone = \Config::get('app::timezone');
+        date_default_timezone_set($this->getTimezone());
     }
 
 
@@ -124,7 +124,7 @@ class Container implements ContainerContract
      */
     public function getTimezone()
     {
-        return $this -> timezone;
+        return $this->timezone;
     }
 
     /**
@@ -134,7 +134,7 @@ class Container implements ContainerContract
      */
     public function getEnvironment()
     {
-        return $this -> environment;
+        return $this->environment;
     }
 
     /**
@@ -143,7 +143,7 @@ class Container implements ContainerContract
      */
     public function setEnvironment()
     {
-        $this -> environment = \Config::get('app::environment');
+        $this->environment = \Config::get('app::environment');
     }
 
     /**
@@ -152,7 +152,7 @@ class Container implements ContainerContract
      */
     public function setAppPath($path)
     {
-        $this -> appPath = $path;
+        $this->appPath = $path;
     }
 
     /**
@@ -162,7 +162,7 @@ class Container implements ContainerContract
      */
     public function getAppPath()
     {
-        return $this -> appPath;
+        return $this->appPath;
     }
 
     /**
@@ -171,7 +171,7 @@ class Container implements ContainerContract
      */
     public function setLocale()
     {
-        $this -> locale = \Config::get('app::locale');
+        $this->locale = \Config::get('app::locale');
     }
 
     /**
@@ -181,7 +181,7 @@ class Container implements ContainerContract
      */
     public function getLocale()
     {
-        return $this -> locale;
+        return $this->locale;
     }
 
     /**
@@ -190,7 +190,7 @@ class Container implements ContainerContract
      */
     public function setResponse($response)
     {
-        $this -> response = $response;
+        $this->response = $response;
     }
 
     /**
@@ -200,7 +200,7 @@ class Container implements ContainerContract
      */
     public function getResponse()
     {
-        return $this -> response;
+        return $this->response;
     }
 
     /**
@@ -210,7 +210,7 @@ class Container implements ContainerContract
     public function setRequest(\Request $request)
     {   
         \EventDispatcher::dispatch(KernalEvent::REQUEST, new HttpEvent($request));
-        $this -> request = $request;
+        $this->request = $request;
     }
 
     /**
@@ -220,7 +220,7 @@ class Container implements ContainerContract
      */
     public function getRequest()
     {
-        return $this -> request;
+        return $this->request;
     }
 
     public function runningInConsole()
@@ -231,12 +231,12 @@ class Container implements ContainerContract
     private function needDebug()
     {
         if (\Config::get('app::environment') == "dev" && \Config::get('app::debug')) {
-            $this -> debug = true;
+            $this->debug = true;
         }
     }
 
     public function isDebug()
     {
-        return $this -> debug;
+        return $this->debug;
     }
 }

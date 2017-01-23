@@ -14,12 +14,12 @@ class SqlMigrateCommand extends Command
 
         $lock = \FileCache::isExist("sql.lock", $sqlDir);
         if($lock) {
-            $this -> fileList = \FileCache::get("sql.lock", $sqlDir);
+            $this->fileList = \FileCache::get("sql.lock", $sqlDir);
         }
 
-        $this -> ListSql($sqlDir);
+        $this->ListSql($sqlDir);
 
-        \FileCache::set("sql.lock", $this -> fileList, $sqlDir);
+        \FileCache::set("sql.lock", $this->fileList, $sqlDir);
     }
 
     private function ListSql($sqlDir)
@@ -32,7 +32,7 @@ class SqlMigrateCommand extends Command
                 $fileName = $file[0];
 
                 if ($fileName && isset($file[1]) && $file[1] == "php") {
-                    $this -> filterLockFile($fileName);
+                    $this->filterLockFile($fileName);
                 }
             }
             closedir($dir);
@@ -41,62 +41,62 @@ class SqlMigrateCommand extends Command
 
     private function filterLockFile($file)
     {
-        $fileList = $this -> fileList;
+        $fileList = $this->fileList;
 
         if (in_array($file, $fileList)) return;
 
         $migrateClass = "\\app\\sql\\".$file;
         $sqlMigrate = new $migrateClass;
-        $sqlMigrate -> run();
-        $sqlArr = $sqlMigrate -> getSqlArr();
+        $sqlMigrate->run();
+        $sqlArr = $sqlMigrate->getSqlArr();
 
-        $this -> startMigrate($sqlArr);
+        $this->startMigrate($sqlArr);
 
         $fileList[] = $file;
-        $this -> fileList = $fileList;
+        $this->fileList = $fileList;
     }
 
     private function startMigrate($sqlArr)
     {
         $dao = new \Dao();
         foreach ($sqlArr as $sql) {
-            $this -> doSql($dao, $sql);
+            $this->doSql($dao, $sql);
         }
     }
 
     private function doSql($dao, $sql) {
 
-        $input = $this -> getArgv();
+        $input = $this->getArgv();
         $type = isset($input[0]) ? $input[0] : 'default';
         $subType = isset($input[1]) ? $input[1] : 'all';
 
         switch ($type) {
             case 'write':
                     if ($subType == 'all') {
-                        $dao -> querySql($sql, 'all_write');
+                        $dao->querySql($sql, 'all_write');
                     }else {
-                        $dao -> querySql($sql, 'write', $subType);
+                        $dao->querySql($sql, 'write', $subType);
                     }
                 break;
             case 'read':
                     if ($subType == 'all') {
-                        $dao -> querySql($sql, 'all_read');
+                        $dao->querySql($sql, 'all_read');
                     }else {
-                        $dao -> querySql($sql, 'read', $subType);
+                        $dao->querySql($sql, 'read', $subType);
                     }
                 break;
             case 'default':
-                    $dao -> querySql($sql, 'default');
+                    $dao->querySql($sql, 'default');
                 break;
             case 'all':
-                    $dao -> querySql($sql, 'default');
-                    $dao -> querySql($sql, 'all_write');
-                    $dao -> querySql($sql, 'all_read');
+                    $dao->querySql($sql, 'default');
+                    $dao->querySql($sql, 'all_write');
+                    $dao->querySql($sql, 'all_read');
                 break;
             default:
                 break;
         }
 
-        $this -> outPut($sql);
+        $this->outPut($sql);
     }
 }

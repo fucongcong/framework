@@ -9,7 +9,7 @@ class GenerateServiceCommand extends Command
 {
     public function init()
     {
-        $input = $this -> getArgv();
+        $input = $this->getArgv();
 
         if (!isset($input[0])) {
             throw new \RuntimeException("名称不能为空！");
@@ -21,52 +21,52 @@ class GenerateServiceCommand extends Command
         }
 
         $serviceName = ucfirst($name);
-        $this -> outPut('开始初始化'.$serviceName.'Service...');
+        $this->outPut('开始初始化'.$serviceName.'Service...');
 
         $dir = __ROOT__."src/Services";
         $daoDir = __ROOT__."src/Dao";
 
-        $this -> outPut('正在生成目录...');
+        $this->outPut('正在生成目录...');
 
         if (is_dir($dir."/".$serviceName)) {
 
-            $this -> outPut('目录已存在...初始化失败');
+            $this->outPut('目录已存在...初始化失败');
             die;
         }
 
         $filesystem = new Filesystem();
-        $filesystem -> mkdir($daoDir."/".$serviceName."");
-        $filesystem -> mkdir($daoDir."/".$serviceName."/Impl");
-        $filesystem -> mkdir($dir."/".$serviceName."/Impl");
-        $filesystem -> mkdir($dir."/".$serviceName."/Rely");
+        $filesystem->mkdir($daoDir."/".$serviceName."");
+        $filesystem->mkdir($daoDir."/".$serviceName."/Impl");
+        $filesystem->mkdir($dir."/".$serviceName."/Impl");
+        $filesystem->mkdir($dir."/".$serviceName."/Rely");
 
-        $this -> outPut('开始创建模板...');
-        $data = $this -> getFile("Service.tpl", $serviceName);
+        $this->outPut('开始创建模板...');
+        $data = $this->getFile("Service.tpl", $serviceName);
         file_put_contents ($dir."/".$serviceName."/".$serviceName."Service.php", $data);
 
-        $data = $this -> getFile("ServiceImpl.tpl", $serviceName);
+        $data = $this->getFile("ServiceImpl.tpl", $serviceName);
         file_put_contents ($dir."/".$serviceName."/Impl/".$serviceName."ServiceImpl.php", $data);
 
-        $data = $this -> getFile("ServiceImpl.tpl", $serviceName);
+        $data = $this->getFile("ServiceImpl.tpl", $serviceName);
         file_put_contents ($dir."/".$serviceName."/Impl/".$serviceName."ServiceImpl.php", $data);
 
-        $data = $this -> getFile("BaseService.tpl", $serviceName);
+        $data = $this->getFile("BaseService.tpl", $serviceName);
         file_put_contents ($dir."/".$serviceName."/Rely/".$serviceName."BaseService.php", $data);
 
-        $data = $this -> getFile("Dao.tpl", $serviceName);
+        $data = $this->getFile("Dao.tpl", $serviceName);
         file_put_contents ($daoDir."/".$serviceName."/".$serviceName."Dao.php", $data);
 
-        $data = $this -> getFile("DaoImpl.tpl", $serviceName);
+        $data = $this->getFile("DaoImpl.tpl", $serviceName);
         file_put_contents ($daoDir."/".$serviceName."/Impl/".$serviceName."DaoImpl.php", $data);
 
-        $this -> outPut('初始化'.$serviceName.'Service完成');
+        $this->outPut('初始化'.$serviceName.'Service完成');
     }
 
     private function getFile($tpl, $serviceName)
     {
         $data = file_get_contents(__DIR__."/../tpl/{$tpl}");
 
-        return $this -> getData($data, $serviceName);
+        return $this->getData($data, $serviceName);
     }
 
     private function getData($data, $serviceName)

@@ -12,7 +12,7 @@ class Controller implements ControllerContract
 
 	public function __construct($app)
 	{
-		$this -> app = $app;
+		$this->app = $app;
 	}
 
 	/**
@@ -24,22 +24,22 @@ class Controller implements ControllerContract
 	 */
 	public function render($tpl, $array = array())
 	{	
-		if ($this -> getContainer() -> isDebug()) {
-			if ($this -> app -> singleton('debugbar') -> hasCollector('view')) {
+		if ($this->getContainer()->isDebug()) {
+			if ($this->app->singleton('debugbar')->hasCollector('view')) {
 				$array['模板地址'] = $tpl;
-				$this -> app -> singleton('debugbar') -> getCollector('view') -> setData($array);
+				$this->app->singleton('debugbar')->getCollector('view')->setData($array);
 			} else {
 				$array['模板地址'] = $tpl;
-				$this -> app -> singleton('debugbar') -> addCollector(new \Group\Debug\Collector\VarCollector($array));
+				$this->app->singleton('debugbar')->addCollector(new \Group\Debug\Collector\VarCollector($array));
 			}
 		}
 		
-		return $this -> twigInit() -> render($tpl, $array);
+		return $this->twigInit()->render($tpl, $array);
 	}
 
 	public function twigInit()
 	{
-		return $this -> app -> singleton('twig', function() {
+		return $this->app->singleton('twig', function() {
 			$loader = new \Twig_Loader_Filesystem(\Config::get('view::path'));
 
 			if (\Config::get('view::cache')) {
@@ -51,16 +51,16 @@ class Controller implements ControllerContract
 			$twig = new \Twig_Environment($loader, isset($env) ? $env : array());
 
 			//开启twig的cache后默认不显示twig数据收集。这里有一点小bug
-			if ($this -> getContainer() -> isDebug() && empty($env)) {
+			if ($this->getContainer()->isDebug() && empty($env)) {
 				$twig = new \DebugBar\Bridge\Twig\TraceableTwigEnvironment($twig);
-				$this -> app -> singleton('debugbar') -> addCollector(new \DebugBar\Bridge\Twig\TwigCollector($twig));
+				$this->app->singleton('debugbar')->addCollector(new \DebugBar\Bridge\Twig\TwigCollector($twig));
 			}
 			
-			$twig -> addExtension(new WebExtension());
+			$twig->addExtension(new WebExtension());
 			$extensions = \Config::get('view::extensions');
 			foreach ($extensions as $extension) {
-				if($this -> getContainer() -> buildMoudle($extension) -> isSubclassOf('Twig_Extension'))
-					$twig -> addExtension(new $extension);
+				if($this->getContainer()->buildMoudle($extension)->isSubclassOf('Twig_Extension'))
+					$twig->addExtension(new $extension);
 			}
 
 			return $twig;
@@ -75,7 +75,7 @@ class Controller implements ControllerContract
 	 */
 	public function createService($serviceName)
 	{
-		return $this -> app -> singleton('service') -> createService($serviceName);
+		return $this->app->singleton('service')->createService($serviceName);
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Controller implements ControllerContract
 	 */
 	public function route()
 	{
-		return $this -> app -> singleton('route');
+		return $this->app->singleton('route');
 	}
 
 	/**
@@ -95,17 +95,17 @@ class Controller implements ControllerContract
 	 */
 	public function getContainer()
 	{
-		return $this -> app -> singleton('container');
+		return $this->app->singleton('container');
 	}
 
 	public function setFlashMessage($type, $message)
 	{
-		\Session::getFlashBag() -> set($type, $message);
+		\Session::getFlashBag()->set($type, $message);
 	}
 
 	public function getFlashMessage()
 	{
-		return \Session::getFlashBag() -> all();
+		return \Session::getFlashBag()->all();
 	}
 
     public function redirect($url, $status = 302)

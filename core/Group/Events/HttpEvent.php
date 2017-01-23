@@ -10,17 +10,17 @@ final class HttpEvent extends \Event
 
     public function __construct(\Request $request = null, $response = null)
     {	
-    	$this -> request = $request;
-        $this -> response = $response;
+    	$this->request = $request;
+        $this->response = $response;
     }
 
     public function getResponse()
     {
-        return $this -> response;
+        return $this->response;
     }
 
     public function getRequest()
     {
-        return $this -> request;
+        return $this->request;
     }
 }

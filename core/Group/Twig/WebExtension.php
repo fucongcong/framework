@@ -69,13 +69,13 @@ class WebExtension extends Twig_Extension
 	{	
 		$config['controller'] = $controller;
 		$config['parameters'] = $params;
-		return \App::getInstance() -> router -> getTpl($config);
+		return \App::getInstance()->router->getTpl($config);
 	}
 
 	public function getCsrfToken()
 	{
 		$csrfProvider = new CsrfSessionService();
-		return $csrfProvider -> generateCsrfToken();
+		return $csrfProvider->generateCsrfToken();
 	}
 
     public function smarttimeFilter($time) {
@@ -113,17 +113,17 @@ class WebExtension extends Twig_Extension
 
     public function debug()
     {   
-        if (\App::getInstance() -> singleton('container') -> isDebug()) {
-            $debugbarRenderer = \App::getInstance() -> singleton('debugbar') -> getJavascriptRenderer();
-            return $debugbarRenderer -> render();
+        if (\App::getInstance()->singleton('container')->isDebug()) {
+            $debugbarRenderer = \App::getInstance()->singleton('debugbar')->getJavascriptRenderer();
+            return $debugbarRenderer->render();
         }
     }
 
     public function debugHeader()
     {   
-        if (\App::getInstance() -> singleton('container') -> isDebug()) {
-            $debugbarRenderer = \App::getInstance() -> singleton('debugbar') -> getJavascriptRenderer();
-            return $debugbarRenderer -> renderHead();
+        if (\App::getInstance()->singleton('container')->isDebug()) {
+            $debugbarRenderer = \App::getInstance()->singleton('debugbar')->getJavascriptRenderer();
+            return $debugbarRenderer->renderHead();
         }
     }
 

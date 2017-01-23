@@ -8,6 +8,6 @@ abstract class Listener
 
     public function getMethod()
     {
-        return $this -> setMethod();
+        return $this->setMethod();
     }
 }

@@ -20,10 +20,10 @@ class ExtendedPdo extends Aura_ExtendedPdo
         $options,
         $attributes);
 
-        if (\App::getInstance() -> singleton('container') -> isDebug()) {
-            $this -> setProfiler(new \Aura\Sql\Profiler);
+        if (\App::getInstance()->singleton('container')->isDebug()) {
+            $this->setProfiler(new \Aura\Sql\Profiler);
             $this->getProfiler()->setActive(true);
-            $this -> debug = true;
+            $this->debug = true;
         }
     }
     /**
@@ -203,8 +203,8 @@ class ExtendedPdo extends Aura_ExtendedPdo
         }
 
         
-        if ($this -> debug && !\App::getInstance() -> singleton('container') ->runningInConsole()) {
-            \App::getInstance() -> singleton('debugbar') -> getCollector('sql') -> setData([
+        if ($this->debug && !\App::getInstance()->singleton('container') ->runningInConsole()) {
+            \App::getInstance()->singleton('debugbar')->getCollector('sql')->setData([
                 microtime(true) - $this->profile['time'],
                 $this->profile['function'],
                 $statement,

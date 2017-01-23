@@ -14,7 +14,7 @@ class RpcServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this -> app -> singleton('rpc', function () {
+        $this->app->singleton('rpc', function () {
             return new RpcService();
         });
     }

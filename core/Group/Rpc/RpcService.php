@@ -8,7 +8,7 @@ class RpcService
 
     public function __construct()
     {   
-        $path = \Container::getInstance() -> getAppPath();
+        $path = \Container::getInstance()->getAppPath();
 
         new \Group\Plugin\Rpc\Hprose();
         $type = \Config::get('rpc::current_server');
@@ -16,7 +16,7 @@ class RpcService
         $host = $server[$type]['host'];
         $port = $server[$type]['port'];
 
-        $this -> client = new \HproseSwooleClient("{$type}://{$host}:{$port}");
+        $this->client = new \HproseSwooleClient("{$type}://{$host}:{$port}");
     }
 
     public function call($name, $function, $args) 
@@ -25,7 +25,7 @@ class RpcService
         $func = "{$group}_{$name}Service_{$function}";
 
         try {
-            return call_user_func_array([$this -> client, $func], $args);
+            return call_user_func_array([$this->client, $func], $args);
         } catch(\Exception $e) {
             return false;
         }

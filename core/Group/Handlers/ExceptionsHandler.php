@@ -39,7 +39,7 @@ class ExceptionsHandler
      */
     public function bootstrap(App $app)
     {
-        $this -> app = $app;
+        $this->app = $app;
 
         error_reporting(-1);
 
@@ -75,15 +75,15 @@ class ExceptionsHandler
 
             switch ($level) {
                 case E_USER_ERROR:
-                    $this -> record($error);
-                    if ($this -> app -> container -> runningInConsole()) {
-                        $this -> renderForConsole($e);
+                    $this->record($error);
+                    if ($this->app->container->runningInConsole()) {
+                        $this->renderForConsole($e);
                     } else {
-                        $this -> renderHttpResponse($e);
+                        $this->renderHttpResponse($e);
                     }
                     break;
                 default:
-                    $this -> record($error, 'warning');
+                    $this->record($error, 'warning');
                     break;
             }
             return true;
@@ -95,18 +95,18 @@ class ExceptionsHandler
     public function handleException($e)
     {
         $error = [
-            'message' => $e -> getMessage(),
-            'file'    => $e -> getFile(),
-            'line'    => $e -> getLine(),
-            'trace'   => $e -> getTraceAsString(),
-            'type'    => $e -> getCode(),
+            'message' => $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+            'trace'   => $e->getTraceAsString(),
+            'type'    => $e->getCode(),
         ];
 
-        $this -> record($error);
-        if ($this -> app -> container -> runningInConsole()) {
-            $this -> renderForConsole($error);
+        $this->record($error);
+        if ($this->app->container->runningInConsole()) {
+            $this->renderForConsole($error);
         } else {
-            $this -> renderHttpResponse($error);
+            $this->renderHttpResponse($error);
         }
     }
 
@@ -124,9 +124,9 @@ class ExceptionsHandler
     protected function renderHttpResponse($e)
     {
         //dev下面需要render信息
-        if ($this -> app -> container -> getEnvironment() == 'prod') {
-            $controller = new \Controller($this -> app);
-            $e = $controller -> twigInit() -> render(\Config::get('view::error_page'));
+        if ($this->app->container->getEnvironment() == 'prod') {
+            $controller = new \Controller($this->app);
+            $e = $controller->twigInit()->render(\Config::get('view::error_page'));
         }else {
             if (!is_array($e)) {
                 $trace        = debug_backtrace();
@@ -151,13 +151,13 @@ class ExceptionsHandler
     public function handleShutdown()
     {
         if ($e = error_get_last()) {
-            if ($this -> isFatal($e['type'])) {
-                $this -> record($e);
+            if ($this->isFatal($e['type'])) {
+                $this->record($e);
                 $e['trace'] = '';
-                if ($this -> app -> container -> runningInConsole()) {
-                    $this -> renderForConsole($e);
+                if ($this->app->container->runningInConsole()) {
+                    $this->renderForConsole($e);
                 } else {
-                    $this -> renderHttpResponse($e);
+                    $this->renderHttpResponse($e);
                 }
             }
                 
@@ -166,7 +166,7 @@ class ExceptionsHandler
 
     protected function record($e, $type = 'error')
     {
-        \Log::$type('[' . $this -> levels[$e['type']] . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
+        \Log::$type('[' . $this->levels[$e['type']] . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
     }
 
     /**
