@@ -3,17 +3,17 @@
 namespace Group\Queue;
 
 abstract class QueueJob
-{	
-	protected $jobId;
+{   
+    protected $jobId;
 
-	protected $jobData;
+    protected $jobData;
 
-	public function __construct($jobId, $jobData)
-	{	
-		$this->jobId = $jobId;
+    public function __construct($jobId, $jobData)
+    {   
+        $this->jobId = $jobId;
 
-		$this->jobData = $jobData;
-	}
+        $this->jobData = $jobData;
+    }
 
     abstract function handle();
 }
