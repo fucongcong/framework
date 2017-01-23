@@ -1,20 +1,7 @@
-engines:
-  fixme:
-    enabled: true
-  phpmd:
-    enabled: true
-  duplication:
-  	enabled: true
-    config:
-    	languages:
-      - php
-ratings:
-  paths:
-  - app/**
-  - lib/**
-  - "**.rb"
-  - "**.go"
+PHP: true
+
 exclude_paths:
-- core/Group/Plugin/**/*
 - test/**/*
+- vendor/**/*
 - config/**/*
+- core/Group/Plugin/**/*
