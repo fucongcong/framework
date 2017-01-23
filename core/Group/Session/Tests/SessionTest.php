@@ -11,7 +11,7 @@ class SessionTest extends Test
     {
         Session::set('group', 'good');
         $info = Session::get('group');
-        $this -> assertEquals('good', $info);
+        $this->assertEquals('good', $info);
         Session::clear();
     }
 
@@ -19,7 +19,7 @@ class SessionTest extends Test
     {
         Session::set('group', 'good');
         $info = Session::has('group');
-        $this -> assertTrue($info);
+        $this->assertTrue($info);
     }
 
     public function testClear()
@@ -27,16 +27,16 @@ class SessionTest extends Test
         Session::set('group', 'good');
         Session::clear();
         $info = Session::get('group');
-        $this -> assertEquals('', $info);
+        $this->assertEquals('', $info);
     }
 
     public function testAll()
     {
         $info = Session::all();
-        $this -> assertEmpty($info);
+        $this->assertEmpty($info);
         Session::set('group', 'good');
         $info = Session::all();
-        $this -> assertEquals(['group' => 'good'], $info);
+        $this->assertEquals(['group' => 'good'], $info);
     }
 
     public function testRemove()
@@ -44,13 +44,13 @@ class SessionTest extends Test
         Session::set('group', 'good');
         Session::remove('group');
         $info = Session::get('group');
-        $this -> assertEquals('', $info);
+        $this->assertEquals('', $info);
     }
 
     public function testIsStarted()
     {
         $status = Session::isStarted();
-        $this -> assertTrue($status);
+        $this->assertTrue($status);
     }
 
     public function testReplace()
@@ -58,6 +58,6 @@ class SessionTest extends Test
         Session::set('group', 'good');
         $attributes = ['group' => 'hello'];
         Session::replace($attributes);
-        $this -> assertEquals($attributes['group'], Session::get('group'));
+        $this->assertEquals($attributes['group'], Session::get('group'));
     }
 }

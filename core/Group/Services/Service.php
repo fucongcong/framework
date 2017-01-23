@@ -12,7 +12,7 @@ class Service
 		$class = $serviceName."DaoImpl";
 		$serviceName = "src\\Dao\\".$group."\\Impl\\".$class;
 
-        return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
+        return \App::getInstance()->singleton(strtolower($serviceName), function() use ($serviceName) {
             return new $serviceName();
         });
 	}
@@ -24,16 +24,16 @@ class Service
         $class = $serviceName."ServiceImpl";
         $serviceName = "src\\Services\\".$group."\\Impl\\".$class;
 
-        return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
+        return \App::getInstance()->singleton(strtolower($serviceName), function() use ($serviceName) {
             return new $serviceName();
         });
     }
 
     // public function register()
     // {
-    //     $serviceName = $this -> serviceName;
+    //     $serviceName = $this->serviceName;
 
-    //     return \App::getInstance() -> singleton(strtolower($serviceName), function() use ($serviceName) {
+    //     return \App::getInstance()->singleton(strtolower($serviceName), function() use ($serviceName) {
     //         return new $serviceName();
     //     });
     // }

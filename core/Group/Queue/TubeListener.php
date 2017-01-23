@@ -13,8 +13,8 @@ class TubeListener
 	public function __construct()
 	{
 		$jobs = \Config::get("queue::queue_jobs");
-		$this -> setJobs($jobs);
-		$this -> setTubes();
+		$this->setJobs($jobs);
+		$this->setTubes();
 	}
 
     /**
@@ -25,7 +25,7 @@ class TubeListener
 	public function setJobs($jobs)
 	{
 		foreach ($jobs as $job) {
-			$this -> jobs[$job['tube']][$job['job']] = $job;
+			$this->jobs[$job['tube']][$job['job']] = $job;
 		}
 	}
 
@@ -35,7 +35,7 @@ class TubeListener
      */
 	public function setTubes()
 	{
-		foreach ($this -> jobs as $tube => $job) {
+		foreach ($this->jobs as $tube => $job) {
 			$task_worker_num = 0;
             foreach ($job as $key => $value) {
                if ($task_worker_num < $value['task_worker_num']) {
@@ -43,7 +43,7 @@ class TubeListener
                 }
             }
             for($i = 0; $i < $task_worker_num; $i++) {
-            	$this -> tubes[] = $tube;
+            	$this->tubes[] = $tube;
             }
 		}
 	}
@@ -55,7 +55,7 @@ class TubeListener
      */
 	public function getTubes()
 	{
-		return $this -> tubes;
+		return $this->tubes;
 	}
 
     /**
@@ -65,7 +65,7 @@ class TubeListener
      */
 	public function getJobs()
 	{
-		return $this -> jobs;
+		return $this->jobs;
 	}
 
     /**
@@ -75,7 +75,7 @@ class TubeListener
      */
 	public function getTubesCount()
 	{
-		return count($this -> tubes);
+		return count($this->tubes);
 	}
 
     /**
@@ -87,15 +87,15 @@ class TubeListener
      */
 	public function getJob($tube, Pheanstalk $pheanstalk)
 	{	
-		if (!isset($this -> jobs[$tube])) return false;
+		if (!isset($this->jobs[$tube])) return false;
 		
 		$timeout = 3;
-		$job = $pheanstalk -> watch($tube) -> reserve($timeout);
-		if (empty($job) || !is_object($job) || $job -> getId() == 0 || empty($job -> getData())) return false;
+		$job = $pheanstalk->watch($tube)->reserve($timeout);
+		if (empty($job) || !is_object($job) || $job->getId() == 0 || empty($job->getData())) return false;
 		
 		$data = [
 			'job' => $job,
-			'handle' => $this -> jobs[$tube],
+			'handle' => $this->jobs[$tube],
 		];
 		return serialize($data);
 	}

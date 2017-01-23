@@ -32,10 +32,10 @@ class EventDispatcherService implements EventDispatcherContract
     {
         if (empty($event)) $event = new Event;
 
-        $this -> setEvents($eventName);
+        $this->setEvents($eventName);
 
-        if (isset($this -> listeners[$eventName])) {
-            $this -> doDispatch($eventName, $event);
+        if (isset($this->listeners[$eventName])) {
+            $this->doDispatch($eventName, $event);
         }
 
         return $event;
@@ -50,8 +50,8 @@ class EventDispatcherService implements EventDispatcherContract
      */
     public function addListener($eventName, $listener, $priority = 0)
     {
-        $this -> listeners[$eventName][$priority][] = $listener;
-        $this -> sortEvents($eventName);
+        $this->listeners[$eventName][$priority][] = $listener;
+        $this->sortEvents($eventName);
     }
 
     /**
@@ -62,14 +62,14 @@ class EventDispatcherService implements EventDispatcherContract
      */
     public function removeListener($eventName, $listener)
     {
-       if (!isset($this -> listeners[$eventName])) {
+       if (!isset($this->listeners[$eventName])) {
             return;
         }
 
-        foreach ($this -> listeners[$eventName] as $priority => $listeners) {
+        foreach ($this->listeners[$eventName] as $priority => $listeners) {
             if (false !== ($key = array_search($listener, $listeners, true))) {
-                unset($this -> listeners[$eventName][$priority][$key]);
-                $this -> sortEvents($eventName);
+                unset($this->listeners[$eventName][$priority][$key]);
+                $this->sortEvents($eventName);
             }
         }
     }
@@ -81,9 +81,9 @@ class EventDispatcherService implements EventDispatcherContract
      */
     private function sortEvents($eventName)
     {
-        if (isset($this -> listeners[$eventName])) {
-            krsort($this -> listeners[$eventName]);
-            $this -> sorted[$eventName] = call_user_func_array('array_merge', $this->listeners[$eventName]);
+        if (isset($this->listeners[$eventName])) {
+            krsort($this->listeners[$eventName]);
+            $this->sorted[$eventName] = call_user_func_array('array_merge', $this->listeners[$eventName]);
         }
     }
 
@@ -94,8 +94,8 @@ class EventDispatcherService implements EventDispatcherContract
      */
     private function setEvents($eventName)
     {
-        if (!isset($this -> sorted[$eventName]))
-            $this -> sorted[$eventName] = [];
+        if (!isset($this->sorted[$eventName]))
+            $this->sorted[$eventName] = [];
     }
 
     /**
@@ -107,10 +107,10 @@ class EventDispatcherService implements EventDispatcherContract
     public function getListeners($eventName = null)
     {
         if (isset($eventName)) {
-            return isset($this -> sorted[$eventName]) ? $this -> sorted[$eventName] : null;
+            return isset($this->sorted[$eventName]) ? $this->sorted[$eventName] : null;
         }
 
-        return $this -> sorted;
+        return $this->sorted;
     }
 
     /**
@@ -121,11 +121,11 @@ class EventDispatcherService implements EventDispatcherContract
      */
     public function hasListeners($eventName = null)
     {
-        if (isset($eventName) && isset($this -> sorted[$eventName])) {
-            return  empty($this -> sorted[$eventName]) ? false : true;
+        if (isset($eventName) && isset($this->sorted[$eventName])) {
+            return  empty($this->sorted[$eventName]) ? false : true;
         }
 
-        return empty($this -> sorted) ? false : true;
+        return empty($this->sorted) ? false : true;
     }
 
     /**
@@ -135,16 +135,16 @@ class EventDispatcherService implements EventDispatcherContract
      */
     public function addSubscriber(EventSubscriberInterface $subscriber)
     {
-        foreach ($subscriber -> getSubscribedEvents() as $eventName => $params) {
+        foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
             if (is_string($params)) {
-                $this -> addListener($eventName, array($subscriber, $params));
+                $this->addListener($eventName, array($subscriber, $params));
 
             } elseif (is_string($params[0])) {
-                $this -> addListener($eventName, array($subscriber, $params[0]), isset($params[1]) ? $params[1] : 0);
+                $this->addListener($eventName, array($subscriber, $params[0]), isset($params[1]) ? $params[1] : 0);
 
             } else {
                 foreach ($params as $listener) {
-                    $this -> addListener($eventName, array($subscriber, $listener[0]), isset($listener[1]) ? $listener[1] : 0);
+                    $this->addListener($eventName, array($subscriber, $listener[0]), isset($listener[1]) ? $listener[1] : 0);
                 }
             }
         }
@@ -157,13 +157,13 @@ class EventDispatcherService implements EventDispatcherContract
      */
     public function removeSubscriber(EventSubscriberInterface $subscriber)
     {
-        foreach ($subscriber -> getSubscribedEvents() as $eventName => $params) {
+        foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
             if (is_array($params) && is_array($params[0])) {
                 foreach ($params as $listener) {
-                    $this -> removeListener($eventName, array($subscriber, $listener[0]));
+                    $this->removeListener($eventName, array($subscriber, $listener[0]));
                 }
             } else {
-                $this -> removeListener($eventName, array($subscriber, is_string($params) ? $params : $params[0]));
+                $this->removeListener($eventName, array($subscriber, is_string($params) ? $params : $params[0]));
             }
         }
     }
@@ -176,14 +176,14 @@ class EventDispatcherService implements EventDispatcherContract
      */
     private function doDispatch($eventName, $event)
     {
-        $listeners = $this -> sorted[$eventName];
+        $listeners = $this->sorted[$eventName];
 
         foreach ($listeners as $listener) {
             if (is_callable($listener, false)) {
                 call_user_func($listener, $event);
             }
             if ($listener instanceof Listener) {
-                call_user_func_array([$listener, $listener -> getMethod()], [$event]);
+                call_user_func_array([$listener, $listener->getMethod()], [$event]);
             }
         }
     }

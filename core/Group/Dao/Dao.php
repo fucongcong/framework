@@ -14,7 +14,7 @@ class Dao
     public function __construct()
     {
         $pdo = \Config::get('database::pdo');
-        $this -> config = $pdo;
+        $this->config = $pdo;
     }
 
     /**
@@ -24,7 +24,7 @@ class Dao
      */
     public function getDefault()
     {
-        return $this -> getConnection() -> getDefault();
+        return $this->getConnection()->getDefault();
     }
 
     /**
@@ -35,7 +35,7 @@ class Dao
      */
     public function getRead($name = null)
     {
-        return $this -> getConnection() -> getRead($name);
+        return $this->getConnection()->getRead($name);
     }
 
     /**
@@ -46,7 +46,7 @@ class Dao
      */
     public function getWrite($name = null)
     {
-        return $this -> getConnection() -> getWrite($name);
+        return $this->getConnection()->getWrite($name);
     }
 
     /**
@@ -56,12 +56,12 @@ class Dao
      */
     public function getAllRead()
     {
-        $config = $this -> config;
+        $config = $this->config;
         $connections = [];
 
         if (isset($config['read'])) {
             foreach ($config['read'] as $name => $db) {
-                $connections[] = $this -> getRead($name);
+                $connections[] = $this->getRead($name);
             }
         }
 
@@ -75,12 +75,12 @@ class Dao
      */
     public function getAllWrite()
     {
-        $config = $this -> config;
+        $config = $this->config;
         $connections = [];
 
         if (isset($config['write'])) {
             foreach ($config['write'] as $name => $db) {
-                $connections[] = $this -> getWrite($name);
+                $connections[] = $this->getWrite($name);
             }
         }
 
@@ -98,25 +98,25 @@ class Dao
     {
         switch ($type) {
             case 'write':
-                    $this -> getWrite($name) -> query($sql);
+                    $this->getWrite($name)->query($sql);
                 break;
             case 'all_write':
-                    $connections = $this -> getAllWrite();
+                    $connections = $this->getAllWrite();
                     foreach ($connections as $connection) {
-                        $connection -> query($sql);
+                        $connection->query($sql);
                     }
                 break;
             case 'read':
-                    $this -> getRead($name) -> query($sql);
+                    $this->getRead($name)->query($sql);
                 break;
             case 'all_read':
-                    $connections = $this -> getAllRead();
+                    $connections = $this->getAllRead();
                     foreach ($connections as $connection) {
-                        $connection -> query($sql);
+                        $connection->query($sql);
                     }
                 break;
             case 'default':
-                    $this -> getDefault() -> query($sql);
+                    $this->getDefault()->query($sql);
                 break;
             default:
                 break;
@@ -129,7 +129,7 @@ class Dao
             return self::$connection;
         }
 
-        $connection = $this -> getConnectionLocator();
+        $connection = $this->getConnectionLocator();
 
         self::$connection = $connection;
 
@@ -138,11 +138,11 @@ class Dao
 
     private function getConnectionLocator()
     {
-        $config = $this -> config;
+        $config = $this->config;
         $connections = new ConnectionLocator;
 
         if (isset($config['default'])) {
-            $connections -> setDefault(function () use ($config) {
+            $connections->setDefault(function () use ($config) {
                 return new ExtendedPdo(
                         $config['default']['database_driver'].':host='.$config['default']['database_host'].';dbname='.$config['default']['database_name'].';port='.$config['default']['database_port'].';charset='.$config['default']['database_charset'],
                         $config['default']['database_user'],
@@ -153,7 +153,7 @@ class Dao
 
         if (isset($config['write'])) {
             foreach ($config['write'] as $name => $db) {
-                $connections -> setWrite($name, function () use ($db) {
+                $connections->setWrite($name, function () use ($db) {
                     return new ExtendedPdo(
                         $db['database_driver'].':host='.$db['database_host'].';dbname='.$db['database_name'].';port='.$db['database_port'].';charset='.$db['database_charset'],
                         $db['database_user'],
@@ -165,7 +165,7 @@ class Dao
 
         if (isset($config['read'])) {
             foreach ($config['read'] as $name => $db) {
-                $connections -> setRead($name, function () use ($db) {
+                $connections->setRead($name, function () use ($db) {
                     return new ExtendedPdo(
                         $db['database_driver'].':host='.$db['database_host'].';dbname='.$db['database_name'].';port='.$db['database_port'].';charset='.$db['database_charset'],
                         $db['database_user'],

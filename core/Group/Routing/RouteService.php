@@ -74,7 +74,7 @@ Class RouteService implements RouteContract
      */
     public function setContainer(Container $container)
     {
-        $this -> container = $container;
+        $this->container = $container;
 
         return $this;
     }
@@ -86,7 +86,7 @@ Class RouteService implements RouteContract
      */
     public function setParameters($parameters)
     {
-        $this -> parameters = $parameters;
+        $this->parameters = $parameters;
     }
 
     /**
@@ -96,7 +96,7 @@ Class RouteService implements RouteContract
      */
     public function getParametersName()
     {
-        return $this -> parametersName ;
+        return $this->parametersName ;
     }
 
     /**
@@ -106,7 +106,7 @@ Class RouteService implements RouteContract
      */
     public function setParametersName($parametersName)
     {
-        $this -> parametersName = $parametersName;
+        $this->parametersName = $parametersName;
     }
 
     /**
@@ -116,7 +116,7 @@ Class RouteService implements RouteContract
      */
     public function getParameters()
     {
-        return $this -> parameters ;
+        return $this->parameters ;
     }
 
     /**
@@ -126,7 +126,7 @@ Class RouteService implements RouteContract
      */
     public function setAction($action)
     {
-        $this -> action = $action;
+        $this->action = $action;
     }
 
     /**
@@ -136,7 +136,7 @@ Class RouteService implements RouteContract
      */
     public function getAction()
     {
-        return $this -> action ;
+        return $this->action ;
     }
 
     /**
@@ -146,7 +146,7 @@ Class RouteService implements RouteContract
      */
     public function setUri($uri)
     {
-        $this -> uri = $uri;
+        $this->uri = $uri;
     }
 
     /**
@@ -156,7 +156,7 @@ Class RouteService implements RouteContract
      */
     public function getUri()
     {
-        return $this -> uri ;
+        return $this->uri ;
     }
 
     /**
@@ -166,7 +166,7 @@ Class RouteService implements RouteContract
      */
     public function setMethods($methods)
     {
-        $this -> methods = $methods;
+        $this->methods = $methods;
     }
 
     /**
@@ -176,7 +176,7 @@ Class RouteService implements RouteContract
      */
     public function getMethods()
     {
-        return $this -> methods ;
+        return $this->methods ;
     }
 
     /**
@@ -186,7 +186,7 @@ Class RouteService implements RouteContract
      */
     public function setCurrentMethod($method)
     {
-        $this -> currentMethod = strtoupper($method);
+        $this->currentMethod = strtoupper($method);
     }
 
     /**
@@ -196,17 +196,17 @@ Class RouteService implements RouteContract
      */
     public function getCurrentMethod()
     {
-        return $this -> currentMethod ;
+        return $this->currentMethod ;
     }
 
     public function setRouting($routing)
     {
-        $this -> routing = $routing;
+        $this->routing = $routing;
     }
 
     public function getRouting()
     {
-        return $this -> routing ;
+        return $this->routing ;
     }
     
     /**
@@ -216,7 +216,7 @@ Class RouteService implements RouteContract
      */
     public function deParse($alias, $parameters = [])
     {
-        $routing = $this -> routing;
+        $routing = $this->routing;
 
         if(!isset($routing[$alias])) return false;
 

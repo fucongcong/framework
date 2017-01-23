@@ -11,7 +11,7 @@ class CronAdmin
     public function __construct()
     {
         $http = new swoole_http_server('127.0.0.1', '9999');
-        $http -> set(array(
+        $http->set(array(
             'reactor_num' => 1,
             'worker_num' => 2,    //worker process num
             'backlog' => 128,   //listen backlog
@@ -21,21 +21,21 @@ class CronAdmin
             'dispatch_mode' => 3, 
         ));
 
-        $http -> on('request', function ($request, $response){
-            $request -> get = isset($request -> get) ? $request -> get : [];
-            $request -> post = isset($request -> post) ? $request -> post : [];
-            $request -> cookie = isset($request -> cookie) ? $request -> cookie : [];
-            $request -> files = isset($request -> files) ? $request -> files : [];
-            $request -> server = isset($request -> server) ? $request -> server : [];
+        $http->on('request', function ($request, $response){
+            $request->get = isset($request->get) ? $request->get : [];
+            $request->post = isset($request->post) ? $request->post : [];
+            $request->cookie = isset($request->cookie) ? $request->cookie : [];
+            $request->files = isset($request->files) ? $request->files : [];
+            $request->server = isset($request->server) ? $request->server : [];
    
             if ($request->server['request_uri'] == '/favicon.ico') {
                 $response->end();
                 return;
             }
             
-            $cache_dir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
-            $pid = \FileCache::get('pid', $cache_dir);
-            $work_ids = \FileCache::get('work_ids', $cache_dir);
+            $cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
+            $pid = \FileCache::get('pid', $cacheDir);
+            $work_ids = \FileCache::get('work_ids', $cacheDir);
             ob_start();
 
             require(__DIR__."/View/console.php");
@@ -43,16 +43,16 @@ class CronAdmin
 
             $output = ob_get_contents();
             ob_end_clean();
-            $response -> status(200);
-            $response -> end($output);
+            $response->status(200);
+            $response->end($output);
             return;
         });
         
-        $this -> http = $http;
+        $this->http = $http;
     }
 
     public function start()
     {
-        $this -> http -> start();
+        $this->http->start();
     }
 }

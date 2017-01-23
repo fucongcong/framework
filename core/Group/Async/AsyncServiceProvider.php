@@ -14,7 +14,7 @@ class AsyncServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this -> app -> singleton('async', function () {
+        $this->app->singleton('async', function () {
 
             return new Client;
         });

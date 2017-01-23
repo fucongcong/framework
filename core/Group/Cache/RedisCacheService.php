@@ -15,7 +15,7 @@ class RedisCacheService implements CacheContract
 
     public function __construct($redis)
     {
-        $this -> redis = $redis;
+        $this->redis = $redis;
     }
 
     /**
@@ -26,7 +26,7 @@ class RedisCacheService implements CacheContract
      */
     public function get($cacheName)
     {
-        return $this -> redis -> get($cacheName);
+        return $this->redis->get($cacheName);
     }
 
     /**
@@ -39,7 +39,7 @@ class RedisCacheService implements CacheContract
      */
     public function set($cacheName, $data, $expireTime = 3600)
     {
-        return $this -> redis -> set($cacheName, $data, $expireTime);
+        return $this->redis->set($cacheName, $data, $expireTime);
     }
 
     /**
@@ -51,7 +51,7 @@ class RedisCacheService implements CacheContract
      */
     public function hGet($hashKey, $key)
     {
-        return $this-> redis -> hGet($hashKey, $key);
+        return $this-> redis->hGet($hashKey, $key);
     }
 
     /**
@@ -65,9 +65,9 @@ class RedisCacheService implements CacheContract
      */
     public function hSet($hashKey, $key, $data, $expireTime = 3600)
     {
-        $status = $this -> redis -> hSet($hashKey, $key, $data);
+        $status = $this->redis->hSet($hashKey, $key, $data);
 
-        $this -> redis -> expire($hashKey, $expireTime);
+        $this->redis->expire($hashKey, $expireTime);
 
         return $status;
     }
@@ -81,9 +81,9 @@ class RedisCacheService implements CacheContract
      */
     public function hDel($hashKey, $key = null)
     {
-        if($key) return $this-> redis -> hDel($hashKey, $key);
+        if($key) return $this-> redis->hDel($hashKey, $key);
 
-        return $this-> redis -> hDel($hashKey);
+        return $this-> redis->hDel($hashKey);
     }
 
     /**

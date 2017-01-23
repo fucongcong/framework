@@ -4,19 +4,19 @@ namespace Group\Cache;
 
 class LocalFileCacheService
 {
-    protected static $cache_dir = "runtime/cache";
+    protected static $cacheDir = "runtime/cache";
 
     /**
      * 获取cache
      *
      * @param  cacheName,  name::key
-     * @param  cache_dir
+     * @param  cacheDir
      * @return string|array
      */
-    public function get($cacheName, $cache_dir = false)
+    public function get($cacheName, $cacheDir = false)
     {
-        $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-        $dir = $cache_dir."/".$cacheName;
+        $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
+        $dir = $cacheDir."/".$cacheName;
 
         return include $dir;
     }
@@ -26,12 +26,12 @@ class LocalFileCacheService
      *
      * @param  cacheName(string)
      * @param  data(array)
-     * @param  cache_dir(string)
+     * @param  cacheDir(string)
      */
-    public function set($cacheName, $data, $cache_dir = false)
+    public function set($cacheName, $data, $cacheDir = false)
     {
-        $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-        $dir = $cache_dir."/".$cacheName;
+        $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
+        $dir = $cacheDir."/".$cacheName;
 
         if (is_array($data)) {
             $data = var_export($data, true);
@@ -55,13 +55,13 @@ return ".$data.";";
      * 文件是否存在
      *
      * @param  cacheName(string)
-     * @param  cache_dir(string)
+     * @param  cacheDir(string)
      * @return boolean
      */
-    public function isExist($cacheName, $cache_dir = false)
+    public function isExist($cacheName, $cacheDir = false)
     {
-        $cache_dir = $cache_dir == false ? self::$cache_dir : $cache_dir;
-        $dir = $cache_dir."/".$cacheName;
+        $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
+        $dir = $cacheDir."/".$cacheName;
 
         return file_exists($dir);
 

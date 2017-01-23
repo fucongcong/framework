@@ -14,10 +14,10 @@ class KernalResponseListener extends \Listener
 
     public function onKernalResponse(\Event $event)
     {	
-    	$response = $event -> getResponse();
+    	$response = $event->getResponse();
         if ($response instanceof \Response || $response instanceof \RedirectResponse || $response instanceof \JsonResponse) 
-         	$response -> send();
+         	$response->send();
 
-        \EventDispatcher::dispatch(KernalEvent::HTTPFINISH, new HttpEvent($event -> getRequest(), $response));
+        \EventDispatcher::dispatch(KernalEvent::HTTPFINISH, new HttpEvent($event->getRequest(), $response));
     }
 }

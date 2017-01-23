@@ -16,30 +16,30 @@ class BootstrapClass
 
     public function __construct($loader, $cacheDir = null)
     {
-        $this -> loader = $loader;
-        if ($cacheDir) $this -> cacheDir = $cacheDir;
+        $this->loader = $loader;
+        if ($cacheDir) $this->cacheDir = $cacheDir;
     }
 
     public function setClass($class) 
     {
-        $file = $this -> loader -> findFile($class);
-        $this -> classes[$class] = $file;
+        $file = $this->loader->findFile($class);
+        $this->classes[$class] = $file;
     }
 
     public function rmClass($class) 
     {
-        $file = $this -> loader -> findFile($class);
-        unset($this -> classes[$class]);
+        $file = $this->loader->findFile($class);
+        unset($this->classes[$class]);
     }
 
     public function bootstrap()
     {      
         $data = "<?php";
-        foreach ($this -> classes as $class => $file) {
+        foreach ($this->classes as $class => $file) {
             $data .= substr(file_get_contents($file), 5); 
         }
         
-        $parts = explode('/', $this -> cacheDir);
+        $parts = explode('/', $this->cacheDir);
         $file = array_pop($parts);
         $dir = '';
         foreach ($parts as $part) {

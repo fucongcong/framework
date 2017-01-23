@@ -21,7 +21,7 @@ abstract class Command
     {
         array_shift($argv);
         array_shift($argv);
-        $this -> argv = $argv;
+        $this->argv = $argv;
     }
 
     /**
@@ -31,7 +31,7 @@ abstract class Command
      */
     public function getArgv()
     {
-        return $this -> argv;
+        return $this->argv;
     }
 
     /**

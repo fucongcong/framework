@@ -12,8 +12,8 @@ class SqlCleanCommand extends Command
     {   
         $dir = __ROOT__."app";
         $filesystem = new Filesystem();
-        $filesystem -> remove($dir."/sql/sql.lock");
+        $filesystem->remove($dir."/sql/sql.lock");
 
-        $this -> outPut("lock文件删除成功");
+        $this->outPut("lock文件删除成功");
     }
 }

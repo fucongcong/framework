@@ -34,7 +34,7 @@ class Bear
         //防止socket超时的问题
         ini_set('default_socket_timeout', -1);
 
-        $this -> initParam($loader); 
+        $this->initParam($loader); 
     }
 
     /**
@@ -43,20 +43,20 @@ class Bear
      */
     public function start()
     {	 
-        $this -> checkStatus();
+        $this->checkStatus();
         \Log::info("异步队列服务启动", [], 'queue.bear');
         //将主进程设置为守护进程
         swoole_process::daemon(true);
         //设置信号
-        $this -> setSignal();
+        $this->setSignal();
 
         //启动N个work工作进程
-        $this -> startWorkers();
+        $this->startWorkers();
 
         //启动队列监听器
-        $this -> bindTubeTick();
+        $this->bindTubeTick();
 
-        $this -> setPid(); 
+        $this->setPid(); 
     }
 
     /**
@@ -65,9 +65,9 @@ class Bear
      */
     public function restart()
     {
-        $this -> stop();
+        $this->stop();
         sleep(1);
-        $this -> start();
+        $this->start();
     }
 
     /**
@@ -76,11 +76,11 @@ class Bear
      */
     public function stop()
     {
-      	$pid = $this -> getPid();
+      	$pid = $this->getPid();
         if (!empty($pid) && $pid) {
             if (swoole_process::kill($pid, 0)) {
                 //杀掉worker进程
-                foreach (\FileCache::get('work_ids', $this -> logDir."/") as $work_id) {
+                foreach (\FileCache::get('work_ids', $this->logDir."/") as $work_id) {
                     swoole_process::kill($work_id, SIGTERM);
                 }
             }   
@@ -94,8 +94,8 @@ class Bear
      */
     public function getPid()
     {
-    	if (file_exists($this -> logDir."/pid"))
-        return file_get_contents($this -> logDir."/pid");
+    	if (file_exists($this->logDir."/pid"))
+        return file_get_contents($this->logDir."/pid");
     }
 
     /**
@@ -105,7 +105,7 @@ class Bear
     public function setPid()
     {
         $pid = posix_getpid();
-        $parts = explode('/', $this -> logDir."/pid");
+        $parts = explode('/', $this->logDir."/pid");
         $file = array_pop($parts);
         $dir = '';
         foreach ($parts as $part) {
@@ -130,12 +130,12 @@ class Bear
             while($ret = swoole_process::wait(false)) {
                 $worker_count++;
                 \Log::info("PID={$ret['pid']}worker进程退出!", [], 'queue.bear');
-                if ($worker_count >= $this -> workerNum){
+                if ($worker_count >= $this->workerNum){
                     //删除pid文件
-                    unlink($this -> logDir."/work_ids");
-                    unlink($this -> logDir."/pid");
+                    unlink($this->logDir."/work_ids");
+                    unlink($this->logDir."/pid");
                     \Log::info("主进程退出!", [], 'queue.bear');
-                    swoole_process::kill($this -> getPid(), SIGKILL); 
+                    swoole_process::kill($this->getPid(), SIGKILL); 
                 }
             }   
         });
@@ -153,13 +153,13 @@ class Bear
     private function startWorkers()
     {   
         //启动worker进程
-        for ($i = 0; $i < $this -> workerNum; $i++) { 
+        for ($i = 0; $i < $this->workerNum; $i++) { 
             $process = new swoole_process(array($this, 'workerCallBack'), true);
             $processPid = $process->start();
-            $this -> setWorkerPids($processPid);
-            $this -> workers[$processPid] = [
+            $this->setWorkerPids($processPid);
+            $this->workers[$processPid] = [
                 'process' => $process,
-                'tube' => $this -> tubes[$i],
+                'tube' => $this->tubes[$i],
             ];
         }
     }
@@ -171,30 +171,30 @@ class Bear
      */
     public function workerCallBack(swoole_process $worker) 
     {   
-        $server = $this -> server;
-        $listener = $this -> listener;
-        $timer = $this -> timer;
+        $server = $this->server;
+        $listener = $this->listener;
+        $timer = $this->timer;
         //worker进程
-        swoole_event_add($worker -> pipe, function($pipe) use ($worker, $server, $listener, $timer) {
+        swoole_event_add($worker->pipe, function($pipe) use ($worker, $server, $listener, $timer) {
 
-            $recv = $worker -> read();
+            $recv = $worker->read();
             $pheanstalk = new Pheanstalk($server['host'], $server['port'], 10);
             
             swoole_timer_tick(intval($timer), function($timerId) use ($recv, $listener, $pheanstalk){
           
-                $recv = $listener -> getJob($recv, $pheanstalk);
+                $recv = $listener->getJob($recv, $pheanstalk);
                 $recv = unserialize($recv); 
                 if (is_object($recv['job'])) {
                     try{
                         foreach ($recv['handle'] as $handerClass => $job) {
-                           $handler = new $handerClass($recv['job'] -> getId(), $recv['job'] -> getData());
-                           $handler -> handle();
+                           $handler = new $handerClass($recv['job']->getId(), $recv['job']->getData());
+                           $handler->handle();
                         }
                         //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
-                        $pheanstalk -> delete($recv['job']);
-                        //\Log::info("jobId:".$recv['job'] -> getId()."任务完成".$recv['job'] -> getData(), [], 'queue.worker');
+                        $pheanstalk->delete($recv['job']);
+                        //\Log::info("jobId:".$recv['job']->getId()."任务完成".$recv['job']->getData(), [], 'queue.worker');
                     }catch(\Exception $e){
-                        \Log::error("jobId:".$recv['job'] -> getId()."任务出错了！", ['jobId' => $recv['job'] -> getId(), 'jobData' => $recv['job'] -> getData(), 'message' => $e -> getMessage()], 'queue.worker');
+                        \Log::error("jobId:".$recv['job']->getId()."任务出错了！", ['jobId' => $recv['job']->getId(), 'jobData' => $recv['job']->getData(), 'message' => $e->getMessage()], 'queue.worker');
                     }
                 } 
             });
@@ -209,8 +209,8 @@ class Bear
      */
     private function setWorkerPids($pid)
     {
-        $this -> workerPids[] = $pid;
-        \FileCache::set('work_ids', $this -> workerPids, $this -> logDir."/");
+        $this->workerPids[] = $pid;
+        \FileCache::set('work_ids', $this->workerPids, $this->logDir."/");
     }
 
     /**
@@ -219,8 +219,8 @@ class Bear
      */
     private function bindTubeTick()
     {
-        $tick = new TubeTick($this -> workers, $this -> pheanstalk);
-        $tick -> work();
+        $tick = new TubeTick($this->workers, $this->pheanstalk);
+        $tick->work();
     }
 
     /**
@@ -230,26 +230,26 @@ class Bear
      */
     private function initParam($loader)
     {
-    	$this -> logDir = \Config::get("queue::log_dir"); 
-        \Log::$cache_dir = $this -> logDir;
+    	$this->logDir = \Config::get("queue::log_dir"); 
+        \Log::$cacheDir = $this->logDir;
     	
-        $this -> classCache = \Config::get("queue::class_cache"); 
+        $this->classCache = \Config::get("queue::class_cache"); 
         $server = \Config::get("queue::server");
         
-        $this -> server = $server;
-        $this -> pheanstalk = new Pheanstalk($server['host'], $server['port'], 10, true);
+        $this->server = $server;
+        $this->pheanstalk = new Pheanstalk($server['host'], $server['port'], 10, true);
 
-        if(!$this -> pheanstalk -> getConnection() -> isServiceListening()) {
+        if(!$this->pheanstalk->getConnection()->isServiceListening()) {
             
             die("beanstalkd队列服务器连接失败");
         }
 
         //开始队列任务的监听
-        $this -> listener = new TubeListener();
-        $this -> workerNum = $this -> setWorkNum($this -> listener -> getJobs());
-        $this -> tubes = $this -> listener -> getTubes();
-        $this -> timer = \Config::get("queue::timer"); 
-        $this -> bootstrapClass($loader, $this -> listener -> getJobs());  
+        $this->listener = new TubeListener();
+        $this->workerNum = $this->setWorkNum($this->listener->getJobs());
+        $this->tubes = $this->listener->getTubes();
+        $this->timer = \Config::get("queue::timer"); 
+        $this->bootstrapClass($loader, $this->listener->getJobs());  
     }
 
     /**
@@ -260,14 +260,14 @@ class Bear
      */
     private function bootstrapClass($loader, $jobs)
     {
-        $classCache = new BootstrapClass($loader, $this -> classCache);
+        $classCache = new BootstrapClass($loader, $this->classCache);
         foreach ($jobs as $job) {
             foreach ($job as $handerClass => $value) {
-                $classCache -> setClass($handerClass);
+                $classCache->setClass($handerClass);
             }  
         }
-        $classCache -> bootstrap();
-        require $this -> classCache;
+        $classCache->bootstrap();
+        require $this->classCache;
     }
 
     /**
@@ -294,8 +294,8 @@ class Bear
 
     private function checkStatus()
     {
-        if ($this -> getPid()) {
-            if (swoole_process::kill($this -> getPid(), 0)) {
+        if ($this->getPid()) {
+            if (swoole_process::kill($this->getPid(), 0)) {
                 exit('队列服务已启动！');
             }
         }

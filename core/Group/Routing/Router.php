@@ -40,11 +40,11 @@ Class Router implements RouterContract
 	 */
 	public function __construct(\Container $container)
 	{
-		$this -> container = $container;
+		$this->container = $container;
 
-		$request = $this -> container -> getRequest();
+		$request = $this->container->getRequest();
 
-		$this -> setRoute($this -> methods, $request -> getPathInfo(), $request -> getMethod());
+		$this->setRoute($this->methods, $request->getPathInfo(), $request->getMethod());
 	}
 
 	/**
@@ -53,12 +53,12 @@ Class Router implements RouterContract
 	 */
 	public function match()
 	{
-		$requestUri = $this -> route -> getUri();
+		$requestUri = $this->route->getUri();
 
-		$routing = $this -> getRouting();
+		$routing = $this->getRouting();
 
 		if (isset($routing[$requestUri])) {
-			$this -> controller($routing[$requestUri]);
+			$this->controller($routing[$requestUri]);
 			return;
 		}
 
@@ -68,16 +68,16 @@ Class Router implements RouterContract
 			$config = "";
 
 			if ($matches[0]) {
-				$config = $this -> pregUrl($matches, $routeKey, $routing);
+				$config = $this->pregUrl($matches, $routeKey, $routing);
 			}
 
 			if ($config) {
-				$this -> controller($config);
+				$this->controller($config);
 				return;
 			}
 		}
 
-		\EventDispatcher::dispatch(KernalEvent::NOTFOUND, new HttpEvent($this -> container -> getRequest()));		
+		\EventDispatcher::dispatch(KernalEvent::NOTFOUND, new HttpEvent($this->container->getRequest()));		
 	}
 
 	/**
@@ -90,7 +90,7 @@ Class Router implements RouterContract
 	 */
 	public function pregUrl($matches, $routeKey, $routing)
 	{	
-		$requestUri = $this -> route -> getUri();
+		$requestUri = $this->route->getUri();
 		if (substr($requestUri, -1) == "/") {
 			$requestUri = substr($requestUri, 0, -1);
 		}
@@ -116,11 +116,11 @@ Class Router implements RouterContract
 			$filterParameters[] = $match;
 		}
 
-		$this -> route -> setParametersName($filterParameters);
+		$this->route->setParametersName($filterParameters);
 
-		if (preg_match_all('/^'.$regex.'$/', $this -> route -> getUri(), $values)) {
+		if (preg_match_all('/^'.$regex.'$/', $this->route->getUri(), $values)) {
 			$config = $routing[$route];
-			$config['parameters'] = $this -> mergeParameters($filterParameters, $values);
+			$config['parameters'] = $this->mergeParameters($filterParameters, $values);
 			return  $config;
 		}
 
@@ -134,12 +134,12 @@ Class Router implements RouterContract
 	 */
 	public function controller($config)
 	{	
-		$tplData = $this -> getTpl($config);
+		$tplData = $this->getTpl($config);
 
 		if ($tplData instanceof Response || $tplData instanceof \RedirectResponse || $tplData instanceof \JsonResponse) {
-			$this -> container -> setResponse($tplData);
+			$this->container->setResponse($tplData);
 		} else {
-			$this -> container -> setResponse(new Response($tplData));
+			$this->container->setResponse(new Response($tplData));
 		}
 	}
 
@@ -149,10 +149,10 @@ Class Router implements RouterContract
 		$className = 'src\\'.$group.'\\Controller\\'.$subGroup.'\\'.$controller.'Controller';
 		$action = $action.'Action';
 
-		$this -> route -> setAction($action);
-		$this -> route -> setParameters(isset($config['parameters']) ? $config['parameters'] : array());
+		$this->route->setAction($action);
+		$this->route->setParameters(isset($config['parameters']) ? $config['parameters'] : array());
 
-		return $this -> container -> doAction($className, $action, isset($config['parameters']) ? $config['parameters'] : array(), $this -> container -> getRequest());
+		return $this->container->doAction($className, $action, isset($config['parameters']) ? $config['parameters'] : array(), $this->container->getRequest());
 	}
 
 	protected function mergeParameters($parameters, $values)
@@ -167,18 +167,18 @@ Class Router implements RouterContract
 	//to do refactor me
 	protected function getRouting()
 	{
-		$routing = $this -> checkMethods();
+		$routing = $this->checkMethods();
 
 		return $routing;
 	}
 
 	protected function checkMethods()
 	{
-		if ($this -> container -> getEnvironment() == "prod") {
-			return $this -> getMethodsCache();
+		if ($this->container->getEnvironment() == "prod") {
+			return $this->getMethodsCache();
 		}
 
-		$config = $this -> createMethodsCache();
+		$config = $this->createMethodsCache();
 
 		return $config;
 	}
@@ -191,22 +191,22 @@ Class Router implements RouterContract
 	 */
 	public function setRoute($methods, $uri, $method)
 	{
-		$this -> route = \Route::getInstance();
-		$this -> route -> setMethods($methods);
-		$this -> route -> setCurrentMethod($method);
-		$this -> route -> setUri($uri);
-		$this -> route -> setRouting($this -> getRoutingConfig());
+		$this->route = \Route::getInstance();
+		$this->route->setMethods($methods);
+		$this->route->setCurrentMethod($method);
+		$this->route->setUri($uri);
+		$this->route->setRouting($this->getRoutingConfig());
 	}
 
 	private function getMethodsCache()
 	{
-		$file = 'route/routing_'.$this -> route -> getCurrentMethod().'.php';
+		$file = 'route/routing_'.$this->route->getCurrentMethod().'.php';
 
 		if(\FileCache::isExist($file)) {
 			return \FileCache::get($file);
 		}
 
-		$config = $this -> createMethodsCache();
+		$config = $this->createMethodsCache();
 		\FileCache::set($file, $config);
 
 		return $config;
@@ -219,7 +219,7 @@ Class Router implements RouterContract
 	 */
 	private function createMethodsCache()
 	{	
-		$routing = $this -> route -> getRouting();
+		$routing = $this->route->getRouting();
 
 		$config = array();
 
@@ -231,9 +231,9 @@ Class Router implements RouterContract
 					continue;
 				}
 
-	       		if(isset($route['methods']) && !in_array(strtoupper($route['methods']), $this -> methods)) continue;
+	       		if(isset($route['methods']) && !in_array(strtoupper($route['methods']), $this->methods)) continue;
 
-                if(isset($route['methods']) && $this -> route -> getCurrentMethod() != strtoupper($route['methods']) ) continue;
+                if(isset($route['methods']) && $this->route->getCurrentMethod() != strtoupper($route['methods']) ) continue;
 
                 $config[$key] = $route;
 		}
@@ -247,7 +247,7 @@ Class Router implements RouterContract
 	{	
 		$file = 'route/routing.php';
 
-		if ($this -> container -> getEnvironment() == "prod") {
+		if ($this->container->getEnvironment() == "prod") {
 			if(\FileCache::isExist($file)) {
 				return \FileCache::get($file);
 			}

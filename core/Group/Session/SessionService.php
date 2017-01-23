@@ -10,7 +10,7 @@ class SessionService
 
     public function __construct(SfSession $session)
     {
-        $this -> session = $session;
+        $this->session = $session;
     }
 
     /**
@@ -22,7 +22,7 @@ class SessionService
      */
     public function get($name, $default = null)
     {
-        return $this -> session -> get($name, $default);
+        return $this->session->get($name, $default);
     }
 
     /**
@@ -33,7 +33,7 @@ class SessionService
      */
     public function set($name, $value)
     {
-        $this -> session -> set($name, $value);
+        $this->session->set($name, $value);
     }
 
     /**
@@ -44,7 +44,7 @@ class SessionService
      */
     public function has($name)
     {
-        return $this -> session -> has($name);
+        return $this->session->has($name);
     }
 
     /**
@@ -54,7 +54,7 @@ class SessionService
      */
     public function all()
     {
-        return $this -> session -> all();
+        return $this->session->all();
     }
 
     /**
@@ -64,7 +64,7 @@ class SessionService
      */
     public function getId()
     {
-        return $this -> session -> getId();
+        return $this->session->getId();
     }
 
     /**
@@ -73,7 +73,7 @@ class SessionService
      */
     public function clear()
     {
-        $this -> session -> clear();
+        $this->session->clear();
     }
 
     /**
@@ -83,7 +83,7 @@ class SessionService
      */
     public function remove($name)
     {
-        $this -> session -> remove($name);
+        $this->session->remove($name);
     }
 
     /**
@@ -93,7 +93,7 @@ class SessionService
      */
     public function isStarted()
     {
-        return $this -> session -> isStarted();
+        return $this->session->isStarted();
     }
 
     /**
@@ -103,7 +103,7 @@ class SessionService
      */
     public function replace(array $attributes)
     {
-        $this -> session -> replace($attributes);
+        $this->session->replace($attributes);
     }
 
     /**
@@ -113,6 +113,6 @@ class SessionService
      */
     public function getFlashBag()
     {
-        return $this -> session -> getFlashBag();
+        return $this->session->getFlashBag();
     }
 }

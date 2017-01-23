@@ -21,7 +21,7 @@ abstract class SqlMigration
      */
     public function addSql($sql)
     {
-        $this -> setSqlArr($sql);
+        $this->setSqlArr($sql);
     }
 
     /**
@@ -31,7 +31,7 @@ abstract class SqlMigration
      */
     public function getSqlArr()
     {
-        return $this -> sqlArr;
+        return $this->sqlArr;
     }
 
     /**
@@ -40,8 +40,8 @@ abstract class SqlMigration
      */
     public function setSqlArr($sql)
     {
-        $sqlArr = $this -> sqlArr;
+        $sqlArr = $this->sqlArr;
         $sqlArr[] = $sql;
-        $this -> sqlArr = $sqlArr;
+        $this->sqlArr = $sqlArr;
     }
 }

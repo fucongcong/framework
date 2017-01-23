@@ -21,15 +21,15 @@ class SessionServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this -> app -> singleton('session', function () {
+        $this->app->singleton('session', function () {
 
-            $storage = new NativeSessionStorage($this -> getOptions(), $this -> getHandler(), new MetadataBag());
-            $this -> checkUserHandler();
+            $storage = new NativeSessionStorage($this->getOptions(), $this->getHandler(), new MetadataBag());
+            $this->checkUserHandler();
             $session = new SfSession($storage, new AttributeBag('_group_attributes'), new FlashBag());
 
-            if (!$session -> isStarted()) {
+            if (!$session->isStarted()) {
                 try{
-                    $session -> start();
+                    $session->start();
                 }catch(\Exception $e){
                 }
             }
@@ -45,14 +45,14 @@ class SessionServiceProvider extends ServiceProvider
      */
     private function getHandler()
     {
-        $driver = $this -> checkConfig();
+        $driver = $this->checkConfig();
 
         switch ($driver) {
             case 'redis':
-                $handler = $this -> getRedisHandler();
+                $handler = $this->getRedisHandler();
                 break;
             default:
-                $handler = $this -> getFileHandler();
+                $handler = $this->getFileHandler();
                 break;
         }
 
@@ -66,14 +66,14 @@ class SessionServiceProvider extends ServiceProvider
      */
     private function getRedisHandler()
     {
-        $handler = new RedisSessionHandler($this -> app -> singleton('redis'));
+        $handler = new RedisSessionHandler($this->app->singleton('redis'));
 
         return $handler;
     }
 
     private function checkUserHandler()
     {   
-        $driver = $this -> checkConfig();
+        $driver = $this->checkConfig();
 
         switch ($driver) {
             case 'redis':

@@ -10,6 +10,6 @@ class RouteTest extends Test
     public function testDeParse()
     {
         // $uri = Route::deParse('user_group', ['id' => 1, 'groupId' => 1]);
-        // $this -> assertEquals('/user/1/group/1', $uri);
+        // $this->assertEquals('/user/1/group/1', $uri);
     }
 }

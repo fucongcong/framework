@@ -26,7 +26,7 @@ class Async
 
     public function __construct($argv)
     {
-        $this -> argv = $argv;
+        $this->argv = $argv;
     }
 
     /**
@@ -35,8 +35,8 @@ class Async
      */
     public function run()
     {
-        $this -> checkArgv();
-        die($this -> help);
+        $this->checkArgv();
+        die($this->help);
     }
 
     /**
@@ -45,7 +45,7 @@ class Async
      */
     protected function checkArgv()
     {
-        $argv = $this -> argv;
+        $argv = $this->argv;
         if (!isset($argv[1])) return;
 
         $config = \Config::get("async::server");

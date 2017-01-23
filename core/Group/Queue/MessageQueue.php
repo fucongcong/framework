@@ -30,8 +30,8 @@ class MessageQueue
 
     public function __construct($argv, $loader)
     {
-        $this -> argv = $argv;
-        $this -> loader = $loader;
+        $this->argv = $argv;
+        $this->loader = $loader;
     }
 
     /**
@@ -40,8 +40,8 @@ class MessageQueue
      */
     public function run()
     {
-        $this -> checkArgv();
-        die($this -> help);
+        $this->checkArgv();
+        die($this->help);
     }
 
     /**
@@ -50,12 +50,12 @@ class MessageQueue
      */
     protected function checkArgv()
     {
-        $argv = $this -> argv;
+        $argv = $this->argv;
         if (!isset($argv[1])) return;
         if (!in_array($argv[1], ['start', 'restart', 'stop'])) return;
-        $bear = new Bear($this -> loader);
+        $bear = new Bear($this->loader);
         $function = $argv[1];
-        $bear -> $function();
+        $bear->$function();
         die;
     }
 }

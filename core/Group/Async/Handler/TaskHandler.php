@@ -18,61 +18,61 @@ abstract class TaskHandler
 	
 	public function __construct($serv, $fd, $fromId, $data)
 	{
-		$this -> serv = $serv;
-		$this -> fd = $fd;
-		$this -> fromId = $fromId;
-		$this -> data = $data;
+		$this->serv = $serv;
+		$this->fd = $fd;
+		$this->fromId = $fromId;
+		$this->data = $data;
 	}
 
 	abstract public function handle();
 
 	public function getData()
 	{
-		return $this -> data;
+		return $this->data;
 	}
 
 	public function getServ()
 	{
-		return $this -> serv;
+		return $this->serv;
 	}
 
 	public function getFd()
 	{
-		return $this -> fd;
+		return $this->fd;
 	}
 
 	public function getfromId()
 	{
-		return $this -> fromId;
+		return $this->fromId;
 	}
 
 	public function setCache(obj $cache)
 	{
-		$this -> cache = $cache;
+		$this->cache = $cache;
 	}
 
 	public function getCache()
 	{
-		return $this -> cache;
+		return $this->cache;
 	}
 
 	public function setDatabase(obj $database)
 	{
-		$this -> database = $database;
+		$this->database = $database;
 	}
 
 	public function getDatabase()
 	{
-		return $this -> database;
+		return $this->database;
 	}
 
 	public function finish($data)
 	{
-		return \Group\Async\DataPack::pack($this -> data['cmd'], $data, $this -> data['info']);
+		return \Group\Async\DataPack::pack($this->data['cmd'], $data, $this->data['info']);
 	}
 
 	public function createService($serviceName)
 	{
-		return \App::getInstance() -> singleton('service') -> createService($serviceName);
+		return \App::getInstance()->singleton('service')->createService($serviceName);
 	}
 }

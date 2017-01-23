@@ -8,16 +8,16 @@ class CsrfSessionService
 
 	public function __construct()
 	{
-		$this -> secret = \Config::get("session::csrf_secret");
+		$this->secret = \Config::get("session::csrf_secret");
 	}
 
 	public function generateCsrfToken()
 	{
-		return sha1($this -> secret.\Session::getId());
+		return sha1($this->secret.\Session::getId());
 	}
 
 	public function isCsrfTokenValid($token)
 	{
-		return $token === $this -> generateCsrfToken();
+		return $token === $this->generateCsrfToken();
 	}
 }

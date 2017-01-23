@@ -81,11 +81,11 @@ class App
 
     public function __construct()
     { 
-        $this -> aliasLoader();
+        $this->aliasLoader();
 
-        $this -> doSingle();
+        $this->doSingle();
 
-        $this -> doSingleInstance();
+        $this->doSingleInstance();
     }
 
     /**
@@ -94,32 +94,32 @@ class App
      */
     public function init($path, $loader)
     {   
-        $this -> initSelf();
+        $this->initSelf();
 
-        $this -> doBootstrap($loader);
+        $this->doBootstrap($loader);
 
         $request = \Request::createFromGlobals();
 
-        $this -> registerServices();
+        $this->registerServices();
        
         \EventDispatcher::dispatch(KernalEvent::INIT);
 
-        $this -> container = $this -> singleton('container');
-        $this -> container -> setAppPath($path);
+        $this->container = $this->singleton('container');
+        $this->container->setAppPath($path);
         
-        if ($this -> container -> isDebug()) {
+        if ($this->container->isDebug()) {
             $debugbar = new \Group\Debug\DebugBar();
-            self::getInstance() -> singletons['debugbar'] = $debugbar;
+            self::getInstance()->singletons['debugbar'] = $debugbar;
         }
 
         $handler = new ExceptionsHandler();
-        $handler -> bootstrap($this);
+        $handler->bootstrap($this);
 
-        $this -> container -> setRequest($request);
+        $this->container->setRequest($request);
 
-        $this -> router = new Router($this -> container);
-        self::getInstance() -> router = $this -> router;
-        $this -> router -> match();
+        $this->router = new Router($this->container);
+        self::getInstance()->router = $this->router;
+        $this->router->match();
     }
 
     /**
@@ -128,34 +128,34 @@ class App
      */
     public function initSwoole($path, $loader, $request)
     {
-        $this -> initSelf();
+        $this->initSelf();
 
         //$request = \Request::createFromGlobals();
-        $request = new \Request($request -> get, $request -> post, [], $request -> cookie
-            , $request -> files, $request -> server);
+        $request = new \Request($request->get, $request->post, [], $request->cookie
+            , $request->files, $request->server);
 
-        $this -> doBootstrap($loader);
+        $this->doBootstrap($loader);
 
-        $this -> registerServices();
+        $this->registerServices();
        
         \EventDispatcher::dispatch(KernalEvent::INIT);
 
-        $this -> container = $this -> singleton('container');
-        $this -> container -> setAppPath($path);
+        $this->container = $this->singleton('container');
+        $this->container->setAppPath($path);
         
-        if ($this -> container -> isDebug()) {
+        if ($this->container->isDebug()) {
             $debugbar = new \Group\Debug\DebugBar();
-            self::getInstance() -> singletons['debugbar'] = $debugbar;
+            self::getInstance()->singletons['debugbar'] = $debugbar;
         }
 
         $handler = new ExceptionsHandler();
-        $handler -> bootstrap($this);
+        $handler->bootstrap($this);
 
-        $this -> container -> setRequest($request);
+        $this->container->setRequest($request);
 
-        $this -> router = new Router($this -> container);
-        self::getInstance() -> router = $this -> router;
-        $this -> router -> match();
+        $this->router = new Router($this->container);
+        self::getInstance()->router = $this->router;
+        $this->router->match();
     }
 
     /**
@@ -165,8 +165,8 @@ class App
     public function aliasLoader()
     {
         $aliases = Config::get('app::aliases');
-        $this -> aliases = array_merge($aliases, $this -> aliases);
-        AliasLoaderHandler::getInstance($this -> aliases) -> register();
+        $this->aliases = array_merge($aliases, $this->aliases);
+        AliasLoaderHandler::getInstance($this->aliases)->register();
 
     }
 
@@ -178,11 +178,11 @@ class App
      */
     public function singleton($name, $callable = null)
     {
-        if (!isset($this -> singletons[$name]) && $callable) {
-            $this -> singletons[$name] = call_user_func($callable);
+        if (!isset($this->singletons[$name]) && $callable) {
+            $this->singletons[$name] = call_user_func($callable);
         }
 
-        return $this -> singletons[$name];
+        return $this->singletons[$name];
     }
 
     /**
@@ -191,15 +191,15 @@ class App
      */
     public function doSingle()
     {
-        foreach ($this -> singles as $alias => $class) {
-            $this -> singletons[$alias] = new $class();
+        foreach ($this->singles as $alias => $class) {
+            $this->singletons[$alias] = new $class();
         }
     }
 
     public function doSingleInstance()
     {
-        foreach ($this -> instances as $alias => $class) {
-            $this -> singletons[$alias] = $class::getInstance();
+        foreach ($this->instances as $alias => $class) {
+            $this->singletons[$alias] = $class::getInstance();
         }
     }
 
@@ -209,9 +209,9 @@ class App
      */
     public function registerServices()
     {   
-        foreach ($this -> serviceProviders as $provider) {
+        foreach ($this->serviceProviders as $provider) {
             $provider = new $provider(self::$instance);
-            $provider -> register();
+            $provider->register();
         }
     }
 
@@ -235,15 +235,15 @@ class App
      */
     public function handleHttp()
     {
-        $response = $this -> container -> getResponse();
-        $request = $this -> container -> getRequest();
+        $response = $this->container->getResponse();
+        $request = $this->container->getRequest();
         \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
     }
 
     public function handleSwooleHttp()
     {
-        $response = $this -> container -> getResponse();
-        $request = $this -> container -> getRequest();
+        $response = $this->container->getResponse();
+        $request = $this->container->getRequest();
         return $response;
         //\EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
     }
@@ -255,8 +255,8 @@ class App
 
     public function rmSingletons($name)
     {
-        if(isset($this -> singletons[$name]))
-            unset($this -> singletons[$name]);
+        if(isset($this->singletons[$name]))
+            unset($this->singletons[$name]);
     }
 
     /**
@@ -266,7 +266,7 @@ class App
      */
     public function doBootstrap($loader) 
     {   
-        $this -> setServiceProviders();
+        $this->setServiceProviders();
 
         if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
             require "runtime/cache/bootstrap.class.cache";
@@ -274,14 +274,14 @@ class App
         }
 
         $bootstrapClass = new BootstrapClass($loader);
-        foreach ($this -> serviceProviders as $serviceProvider) {
-            $bootstrapClass -> setClass($serviceProvider);
+        foreach ($this->serviceProviders as $serviceProvider) {
+            $bootstrapClass->setClass($serviceProvider);
         }
-        foreach ($this -> bootstraps as $bootstrap) {
-            $bootstrap = isset($this -> aliases[$bootstrap]) ? $this -> aliases[$bootstrap] : $bootstrap;
-            $bootstrapClass -> setClass($bootstrap);
+        foreach ($this->bootstraps as $bootstrap) {
+            $bootstrap = isset($this->aliases[$bootstrap]) ? $this->aliases[$bootstrap] : $bootstrap;
+            $bootstrapClass->setClass($bootstrap);
         }
-        $bootstrapClass -> bootstrap();
+        $bootstrapClass->bootstrap();
     }
 
     /**
@@ -291,6 +291,6 @@ class App
     public function setServiceProviders()
     {
         $providers = Config::get('app::serviceProviders');
-        $this -> serviceProviders = array_merge($providers, $this -> serviceProviders);
+        $this->serviceProviders = array_merge($providers, $this->serviceProviders);
     }
 }

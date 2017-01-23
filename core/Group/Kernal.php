@@ -8,11 +8,11 @@ class Kernal
 {
     public function init($path, $loader)
     {
-        $this -> fix_gpc_magic();
+        $this->fix_gpc_magic();
 
         $app = new App();
-        $app -> init($path, $loader);
-        $app -> handleHttp();
+        $app->init($path, $loader);
+        $app->handleHttp();
     }
 
     public function fix_gpc_magic()
