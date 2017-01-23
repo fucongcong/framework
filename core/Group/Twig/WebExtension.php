@@ -10,22 +10,22 @@ use Group\Session\CsrfSessionService;
 class WebExtension extends Twig_Extension
 {
     /**
-	 * 重写Twig_Extension getFunctions方法
-	 *
-	 * @return array
-	 */
- 	public function getFunctions()
-	{
-		return array(
-			'asset' => new \Twig_Function_Method($this, 'getPublic'),
-			'url'   => new \Twig_Function_Method($this, 'getUrl'),
-			'dump'  => new \Twig_Function_Method($this, 'dump'),
-			'render'  => new \Twig_Function_Method($this, 'render', array('is_safe' => array('html'))),
-			'csrf_token'  => new \Twig_Function_Method($this, 'getCsrfToken'),
+     * 重写Twig_Extension getFunctions方法
+     *
+     * @return array
+     */
+    public function getFunctions()
+    {
+        return array(
+            'asset' => new \Twig_Function_Method($this, 'getPublic'),
+            'url'   => new \Twig_Function_Method($this, 'getUrl'),
+            'dump'  => new \Twig_Function_Method($this, 'dump'),
+            'render'  => new \Twig_Function_Method($this, 'render', array('is_safe' => array('html'))),
+            'csrf_token'  => new \Twig_Function_Method($this, 'getCsrfToken'),
             'debug'  => new \Twig_Function_Method($this, 'debug', array('is_safe' => array('html'))),
             'debugHeader'  => new \Twig_Function_Method($this, 'debugHeader', array('is_safe' => array('html'))),
-		);
-	}
+        );
+    }
 
     public function getFilters ()
     {
@@ -35,48 +35,48 @@ class WebExtension extends Twig_Extension
     }
 
     /**
-	 * 获取asset目录下得文件路径
-	 *
-	 * @return string
-	 */
-	public function getPublic($url)
-	{
-		return "/".$url;
-	}
+     * 获取asset目录下得文件路径
+     *
+     * @return string
+     */
+    public function getPublic($url)
+    {
+        return "/".$url;
+    }
 
     /**
-	 * 获取路由
-	 *
-	 * @return string
-	 */
-	public function getUrl($url, $params = [])
-	{
-		return Route::deParse($url, $params);
-	}
+     * 获取路由
+     *
+     * @return string
+     */
+    public function getUrl($url, $params = [])
+    {
+        return Route::deParse($url, $params);
+    }
 
     /**
-	 * 在模板调试使用
-	 *
-	 * @param var
-	 * @return void
-	 */
-	public function dump($var)
-	{
-		return var_dump($var);
-	}
+     * 在模板调试使用
+     *
+     * @param var
+     * @return void
+     */
+    public function dump($var)
+    {
+        return var_dump($var);
+    }
 
-	public function render($controller, $params)
-	{	
-		$config['controller'] = $controller;
-		$config['parameters'] = $params;
-		return \App::getInstance()->router->getTpl($config);
-	}
+    public function render($controller, $params)
+    {   
+        $config['controller'] = $controller;
+        $config['parameters'] = $params;
+        return \App::getInstance()->router->getTpl($config);
+    }
 
-	public function getCsrfToken()
-	{
-		$csrfProvider = new CsrfSessionService();
-		return $csrfProvider->generateCsrfToken();
-	}
+    public function getCsrfToken()
+    {
+        $csrfProvider = new CsrfSessionService();
+        return $csrfProvider->generateCsrfToken();
+    }
 
     public function smarttimeFilter($time) {
         $diff = time() - $time;
@@ -127,8 +127,8 @@ class WebExtension extends Twig_Extension
         }
     }
 
-	public function getName()
-	{
-		return 'group_twig';
-	}
+    public function getName()
+    {
+        return 'group_twig';
+    }
 }
