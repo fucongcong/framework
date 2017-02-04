@@ -8,7 +8,7 @@ class RpcService
 
     public function __construct()
     {   
-        $path = \Container::getInstance()->getAppPath();
+        $path = app('container')->getAppPath();
 
         new \Group\Plugin\Rpc\Hprose();
         $type = \Config::get('rpc::current_server');

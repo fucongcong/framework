@@ -69,7 +69,7 @@ class WebExtension extends Twig_Extension
     {   
         $config['controller'] = $controller;
         $config['parameters'] = $params;
-        return \App::getInstance()->router->getTpl($config);
+        return app()->router->getTpl($config);
     }
 
     public function getCsrfToken()
@@ -113,16 +113,16 @@ class WebExtension extends Twig_Extension
 
     public function debug()
     {   
-        if (\App::getInstance()->singleton('container')->isDebug()) {
-            $debugbarRenderer = \App::getInstance()->singleton('debugbar')->getJavascriptRenderer();
+        if (app('container')->isDebug()) {
+            $debugbarRenderer = app('debugbar')->getJavascriptRenderer();
             return $debugbarRenderer->render();
         }
     }
 
     public function debugHeader()
     {   
-        if (\App::getInstance()->singleton('container')->isDebug()) {
-            $debugbarRenderer = \App::getInstance()->singleton('debugbar')->getJavascriptRenderer();
+        if (app('container')->isDebug()) {
+            $debugbarRenderer = app('debugbar')->getJavascriptRenderer();
             return $debugbarRenderer->renderHead();
         }
     }

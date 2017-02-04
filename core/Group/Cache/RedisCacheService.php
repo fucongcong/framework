@@ -51,7 +51,7 @@ class RedisCacheService implements CacheContract
      */
     public function hGet($hashKey, $key)
     {
-        return $this-> redis->hGet($hashKey, $key);
+        return $this->redis->hGet($hashKey, $key);
     }
 
     /**
@@ -81,9 +81,9 @@ class RedisCacheService implements CacheContract
      */
     public function hDel($hashKey, $key = null)
     {
-        if($key) return $this-> redis->hDel($hashKey, $key);
+        if($key) return $this->redis->hDel($hashKey, $key);
 
-        return $this-> redis->hDel($hashKey);
+        return $this->redis->hDel($hashKey);
     }
 
     /**
@@ -93,6 +93,6 @@ class RedisCacheService implements CacheContract
      */
     public function getRedis()
     {
-        return $this-> redis;
+        return $this->redis;
     }
 }

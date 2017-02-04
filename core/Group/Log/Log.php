@@ -69,8 +69,8 @@ class Log
     public static function writeLog($level, $message, $context, $model)
     {
         $logger = new Logger($model);
-        $env = \Container::getInstance()->getEnvironment();
-        $path = \Container::getInstance()->getAppPath();
+        $env = app('container')->getEnvironment();
+        $path = app('container')->getAppPath();
         $cacheDir = static::$cacheDir;
 
         $logger->pushHandler(new StreamHandler($path.$cacheDir.'/'.$env.'.log', self::$levels[$level]));

@@ -74,7 +74,6 @@ class App
         'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
     ];
 
-    //to do
     protected $instances = [
         'container'         => '\Container',
     ];
@@ -130,7 +129,6 @@ class App
     {
         $this->initSelf();
 
-        //$request = \Request::createFromGlobals();
         $request = new \Request($request->get, $request->post, [], $request->cookie
             , $request->files, $request->server);
 
@@ -237,7 +235,7 @@ class App
     {
         $response = $this->container->getResponse();
         $request = $this->container->getRequest();
-        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
+        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request, $response));
     }
 
     public function handleSwooleHttp()
@@ -292,5 +290,29 @@ class App
     {
         $providers = Config::get('app::serviceProviders');
         $this->serviceProviders = array_merge($providers, $this->serviceProviders);
+    }
+
+    /**
+     * 处理一个抽象对象
+     * @param  string  $abstract
+     * @return mixed
+     */
+    public function make($abstract)
+    {
+        //如果是已经注册的单例对象
+        if (isset($this->singletons[$abstract])) {
+            return $this->singletons[$abstract];
+        }
+
+        $reflector = app('container')->buildMoudle($abstract);
+        //有单例
+        if ($reflector->hasMethod('getInstance')) {
+            $object = $abstract::getInstance();
+            $this->instances[$abstract] =$abstract;
+            $this->singletons[$abstract] = $object;
+            return $object;
+        }
+
+        return new $abstract;
     }
 }
