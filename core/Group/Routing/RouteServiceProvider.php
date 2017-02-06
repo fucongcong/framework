@@ -3,7 +3,6 @@
 namespace Group\Routing;
 
 use ServiceProvider;
-use Group\Routing\RouteService;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -15,7 +14,7 @@ class RouteServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('route', function () {
-            return RouteService::getInstance();
+            return app('Group\Routing\RouteService');
         });
     }
 

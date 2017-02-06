@@ -5,6 +5,9 @@
     "type": "project",
     "license": "MIT",
     "autoload": {
+        "files": [
+            "core/Group/App/helpers.php"
+        ],
         "psr-4": {
             "Group\\": "core/Group/"
         }
