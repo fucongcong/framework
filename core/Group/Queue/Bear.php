@@ -31,9 +31,6 @@ class Bear
 
     public function __construct($loader)
     {      
-        //防止socket超时的问题
-        ini_set('default_socket_timeout', -1);
-
         $this->initParam($loader); 
     }
 
@@ -153,7 +150,7 @@ class Bear
     private function startWorkers()
     {   
         //启动worker进程
-        for ($i = 0; $i < $this->workerNum; $i++) { 
+        for ($i = 0; $i < $this->workerNum; $i++) {
             $process = new swoole_process(array($this, 'workerCallBack'), true);
             $processPid = $process->start();
             $this->setWorkerPids($processPid);
@@ -171,6 +168,8 @@ class Bear
      */
     public function workerCallBack(swoole_process $worker) 
     {   
+        $this->init();
+
         $server = $this->server;
         $listener = $this->listener;
         $timer = $this->timer;
@@ -299,5 +298,16 @@ class Bear
                 exit('队列服务已启动！');
             }
         }
+    }
+
+    private function init()
+    {
+        $loader = require __ROOT__.'/vendor/autoload.php';
+        $loader->setUseIncludePath(true);
+        $app = new \Group\App\App();
+        $app->initSelf();
+        $app->doBootstrap($loader);
+        $app->registerServices();
+        $app->singleton('container')->setAppPath(__ROOT__);
     }
 }

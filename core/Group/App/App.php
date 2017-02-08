@@ -206,7 +206,7 @@ class App
      *
      */
     public function registerServices()
-    {   
+    {
         foreach ($this->serviceProviders as $provider) {
             $provider = new $provider(self::$instance);
             $provider->register();
@@ -290,6 +290,17 @@ class App
     {
         $providers = Config::get('app::serviceProviders');
         $this->serviceProviders = array_merge($providers, $this->serviceProviders);
+    }
+
+    /**
+     * ingore ServiceProviders
+     *
+     */
+    public function ingoreServiceProviders($provider)
+    {   
+        foreach ($this->serviceProviders as $key => $val) {
+            if ($val == $provider) unset($this->serviceProviders[$key]);
+        } 
     }
 
     /**

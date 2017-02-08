@@ -27,7 +27,7 @@ return [
         [
             'name' => 'TestLog2',//任务名
             'time' => '*/2 * * * *',//定时规则 分 小时 天 周 月
-            'command' => 'src\Web\Cron\Test',//执行的类库
+            'command' => 'src\Web\Cron\TestCache',//执行的类库
         ],
 
         // [
