@@ -166,9 +166,9 @@ class Cron
                     \Log::info("主进程退出!", [], 'cron');
                     unlink($this->logDir."/work_ids");
                     unlink($this->logDir."/pid");
-                    foreach ($this->jobs as $job) {
-                        unlink($this->cacheDir."/".$job['name']);
-                    }
+                    // foreach ($this->jobs as $job) {
+                    //     unlink($this->cacheDir."/".$job['name']);
+                    // }
                     swoole_process::kill($this->getPid(), SIGKILL); 
                 }
             }
