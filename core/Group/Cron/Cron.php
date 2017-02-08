@@ -250,6 +250,8 @@ class Cron
 
     public function workerCallBack(swoole_process $worker)
     {   
+        $this->init();
+        
         swoole_event_add($worker->pipe, function($pipe) use ($worker) { 
             $recv = $worker->read(); 
             $recv = json_decode($recv, true);
@@ -444,5 +446,16 @@ class Cron
         $classCache->bootstrap();
         
         require $this->classCache;
+    }
+
+    private function init()
+    {
+        $loader = require __ROOT__.'/vendor/autoload.php';
+        $loader->setUseIncludePath(true);
+        $app = new \Group\App\App();
+        $app->initSelf();
+        $app->doBootstrap($loader);
+        $app->registerServices();
+        $app->singleton('container')->setAppPath(__ROOT__);
     }
 }
