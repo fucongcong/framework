@@ -84,7 +84,9 @@ class Cron
     }
 
     public function start()
-    {
+    {   
+        unlink($this->logDir."/work_ids");
+        
         $this->checkStatus();
         \Log::info("定时服务启动", [], 'cron');
         //将主进程设置为守护进程
