@@ -100,4 +100,6 @@ interface Container
     public function getRequest();
 
     public function runningInConsole();
+
+    public function isDebug();
 }

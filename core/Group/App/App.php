@@ -9,14 +9,15 @@ use Group\Handlers\ExceptionsHandler;
 use Group\Events\HttpEvent;
 use Group\Events\KernalEvent;
 use Group\Cache\BootstrapClass;
+use Group\Container\Container;
 
 class App
 {
     /**
-     * array singletons
+     * array instances
      *
      */
-    protected $singletons;
+    protected $instances;
 
     private static $instance;
 
@@ -74,10 +75,6 @@ class App
         'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
     ];
 
-    protected $instances = [
-        'container'         => '\Container',
-    ];
-
     public function __construct()
     { 
         $this->aliasLoader();
@@ -108,7 +105,7 @@ class App
         
         if ($this->container->isDebug()) {
             $debugbar = new \Group\Debug\DebugBar();
-            self::getInstance()->singletons['debugbar'] = $debugbar;
+            self::getInstance()->instances['debugbar'] = $debugbar;
         }
 
         $handler = new ExceptionsHandler();
@@ -143,7 +140,7 @@ class App
         
         if ($this->container->isDebug()) {
             $debugbar = new \Group\Debug\DebugBar();
-            self::getInstance()->singletons['debugbar'] = $debugbar;
+            self::getInstance()->instances['debugbar'] = $debugbar;
         }
 
         $handler = new ExceptionsHandler();
@@ -176,11 +173,11 @@ class App
      */
     public function singleton($name, $callable = null)
     {
-        if (!isset($this->singletons[$name]) && $callable) {
-            $this->singletons[$name] = call_user_func($callable);
+        if (!isset($this->instances[$name]) && $callable) {
+            $this->instances[$name] = call_user_func($callable);
         }
 
-        return $this->singletons[$name];
+        return $this->instances[$name];
     }
 
     /**
@@ -188,17 +185,17 @@ class App
      *
      */
     public function doSingle()
-    {
+    {   
+        $singles = Config::get('app::singles');
+        $this->singles = array_merge($singles, $this->singles);
         foreach ($this->singles as $alias => $class) {
-            $this->singletons[$alias] = new $class();
+            $this->instances[$alias] = new $class();
         }
     }
 
     public function doSingleInstance()
     {
-        foreach ($this->instances as $alias => $class) {
-            $this->singletons[$alias] = $class::getInstance();
-        }
+        $this->instances['container'] = Container::getInstance();
     }
 
     /**
@@ -251,10 +248,10 @@ class App
         self::$instance = $this;
     }
 
-    public function rmSingletons($name)
+    public function rmInstances($name)
     {
-        if(isset($this->singletons[$name]))
-            unset($this->singletons[$name]);
+        if(isset($this->instances[$name]))
+            unset($this->instances[$name]);
     }
 
     /**
@@ -311,19 +308,27 @@ class App
     public function make($abstract)
     {
         //如果是已经注册的单例对象
-        if (isset($this->singletons[$abstract])) {
-            return $this->singletons[$abstract];
+        if (isset($this->instances[$abstract])) {
+            return $this->instances[$abstract];
         }
 
         $reflector = app('container')->buildMoudle($abstract);
+        if (!$reflector->isInstantiable()) {
+            throw new Exception("Target [$concrete] is not instantiable!");
+        }
+
         //有单例
         if ($reflector->hasMethod('getInstance')) {
             $object = $abstract::getInstance();
-            $this->instances[$abstract] =$abstract;
-            $this->singletons[$abstract] = $object;
+            $this->instances[$abstract] = $object;
             return $object;
         }
 
-        return new $abstract;
+        $constructor = $reflector->getConstructor();
+        if (is_null($constructor)) {
+            return new $abstract;
+        }
+
+        return null;
     }
 }
