@@ -199,6 +199,11 @@ class Bear
             });
                     
         });
+
+        //接受退出的信号
+        swoole_process::signal(SIGTERM, function ($signo) use ($worker) {
+            $worker->exit();
+        });
     }
 
     /**

@@ -85,7 +85,7 @@ class Cron
 
     public function start()
     {   
-        unlink($this->logDir."/work_ids");
+        if(file_exists($this->logDir."/work_ids")) unlink($this->logDir."/work_ids");
         
         $this->checkStatus();
         \Log::info("定时服务启动", [], 'cron');
@@ -102,6 +102,7 @@ class Cron
             foreach ($this->jobs as $key => $job) {
                 $workers = $this->table->get('workers');
                 $workers = json_decode($workers['workers'], true);
+
                 //这里可以优化 如果用redis等等持久化的缓存来存的话  就可以做到对子进程的管理了，比如重新跑脚本，现在swoole table只能用于当前进程
                 if (isset($workers[$job['name']]['nextTime'])) continue;
 
@@ -143,7 +144,8 @@ class Cron
             if (swoole_process::kill($pid, 0)) {
                 //杀掉worker进程
                 foreach (\FileCache::get('work_ids', $this->cacheDir) as $work_id) {
-                    swoole_process::kill($work_id, SIGKILL);
+                    //向子进程发送退出命令,结束完当前任务后退出
+                    swoole_process::kill($work_id, SIGTERM);
                 }
             }
         }
@@ -273,6 +275,11 @@ class Cron
                     $this->restartJob($timerId, $worker['job']);
                 }
             }
+        });
+
+        //接受退出的信号
+        swoole_process::signal(SIGTERM, function ($signo) use ($worker) {
+            $worker->exit();
         });
     }
 
