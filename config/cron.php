@@ -30,6 +30,12 @@ return [
             'command' => 'src\Web\Cron\TestCache',//执行的类库
         ],
 
+        [
+            'name' => 'TestLog4',//任务名
+            'time' => '*/2 3 * * *',//定时规则 分 小时 天 周 月
+            'command' => 'src\Web\Cron\TestCache',//执行的类库
+        ],
+
         // [
         //     'name' => 'testCache',
         //     'time' => '25 */2 * * *',//定时规则 分 小时 天 周 月

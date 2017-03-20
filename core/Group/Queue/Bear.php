@@ -306,7 +306,9 @@ class Bear
     }
 
     private function init()
-    {
+    {   
+        opcache_reset();
+        
         $loader = require __ROOT__.'/vendor/autoload.php';
         $loader->setUseIncludePath(true);
         $app = new \Group\App\App();
