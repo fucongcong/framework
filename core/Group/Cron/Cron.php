@@ -51,7 +51,7 @@ class Cron
  ----------------------------------------------------------
 \033[0m
 \033[31m 使用帮助: \033[0m
-\033[33m Usage: app/cron [start|restart|stop|status|exec (cron name)|rejob (cron name)] \033[0m
+\033[33m Usage: app/cron [start|restart|stop|status|exec (cron name)|rejob (cron name)]|server \033[0m
 ";
     /**
      * 初始化环境
@@ -85,10 +85,11 @@ class Cron
 
     public function start()
     {   
-        if(file_exists($this->logDir."/work_ids")) unlink($this->logDir."/work_ids");
-        
         $this->checkStatus();
         \Log::info("定时服务启动", [], 'cron');
+
+        if(file_exists($this->logDir."/work_ids")) unlink($this->logDir."/work_ids");
+        
         //将主进程设置为守护进程
         if ($this->daemon) swoole_process::daemon(true);
 
@@ -211,10 +212,16 @@ class Cron
         $argv = $this->argv;
         if (!isset($argv[1])) die($this->help);
 
-        if (!in_array($argv[1], ['start', 'restart', 'stop', 'status', 'exec', 'rejob'])) die($this->help);
+        if (!in_array($argv[1], ['start', 'restart', 'stop', 'status', 'exec', 'rejob', 'server'])) die($this->help);
 
         $function = $argv[1];
         $this->$function();
+    }
+
+    public function server()
+    {
+        $server = new \Group\Cron\CronAdmin();
+        $server->start();
     }
 
     public function exec()
@@ -458,7 +465,9 @@ class Cron
     }
 
     private function init()
-    {
+    {   
+        opcache_reset();
+        
         $loader = require __ROOT__.'/vendor/autoload.php';
         $loader->setUseIncludePath(true);
         $app = new \Group\App\App();

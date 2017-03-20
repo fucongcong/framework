@@ -10,7 +10,7 @@ class CronAdmin
 
     public function __construct()
     {
-        $http = new swoole_http_server('127.0.0.1', '9999');
+        $http = new swoole_http_server('127.0.0.1', '10008');
         $http->set(array(
             'reactor_num' => 1,
             'worker_num' => 2,    //worker process num
@@ -33,16 +33,26 @@ class CronAdmin
                 return;
             }
             
+            if ($request->post) {
+                $post = $request->post;
+                $action = $post['action'];
+                $this->$action($post);
+        
+                $response->status(200);
+                $response->end(json_encode(['status' => 'success', 'code' => 200]));
+                return;
+            }
+
             $cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
-            $pid = \FileCache::get('pid', $cacheDir);
-            $work_ids = \FileCache::get('work_ids', $cacheDir);
-            ob_start();
+            $pid = \FileCache::get('pid', $cacheDir) ? : 0;
+            $works = \FileCache::get('cronAdmin', $cacheDir) ? : [];
+            $work_ids = \FileCache::get('work_ids', $cacheDir) ? : [];
 
-            require(__DIR__."/View/console.php");
-
-
-            $output = ob_get_contents();
-            ob_end_clean();
+            $output = $this->twigInit()->render('console.html.twig', [
+                'pid' => $pid,
+                'work_ids' => $work_ids,
+                'works' => $works,
+                ]);
             $response->status(200);
             $response->end($output);
             return;
@@ -54,5 +64,45 @@ class CronAdmin
     public function start()
     {
         $this->http->start();
+    }
+
+    public function startMaster($post)
+    {
+        $path = __ROOT__;
+        exec("cd /var/www/Group-framework && app/cron start > /dev/null &");
+    }
+
+    public function restartMaster($post)
+    {
+        $path = __ROOT__;
+        exec("cd /var/www/Group-framework && app/cron restart > /dev/null &");
+    }
+
+    public function stopMaster($post)
+    {
+        $path = __ROOT__;
+        exec("cd /var/www/Group-framework && app/cron stop > /dev/null &");
+    }
+
+    public function execWorker($post)
+    {
+        $path = __ROOT__;
+        $jobName = $post['jobName'];
+        exec("cd /var/www/Group-framework && app/cron exec {$jobName} > /dev/null &");
+    }
+
+    public function rejobWorker($post)
+    {
+        $path = __ROOT__;
+        $jobName = $post['jobName'];
+        exec("cd /var/www/Group-framework && app/cron rejob {$jobName} > /dev/null &");
+    }
+
+    private function twigInit()
+    {
+        $loader = new \Twig_Loader_Filesystem(dirname(__FILE__)."/View");
+        $twig = new \Twig_Environment($loader, isset($env) ? $env : array());
+
+        return $twig;
     }
 }
