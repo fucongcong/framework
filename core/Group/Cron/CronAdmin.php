@@ -10,7 +10,7 @@ class CronAdmin
 
     public function __construct()
     {
-        $http = new swoole_http_server('127.0.0.1', '10008');
+        $http = new swoole_http_server('0.0.0.0', '10008');
         $http->set(array(
             'reactor_num' => 1,
             'worker_num' => 2,    //worker process num
