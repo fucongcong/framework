@@ -466,7 +466,7 @@ class Cron
 
     private function init()
     {   
-        opcache_reset();
+        if(function_exists("opcache_reset")) opcache_reset();
         
         $loader = require __ROOT__.'/vendor/autoload.php';
         $loader->setUseIncludePath(true);
