@@ -30,8 +30,9 @@ class Console
             'help' => '执行sql更新'
         ],
         'sql:rollback' => [
+            'args' => 'version',
             'command' => 'Group\Console\Command\SqlRollBackCommand',
-            'help' => '执行sql回滚'
+            'help' => '执行sql回滚到指定版本'
         ],
     ];
 

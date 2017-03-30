@@ -18,9 +18,7 @@ class SqlMigrateCommand extends Command
         $versions = $this->doSql($this->getMigrations(), false)->fetchAll();
         $this->versions = array_values(ArrayToolkit::column($versions, "version"));
 
-        $sqlDir = __ROOT__."app/sql/";
-
-        $this->ListSql($sqlDir);
+        $this->ListSql(__ROOT__."app/sql/");
     }
 
     private function ListSql($sqlDir)
