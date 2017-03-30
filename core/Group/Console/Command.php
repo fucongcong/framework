@@ -40,6 +40,15 @@ abstract class Command
      */
     public function outPut($info)
     {
-        echo $info."\n";
+        echo $info.PHP_EOL;
+    }
+
+    /**
+     * 错误提示
+     *
+     */
+    public function error($error)
+    {
+        die($error.PHP_EOL);
     }
 }

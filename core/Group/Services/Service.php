@@ -21,6 +21,7 @@ class Service
     public function createService($serviceName)
     {
         list($group, $serviceName) = explode(":", $serviceName);
+        // return  \Rpc::service("{$group}:{$serviceName}");
         $class = $serviceName."ServiceImpl";
         $serviceName = "src\\Services\\".$group."\\Impl\\".$class;
 
