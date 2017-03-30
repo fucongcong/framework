@@ -3,23 +3,24 @@
 namespace Group\Console\Command;
 
 use Group\Console\Command as Command;
+use Group\Common\ArrayToolkit;
 
 class SqlMigrateCommand extends Command
 {
-    protected $fileList = [];
+    protected $versions = [];
+
+    protected $dao;
 
     public function init()
-    {
+    {   
+        $this->dao = new \Dao();
+        $this->doSql($this->getInitSql(), false);
+        $versions = $this->doSql($this->getMigrations(), false)->fetchAll();
+        $this->versions = array_values(ArrayToolkit::column($versions, "version"));
+
         $sqlDir = __ROOT__."app/sql/";
 
-        $lock = \FileCache::isExist("sql.lock", $sqlDir);
-        if($lock) {
-            $this->fileList = \FileCache::get("sql.lock", $sqlDir);
-        }
-
         $this->ListSql($sqlDir);
-
-        \FileCache::set("sql.lock", $this->fileList, $sqlDir);
     }
 
     private function ListSql($sqlDir)
@@ -41,9 +42,9 @@ class SqlMigrateCommand extends Command
 
     private function filterLockFile($file)
     {
-        $fileList = $this->fileList;
+        $versions = $this->versions;
 
-        if (in_array($file, $fileList)) return;
+        if (in_array($file, $versions)) return;
 
         $migrateClass = "\\app\\sql\\".$file;
         $sqlMigrate = new $migrateClass;
@@ -52,51 +53,35 @@ class SqlMigrateCommand extends Command
 
         $this->startMigrate($sqlArr);
 
-        $fileList[] = $file;
-        $this->fileList = $fileList;
+        $this->doSql($this->insertVersion($file), false);
     }
 
     private function startMigrate($sqlArr)
     {
-        $dao = new \Dao();
         foreach ($sqlArr as $sql) {
-            $this->doSql($dao, $sql);
+            $this->doSql($sql);
         }
     }
 
-    private function doSql($dao, $sql) {
+    private function doSql($sql, $needOutput = true)
+    {   
+        if ($needOutput) $this->outPut($sql);
 
-        $input = $this->getArgv();
-        $type = isset($input[0]) ? $input[0] : 'default';
-        $subType = isset($input[1]) ? $input[1] : 'all';
+        return $this->dao->querySql($sql, 'default');
+    }
 
-        switch ($type) {
-            case 'write':
-                    if ($subType == 'all') {
-                        $dao->querySql($sql, 'all_write');
-                    }else {
-                        $dao->querySql($sql, 'write', $subType);
-                    }
-                break;
-            case 'read':
-                    if ($subType == 'all') {
-                        $dao->querySql($sql, 'all_read');
-                    }else {
-                        $dao->querySql($sql, 'read', $subType);
-                    }
-                break;
-            case 'default':
-                    $dao->querySql($sql, 'default');
-                break;
-            case 'all':
-                    $dao->querySql($sql, 'default');
-                    $dao->querySql($sql, 'all_write');
-                    $dao->querySql($sql, 'all_read');
-                break;
-            default:
-                break;
-        }
+    private function getInitSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `migration_versions`( `version` VARCHAR(50) NOT NULL COMMENT '版本号' , UNIQUE `version-un` (`version`)) ENGINE = InnoDB;";
+    }
 
-        $this->outPut($sql);
+    private function insertVersion($version)
+    {
+        return "INSERT INTO `migration_versions` (`version`) VALUES ('{$version}')";
+    }
+
+    private function getMigrations()
+    {
+        return "SELECT * FROM `migration_versions`";
     }
 }

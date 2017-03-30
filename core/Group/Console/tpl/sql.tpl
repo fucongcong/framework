@@ -15,5 +15,4 @@ class {{name}} extends SqlMigration
     {
 
     }
-
 }

@@ -12,12 +12,12 @@ class GenerateServiceCommand extends Command
         $input = $this->getArgv();
 
         if (!isset($input[0])) {
-            throw new \RuntimeException("名称不能为空！");
+            $this->error("名称不能为空！");
         }
 
         $name = $input[0];
         if (!preg_match('/^[a-zA-Z\s]+$/', $name)) {
-            throw new \RuntimeException("名称只能为英文！");
+            $this->error("名称只能为英文！");
         }
 
         $serviceName = ucfirst($name);
@@ -29,9 +29,7 @@ class GenerateServiceCommand extends Command
         $this->outPut('正在生成目录...');
 
         if (is_dir($dir."/".$serviceName)) {
-
-            $this->outPut('目录已存在...初始化失败');
-            die;
+            $this->error('目录已存在...初始化失败');
         }
 
         $filesystem = new Filesystem();

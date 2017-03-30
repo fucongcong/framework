@@ -11,12 +11,28 @@ class Console
      *
      */
     protected $options = [
-        'generate:service' => 'Group\Console\Command\GenerateServiceCommand',
-        'generate:controller' => 'Group\Console\Command\GenerateControllerCommand',
-        'sql:generate' => 'Group\Console\Command\SqlGenerateCommand',
-        'sql:clean' => 'Group\Console\Command\SqlCleanCommand',
-        'sql:migrate' => 'Group\Console\Command\SqlMigrateCommand',
-        'sql:rollback' => 'Group\Console\Command\SqlRollBackCommand',
+        'generate:service' => [
+            'args' => 'name',
+            'command' => 'Group\Console\Command\GenerateServiceCommand',
+            'help' => '生成一个自定义service'
+        ],
+        'generate:controller' => [
+            'args' => 'name|groupname:name',
+            'command' => 'Group\Console\Command\GenerateControllerCommand',
+            'help' => '生成一个自定义controller(默认存放在src/Web,如果想要指定分组 groupname:name)'
+        ],
+        'sql:generate' => [
+            'command' => 'Group\Console\Command\SqlGenerateCommand',
+            'help' => '生成一个sql执行模板(存放于app/sql)'
+        ],
+        'sql:migrate' => [
+            'command' => 'Group\Console\Command\SqlMigrateCommand',
+            'help' => '执行sql更新'
+        ],
+        'sql:rollback' => [
+            'command' => 'Group\Console\Command\SqlRollBackCommand',
+            'help' => '执行sql回滚'
+        ],
     ];
 
     protected $help = "
@@ -34,12 +50,6 @@ class Console
 \033[31m 使用帮助: \033[0m
 \033[33m Usage: app/console [options] [args...] \033[0m
 
-\033[32m generate:service name \033[0m                                          生成一个自定义service
-\033[32m generate:controller  name|groupname:name \033[0m                       生成一个自定义controller(默认存放在src/Web,如果想要指定分组 groupname:name)
-\033[32m sql:generate\033[0m                                                    生成一个sql执行模板(存放于app/sql)
-\033[32m sql:clean\033[0m                                                       清除lock文件,您可以再次执行migrate脚本中的命令
-\033[32m sql:migrate  [default|write|read|all]\033[0m \033[33m[name]\033[0m     参数可不填，执行sql更新
-\033[32m sql:rollback [default|write|read|all]\033[0m \033[33m[name]\033[0m     参数可不填，执行sql回滚
 ";
 
     public function __construct($argv)
@@ -54,9 +64,14 @@ class Console
      *
      */
     public function run()
-    {
+    {   
         $this->checkArgv();
-        die($this->help);
+
+        printf($this->help);
+        foreach ($this->options as $command => $option) {
+            $option['args'] = isset($option['args']) ? $option['args'] : '';
+            printf("%-70s %-s".PHP_EOL, "\033[32m ".$command."\033[0m"."\033[33m ".$option['args']."\033[0m", $option['help']);
+        }
     }
 
     /**
@@ -68,13 +83,13 @@ class Console
         $argv = $this->argv;
         if (!isset($argv[1])) return;
         $options = $this->options;
-        if (!isset($options[$argv[1]])) {
+        if (!isset($options[$argv[1]]['command'])) {
 
-            $this->help = "\033[31m错误的命令！\033[0m\n";
+            $this->help = "\033[31m错误的命令！\033[0m".PHP_EOL;
             return;
         }
 
-        $command = new $options[$argv[1]];
+        $command = new $options[$argv[1]]['command'];
         $command->setArgv($argv);
         $command->init();
         die;
@@ -86,11 +101,11 @@ class Console
         $options = [];
         $helps = "";
         foreach ($commands as $command => $option) {
-            $options[$command] = $option['command'];
-            $helps .= "\033[32m ".$command."\033[0m                                        ".$option['help']."\n";
+            $options[$command] = $option;
         }
 
         $this->options = array_merge($this->options, $options);
+
         $this->help = $this->help.$helps;
     }
 }

@@ -98,7 +98,7 @@ class Dao
     {
         switch ($type) {
             case 'write':
-                    $this->getWrite($name)->query($sql);
+                    return $this->getWrite($name)->query($sql);
                 break;
             case 'all_write':
                     $connections = $this->getAllWrite();
@@ -107,7 +107,7 @@ class Dao
                     }
                 break;
             case 'read':
-                    $this->getRead($name)->query($sql);
+                    return $this->getRead($name)->query($sql);
                 break;
             case 'all_read':
                     $connections = $this->getAllRead();
@@ -116,7 +116,7 @@ class Dao
                     }
                 break;
             case 'default':
-                    $this->getDefault()->query($sql);
+                    return $this->getDefault()->query($sql);
                 break;
             default:
                 break;
