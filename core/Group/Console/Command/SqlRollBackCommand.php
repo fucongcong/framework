@@ -4,25 +4,30 @@ namespace Group\Console\Command;
 
 use Group\Console\Command as Command;
 use Group\Console\Command\SqlCleanCommand as SqlCleanCommand;
+use Group\Common\ArrayToolkit;
 
 class SqlRollBackCommand extends Command
 {
     protected $fileList = [];
 
+    protected $toVersion;
+
+    protected $versions = [];
+
+    protected $dao;
+
     public function init()
     {
-        $sqlDir = __ROOT__."app/sql/";
+        $this->dao = new \Dao();
+        $input = $this->getArgv();
+        $this->toVersion = isset($input[0]) ? $input[0] : null;
 
-        $lock = \FileCache::isExist("sql.lock", $sqlDir);
-        if($lock) {
-            $this->fileList = \FileCache::get("sql.lock", $sqlDir);
-        }
+        $versions = $this->doSql($this->getMigrations(), false)->fetchAll();
+        $this->versions = array_values(ArrayToolkit::column($versions, "version"));
 
-        $this->ListSql($sqlDir);
+        if (!in_array($this->toVersion, $this->versions)) $this->error('找不到指定的版本');
 
-        //清除lock
-        $clean = new SqlCleanCommand;
-        $clean->init();
+        $this->ListSql(__ROOT__."app/sql/");
     }
 
     private function ListSql($sqlDir)
@@ -43,66 +48,40 @@ class SqlRollBackCommand extends Command
 
         krsort($files);
         foreach ($files as $fileName) {
-            $this->filterLockFile($fileName);
+            if ($fileName >= $this->toVersion && in_array($fileName, $this->versions)) {
+                $migrateClass = "\\app\\sql\\".$fileName;
+                $sqlMigrate = new $migrateClass;
+                $sqlMigrate->back();
+                $sqlArr = $sqlMigrate->getSqlArr();
+
+                $this->startRollBack($sqlArr);
+
+                $this->doSql($this->dropVersion($fileName), false);
+            }
         }
-
-    }
-
-    private function filterLockFile($file)
-    {
-        $fileList = $this->fileList;
-
-        if (!in_array($file, $fileList)) return;
-
-        $migrateClass = "\\app\\sql\\".$file;
-        $sqlMigrate = new $migrateClass;
-        $sqlMigrate->back();
-        $sqlArr = $sqlMigrate->getSqlArr();
-
-        $this->startRollBack($sqlArr);
     }
 
     private function startRollBack($sqlArr)
     {
-        $dao = new \Dao();
         foreach ($sqlArr as $sql) {
-            $this->doSql($dao, $sql);
+            $this->doSql($sql);
         }
     }
 
-    private function doSql($dao, $sql) {
+    private function doSql($sql, $needOutput = true)
+    {   
+        if ($needOutput) $this->outPut($sql);
 
-        $input = $this->getArgv();
-        $type = isset($input[0]) ? $input[0] : 'default';
-        $subType = isset($input[1]) ? $input[1] : 'all';
+        return $this->dao->querySql($sql, 'default');
+    }
 
-        switch ($type) {
-            case 'write':
-                    if ($subType == 'all') {
-                        $dao->querySql($sql, 'all_write');
-                    }else {
-                        $dao->querySql($sql, 'write', $subType);
-                    }
-                break;
-            case 'read':
-                    if ($subType == 'all') {
-                        $dao->querySql($sql, 'all_read');
-                    }else {
-                        $dao->querySql($sql, 'read', $subType);
-                    }
-                break;
-            case 'default':
-                    $dao->querySql($sql, 'default');
-                break;
-            case 'all':
-                    $dao->querySql($sql, 'default');
-                    $dao->querySql($sql, 'all_write');
-                    $dao->querySql($sql, 'all_read');
-                break;
-            default:
-                break;
-        }
+    private function dropVersion($version)
+    {
+        return "DELETE FROM `migration_versions` WHERE version = '{$version}'";
+    }
 
-        $this->outPut($sql);
+    private function getMigrations()
+    {
+        return "SELECT * FROM `migration_versions`";
     }
 }

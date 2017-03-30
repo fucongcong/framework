@@ -6,6 +6,8 @@ class RpcService
 {   
     protected $client;
 
+    protected $func;
+
     public function __construct()
     {   
         $path = app('container')->getAppPath();
@@ -26,6 +28,22 @@ class RpcService
 
         try {
             return call_user_func_array([$this->client, $func], $args);
+        } catch(\Exception $e) {
+            return false;
+        }
+    }
+
+    public function service($name) 
+    {
+        list($group, $name) = explode(":", $name);
+        $this->func = "{$group}_{$name}Service";
+        return $this;
+    }
+
+    public function __call($method, $parameters)
+    {
+        try {
+            return call_user_func_array([$this->client, $this->func."_{$method}"], $parameters);
         } catch(\Exception $e) {
             return false;
         }
