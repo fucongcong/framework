@@ -69,33 +69,33 @@ class CronAdmin
     public function startMaster($post)
     {
         $path = __ROOT__;
-        exec("cd {$path} && app/cron start > /dev/null &");
+        exec("cd {$path} && app/cron start > /dev/group &");
     }
 
     public function restartMaster($post)
     {
         $path = __ROOT__;
-        exec("cd {$path} && app/cron restart > /dev/null &");
+        exec("cd {$path} && app/cron restart > /dev/group &");
     }
 
     public function stopMaster($post)
     {
         $path = __ROOT__;
-        exec("cd {$path} && app/cron stop > /dev/null &");
+        exec("cd {$path} && app/cron stop > /dev/group &");
     }
 
     public function execWorker($post)
     {
         $path = __ROOT__;
         $jobName = $post['jobName'];
-        exec("cd {$path} && app/cron exec {$jobName} > /dev/null &");
+        exec("cd {$path} && app/cron exec {$jobName} > /dev/group &");
     }
 
     public function rejobWorker($post)
     {
         $path = __ROOT__;
         $jobName = $post['jobName'];
-        exec("cd {$path} && app/cron rejob {$jobName} > /dev/null &");
+        exec("cd {$path} && app/cron rejob {$jobName} > /dev/group &");
     }
 
     private function twigInit()
