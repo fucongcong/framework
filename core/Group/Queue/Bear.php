@@ -177,32 +177,43 @@ class Bear
         swoole_event_add($worker->pipe, function($pipe) use ($worker, $server, $listener, $timer) {
 
             $recv = $worker->read();
-            $pheanstalk = new Pheanstalk($server['host'], $server['port'], 10);
-            
-            swoole_timer_tick(intval($timer), function($timerId) use ($recv, $listener, $pheanstalk){
-          
-                $recv = $listener->getJob($recv, $pheanstalk);
-                $recv = unserialize($recv); 
-                if (is_object($recv['job'])) {
-                    try{
-                        foreach ($recv['handle'] as $handerClass => $job) {
-                           $handler = new $handerClass($recv['job']->getId(), $recv['job']->getData());
-                           $handler->handle();
-                        }
-                        //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
-                        $pheanstalk->delete($recv['job']);
-                        //\Log::info("jobId:".$recv['job']->getId()."任务完成".$recv['job']->getData(), [], 'queue.worker');
-                    }catch(\Exception $e){
-                        \Log::error("jobId:".$recv['job']->getId()."任务出错了！", ['jobId' => $recv['job']->getId(), 'jobData' => $recv['job']->getData(), 'message' => $e->getMessage()], 'queue.worker');
-                    }
-                } 
-            });
-                    
+
+            if (isset($server['host']) && isset($server['port'])) {
+                $this->handleJob($server, $recv, $listener, $timer);
+            } else {
+                foreach ($server as $one) {
+                    $this->handleJob($one, $recv, $listener, $timer);
+                }
+            }      
         });
 
         //接受退出的信号
         swoole_process::signal(SIGTERM, function ($signo) use ($worker) {
             $worker->exit();
+        });
+    }
+
+    private function handleJob($server, $recv, $listener, $timer)
+    {
+        $pheanstalk = new Pheanstalk($server['host'], $server['port'], 10);
+        
+        swoole_timer_tick(intval($timer), function($timerId) use ($recv, $listener, $pheanstalk){
+        
+            $recv = $listener->getJob($recv, $pheanstalk);
+            $recv = unserialize($recv); 
+            if (is_object($recv['job'])) {
+                try{
+                    foreach ($recv['handle'] as $handerClass => $job) {
+                       $handler = new $handerClass($recv['job']->getId(), $recv['job']->getData());
+                       $handler->handle();
+                    }
+                    //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
+                    $pheanstalk->delete($recv['job']);
+                    //\Log::info("jobId:".$recv['job']->getId()."任务完成".$recv['job']->getData(), [], 'queue.worker');
+                }catch(\Exception $e){
+                    \Log::error("jobId:".$recv['job']->getId()."任务出错了！", ['jobId' => $recv['job']->getId(), 'jobData' => $recv['job']->getData(), 'message' => $e->getMessage()], 'queue.worker');
+                }
+            } 
         });
     }
 
@@ -241,11 +252,13 @@ class Bear
         $server = \Config::get("queue::server");
         
         $this->server = $server;
-        $this->pheanstalk = new Pheanstalk($server['host'], $server['port'], 10, true);
 
-        if(!$this->pheanstalk->getConnection()->isServiceListening()) {
-            
-            die("beanstalkd队列服务器连接失败");
+        if (isset($server['host']) && isset($server['port'])) {
+            $this->initPheanstalk($server['host'], $server['port']);
+        } else {
+            foreach ($server as $one) {
+                $this->initPheanstalk($one['host'], $one['port']);
+            }
         }
 
         //开始队列任务的监听
@@ -254,6 +267,16 @@ class Bear
         $this->tubes = $this->listener->getTubes();
         $this->timer = \Config::get("queue::timer"); 
         $this->bootstrapClass($loader, $this->listener->getJobs());  
+    }
+
+    private function initPheanstalk($host, $port)
+    {
+        $pheanstalk = new Pheanstalk($host, $port, 10, true);
+        if(!$pheanstalk->getConnection()->isServiceListening()) {
+            echo("beanstalkd队列服务器连接失败,地址:{$host}:{$port}");
+        } else {
+            $this->pheanstalk[] = $pheanstalk;
+        }
     }
 
     /**
