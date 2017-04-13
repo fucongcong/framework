@@ -7,6 +7,7 @@ use Group\Contracts\Routing\Router as RouterContract;
 use App;
 use Group\Events\KernalEvent;
 use Group\Events\HttpEvent;
+use Group\Container\Container;
 use Response;
 
 Class Router implements RouterContract
@@ -38,7 +39,7 @@ Class Router implements RouterContract
      * @param Container container
      * @param Request request
      */
-    public function __construct(\Container $container)
+    public function __construct(Container $container)
     {
         $this->container = $container;
 
