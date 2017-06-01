@@ -43,6 +43,17 @@ class RedisCacheService implements CacheContract
     }
 
     /**
+     * 批量获取cache
+     *
+     * @param  cacheNames (array)
+     * @return array
+     */
+    public function mGet(array $cacheNames)
+    {
+        return $this->redis->mGet($cacheNames);
+    }
+
+    /**
      * 获取hash cache
      *
      * @param  hashKey
