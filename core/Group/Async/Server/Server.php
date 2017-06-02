@@ -140,7 +140,7 @@ class Server
 
                 //返回数据
                 $task_count = $this->getTaskCount($info['fd']);
-                if ( $task_count <= 0 ) { 
+                if ( $task_count <= 0 ) {
                     $this->sendData($serv, $info['fd'], $this->task_res[$info['fd']]);
                 }
             }
