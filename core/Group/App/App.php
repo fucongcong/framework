@@ -31,6 +31,7 @@ class App
      */
     protected $aliases = [
         'App'               => 'Group\App\App',
+        'Async'             => 'Group\Async\AsyncServcie',
         'Cache'             => 'Group\Cache\Cache',
         'Config'            => 'Group\Config\Config',
         'Container'         => 'Group\Container\Container',
@@ -40,7 +41,7 @@ class App
         'EventDispatcher'   => 'Group\EventDispatcher\EventDispatcher',
         'Filesystem'        => 'Group\Common\Filesystem',
         'FileCache'         => 'Group\Cache\FileCache',
-        'StaticCache'         => 'Group\Cache\StaticCache',
+        'StaticCache'       => 'Group\Cache\StaticCache',
         'Route'             => 'Group\Routing\Route',
         'Request'           => 'Group\Http\Request',
         'Response'          => 'Group\Http\Response',
@@ -54,7 +55,6 @@ class App
         'Log'               => 'Group\Log\Log',
         'Listener'          => 'Group\Listeners\Listener',
         'Queue'             => 'Group\Queue\Queue',
-        'Async'             => 'Group\Async\Client\Client',
     ];
 
     /**
