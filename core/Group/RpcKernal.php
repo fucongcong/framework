@@ -45,8 +45,10 @@ class RpcKernal
     }
 
     public function blindClass()
-    {
-        opcache_reset();
+    {   
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
 
         $loader = require __ROOT__.'/vendor/autoload.php';
         $loader->setUseIncludePath(true);
@@ -54,6 +56,7 @@ class RpcKernal
         $app = new \Group\App\App();
         $app->initSelf();
         $app->doBootstrap($loader);
+        $app->ingoreServiceProviders("Group\Rpc\RpcServiceProvider");
         $app->registerServices();
         $app->singleton('container')->setAppPath(__ROOT__);
         
