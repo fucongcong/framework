@@ -3,7 +3,7 @@
 namespace Group\Dao;
 
 use Group\Dao\ExtendedPdo;
-use Aura\Sql\ConnectionLocator;
+use Group\Dao\ConnectionLocator;
 
 class Dao
 {
@@ -24,7 +24,7 @@ class Dao
      */
     public function getDefault()
     {
-        return $this->getConnection()->getDefault();
+        return $this->logger($this->getConnection()->getDefault());
     }
 
     /**
@@ -35,7 +35,7 @@ class Dao
      */
     public function getRead($name = null)
     {
-        return $this->getConnection()->getRead($name);
+        return $this->logger($this->getConnection()->getRead($name));
     }
 
     /**
@@ -46,7 +46,7 @@ class Dao
      */
     public function getWrite($name = null)
     {
-        return $this->getConnection()->getWrite($name);
+        return $this->logger($this->getConnection()->getWrite($name));
     }
 
     /**
@@ -143,22 +143,14 @@ class Dao
 
         if (isset($config['default'])) {
             $connections->setDefault(function () use ($config) {
-                return new ExtendedPdo(
-                        $config['default']['database_driver'].':host='.$config['default']['database_host'].';dbname='.$config['default']['database_name'].';port='.$config['default']['database_port'].';charset='.$config['default']['database_charset'],
-                        $config['default']['database_user'],
-                        $config['default']['database_password']
-                );
+                return \Doctrine\DBAL\DriverManager::getConnection($config['default'], new \Doctrine\DBAL\Configuration());
             });
         }
 
         if (isset($config['write'])) {
             foreach ($config['write'] as $name => $db) {
                 $connections->setWrite($name, function () use ($db) {
-                    return new ExtendedPdo(
-                        $db['database_driver'].':host='.$db['database_host'].';dbname='.$db['database_name'].';port='.$db['database_port'].';charset='.$db['database_charset'],
-                        $db['database_user'],
-                        $db['database_password']
-                    );
+                    return \Doctrine\DBAL\DriverManager::getConnection($db, new \Doctrine\DBAL\Configuration());
                 });
             }
         }
@@ -166,15 +158,30 @@ class Dao
         if (isset($config['read'])) {
             foreach ($config['read'] as $name => $db) {
                 $connections->setRead($name, function () use ($db) {
-                    return new ExtendedPdo(
-                        $db['database_driver'].':host='.$db['database_host'].';dbname='.$db['database_name'].';port='.$db['database_port'].';charset='.$db['database_charset'],
-                        $db['database_user'],
-                        $db['database_password']
-                    );
+                    return \Doctrine\DBAL\DriverManager::getConnection($db, new \Doctrine\DBAL\Configuration());
                 });
             }
         }
 
         return $connections;
+    }
+
+    private function logger($connection)
+    {   
+        if (app('container')->isDebug() && !app('container') ->runningInConsole()) {
+            $debugStack = app()->singleton('debugStack', function () {
+                return  new \Doctrine\DBAL\Logging\DebugStack();
+            });
+            app('debugbar')->addCollector(new \DebugBar\Bridge\DoctrineCollector($debugStack));
+
+            $connection->getConfiguration()->setSQLLogger($debugStack);
+        }
+
+        if ($connection->ping() === false) {
+           $connection->close();
+           $connection->connect();
+        }
+        
+        return $connection;
     }
 }
