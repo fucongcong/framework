@@ -169,19 +169,14 @@ class Dao
     private function logger($connection)
     {   
         if (app('container')->isDebug() && !app('container') ->runningInConsole()) {
-            $debugStack = app()->singleton('debugStack', function () {
-                return  new \Doctrine\DBAL\Logging\DebugStack();
-            });
-            app('debugbar')->addCollector(new \DebugBar\Bridge\DoctrineCollector($debugStack));
-
-            $connection->getConfiguration()->setSQLLogger($debugStack);
+            $connection->getConfiguration()->setSQLLogger(app('debugStack'));
         }
 
         if ($connection->ping() === false) {
            $connection->close();
            $connection->connect();
         }
-        
+
         return $connection;
     }
 }

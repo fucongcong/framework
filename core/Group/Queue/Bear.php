@@ -63,7 +63,7 @@ class Bear
     public function restart()
     {
         $this->stop();
-        sleep(1);
+        sleep(3);
         $this->start();
     }
 
