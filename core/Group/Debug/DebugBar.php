@@ -12,5 +12,10 @@ class DebugBar extends \DebugBar\DebugBar
         $this->addCollector(new \DebugBar\DataCollector\TimeDataCollector());
         $this->addCollector(new \DebugBar\DataCollector\MemoryCollector());
         //$this->addCollector(new \Group\Debug\Collector\SqlCollector());
+
+        $debugStack = app()->singleton('debugStack', function () {
+            return  new \Doctrine\DBAL\Logging\DebugStack();
+        });
+        $this->addCollector(new \DebugBar\Bridge\DoctrineCollector($debugStack));
     }
 }

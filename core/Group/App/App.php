@@ -61,7 +61,9 @@ class App
      * array singles
      *
      */
-    protected $singles = [];
+    protected $singles = [
+        'dao' => 'Group\Dao\Dao',
+    ];
 
     protected $serviceProviders = [
         'Group\Services\ServiceRegister',

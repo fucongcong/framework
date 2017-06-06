@@ -72,4 +72,3 @@ if (!function_exists('service')) {
         return app('service')->createService($serviceName);
     }
 }
-

@@ -225,7 +225,9 @@ class Cron
     }
 
     public function exec()
-    {
+    {   
+        $this->init();
+        
         $argv = $this->argv;
         $jobName = isset($argv[2]) ? $argv[2] :'';
         foreach ($this->jobs as $job) {
