@@ -106,4 +106,13 @@ class RedisCacheService implements CacheContract
     {
         return $this->redis;
     }
+
+    public function __call($method, $parameters)
+    {   
+        try {
+            return call_user_func_array([$this->redis, $method], $parameters);
+        } catch (Exception $e) {
+            throw new \Exception("Method [$method] does not exist.");
+        }
+    }
 }
