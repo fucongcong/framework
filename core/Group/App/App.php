@@ -133,7 +133,7 @@ class App
         $request = new \Request($request->get, $request->post, [], $request->cookie
             , $request->files, $request->server);
 
-        $this->doBootstrap($loader);
+        $this->setServiceProviders();
 
         $this->registerServices();
        
