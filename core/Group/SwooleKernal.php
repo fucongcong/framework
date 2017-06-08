@@ -4,6 +4,7 @@ namespace Group;
 
 use Group\App\App;
 use swoole_http_server;
+use Group\Coroutine\Scheduler;
 
 class SwooleKernal
 {
@@ -16,7 +17,9 @@ class SwooleKernal
         $http = new swoole_http_server($host, $port);
         $http->set($setting);
 
-        $http->on('request', function ($request, $response) use ($path, $loader) {
+        $scheduler = new Scheduler();
+
+        $http->on('request', function ($request, $response) use ($path, $loader, $scheduler) {
             $request->get = isset($request->get) ? $request->get : [];
             $request->post = isset($request->post) ? $request->post : [];
             $request->cookie = isset($request->cookie) ? $request->cookie : [];
@@ -34,11 +37,8 @@ class SwooleKernal
             
             $this->fix_gpc_magic($request);
             $app = new App();       
-            $app->initSwoole($path, $loader, $request);
-
-            $data = $app->handleSwooleHttp();
-            $response->status($data->getStatusCode());
-            $response->end($data->getContent());
+            $scheduler->newTask($app->initSwoole($path, $loader, $request, $response));
+            $scheduler->run();
             return;
         });
         $http->start();

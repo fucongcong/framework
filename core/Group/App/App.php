@@ -126,7 +126,7 @@ class App
      * init appliaction
      *
      */
-    public function initSwoole($path, $loader, $request)
+    public function initSwoole($path, $loader, $request, $response)
     {
         $this->initSelf();
 
@@ -154,7 +154,9 @@ class App
 
         $this->router = new Router($this->container);
         self::getInstance()->router = $this->router;
-        $this->router->match();
+        yield $this->router->match();
+
+        yield $this->handleSwooleHttp($response);
     }
 
     /**
@@ -239,11 +241,13 @@ class App
         \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request, $response));
     }
 
-    public function handleSwooleHttp()
+    public function handleSwooleHttp($swooleHttpResponse)
     {
-        $response = $this->container->getResponse();
-        $request = $this->container->getRequest();
-        return $response;
+        $response = (yield $this->container->getResponse());
+        //$request = $this->container->getRequest();
+        $swooleHttpResponse->status($response->getStatusCode());
+        $swooleHttpResponse->end($response->getContent());
+        //yield \Group\Coroutine\SysCall::end('test for syscall end');
         //\EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
     }
 

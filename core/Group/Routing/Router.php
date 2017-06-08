@@ -59,7 +59,7 @@ Class Router implements RouterContract
         $routing = $this->getRouting();
 
         if (isset($routing[$requestUri])) {
-            $this->controller($routing[$requestUri]);
+            yield $this->controller($routing[$requestUri]);
             return;
         }
 
@@ -73,7 +73,7 @@ Class Router implements RouterContract
             }
 
             if ($config) {
-                $this->controller($config);
+                yield $this->controller($config);
                 return;
             }
         }
@@ -135,7 +135,7 @@ Class Router implements RouterContract
      */
     public function controller($config)
     {   
-        $tplData = $this->getTpl($config);
+        $tplData = (yield $this->getTpl($config));
 
         if ($tplData instanceof Response || $tplData instanceof \RedirectResponse || $tplData instanceof \JsonResponse) {
             $this->container->setResponse($tplData);

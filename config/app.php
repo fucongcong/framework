@@ -1,10 +1,10 @@
 <?php
 return [
     // prod|dev
-    'environment' => 'dev',
+    'environment' => 'prod',
 
     //只有在dev环境下才生效。tip: swoole http server下无法正常debug
-    'debug' => true,
+    'debug' => false,
 
     //zh|en|fr...
     'locale' => 'zh',
@@ -20,8 +20,8 @@ return [
     //系统会提前加载服务
     'serviceProviders' => [
         'Group\Redis\RedisServiceProvider',
-        'Group\Session\SessionServiceProvider',
-        'Group\Queue\QueueServiceProvider',
+        //'Group\Session\SessionServiceProvider',
+        //'Group\Queue\QueueServiceProvider',
         //'Group\Rpc\RpcServiceProvider',  //开启后提供rpc服务  需要安装swoole
     ],
 
@@ -43,7 +43,7 @@ return [
     'swoole_port' => 9777,
     'swoole_setting' => [
         'reactor_num' => 4,
-        'worker_num' => 40,    //worker process num
+        'worker_num' => 4,    //worker process num
         'backlog' => 256,   //listen backlog
         'max_request' => 20000,
         'heartbeat_idle_time' => 30,

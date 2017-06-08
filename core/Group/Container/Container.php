@@ -200,7 +200,7 @@ class Container implements ContainerContract
      */
     public function getResponse()
     {
-        return $this->response;
+        yield $this->response;
     }
 
     /**
