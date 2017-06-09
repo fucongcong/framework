@@ -14,6 +14,9 @@ class Scheduler
 
     public function newTask(\Generator $coroutine)
     {
+        if ($this->maxTaskId >= PHP_INT_MAX) {
+            $this->maxTaskId = 0;
+        }
         $taskId = ++$this->maxTaskId;
         $task = new Task($taskId, $coroutine);
         $this->taskQueue->enqueue($task);
@@ -31,6 +34,4 @@ class Scheduler
             $task->run($task->getCoroutine());
         }
     }
-
-
 }

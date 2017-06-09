@@ -20,7 +20,7 @@ return [
     //系统会提前加载服务
     'serviceProviders' => [
         'Group\Redis\RedisServiceProvider',
-        //'Group\Session\SessionServiceProvider',
+        'Group\Session\SessionServiceProvider',
         //'Group\Queue\QueueServiceProvider',
         //'Group\Rpc\RpcServiceProvider',  //开启后提供rpc服务  需要安装swoole
     ],
@@ -42,8 +42,8 @@ return [
     'swoole_host' => '127.0.0.1',
     'swoole_port' => 9777,
     'swoole_setting' => [
-        'reactor_num' => 4,
-        'worker_num' => 4,    //worker process num
+        'reactor_num' => 2,
+        'worker_num' => 2,    //worker process num
         'backlog' => 256,   //listen backlog
         'max_request' => 20000,
         'heartbeat_idle_time' => 30,
