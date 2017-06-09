@@ -18,7 +18,7 @@ class Scheduler
             $this->maxTaskId = 0;
         }
         $taskId = ++$this->maxTaskId;
-        $task = new Task($taskId, $coroutine);
+        $task = new Task($taskId, $coroutine, $this);
         $this->taskQueue->enqueue($task);
     }
 
@@ -31,7 +31,7 @@ class Scheduler
     {
         while (!$this->taskQueue->isEmpty()) {
             $task = $this->taskQueue->dequeue();
-            $task->run($task->getCoroutine());
+            $task->run();
         }
     }
 }

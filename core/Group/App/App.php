@@ -88,6 +88,10 @@ class App
         $this->doSingleInstance();
     }
 
+    /**
+     * init appliaction
+     *
+     */
     public function init($path, $loader)
     {
         $this->initSelf();
@@ -111,10 +115,10 @@ class App
     }
 
     /**
-     * init appliaction
+     * terminate app
      *
      */
-    public function initSwoole($request, $response)
+    public function terminate($request, $response)
     {
         $request = new \Request($request->get, $request->post, [], $request->cookie
             , $request->files, $request->server);
@@ -233,20 +237,20 @@ class App
     {   
         $this->setServiceProviders();
 
-        if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
-            require "runtime/cache/bootstrap.class.cache";
-            return;
-        }
+        // if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
+        //     require "runtime/cache/bootstrap.class.cache";
+        //     return;
+        // }
 
-        $bootstrapClass = new BootstrapClass($loader);
-        foreach ($this->serviceProviders as $serviceProvider) {
-            $bootstrapClass->setClass($serviceProvider);
-        }
-        foreach ($this->bootstraps as $bootstrap) {
-            $bootstrap = isset($this->aliases[$bootstrap]) ? $this->aliases[$bootstrap] : $bootstrap;
-            $bootstrapClass->setClass($bootstrap);
-        }
-        $bootstrapClass->bootstrap();
+        // $bootstrapClass = new BootstrapClass($loader);
+        // foreach ($this->serviceProviders as $serviceProvider) {
+        //     $bootstrapClass->setClass($serviceProvider);
+        // }
+        // foreach ($this->bootstraps as $bootstrap) {
+        //     $bootstrap = isset($this->aliases[$bootstrap]) ? $this->aliases[$bootstrap] : $bootstrap;
+        //     $bootstrapClass->setClass($bootstrap);
+        // }
+        // $bootstrapClass->bootstrap();
     }
 
     /**

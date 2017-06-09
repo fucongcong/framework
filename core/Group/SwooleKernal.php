@@ -46,7 +46,9 @@ class SwooleKernal
 
     public function onWorkerStart($serv, $workerId)
     {   
-        opcache_reset();
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
 
         $this->scheduler = new Scheduler();
 
@@ -58,10 +60,6 @@ class SwooleKernal
         }
 
         echo "HTTP Worker Start...".PHP_EOL;
-
-        if ($workerId == ($serv->setting['worker_num'] - 1)) {
-            echo "HTTP Server Start...".PHP_EOL;
-        }
     }
 
     public function onRequest($request, $response)
@@ -81,14 +79,14 @@ class SwooleKernal
             return;
         }
         
-        $this->fix_gpc_magic($request);
-
-        $this->scheduler->newTask($this->app->initSwoole($request, $response));
+        //$this->fix_gpc_magic($request);
+        $this->scheduler->newTask($this->app->terminate($request, $response));
         $this->scheduler->run();
     }
 
     public function start()
     {   
+        echo "HTTP Server Start...".PHP_EOL;
         $this->http->start();
     }
 

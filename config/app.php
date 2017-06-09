@@ -42,7 +42,8 @@ return [
     'swoole_host' => '127.0.0.1',
     'swoole_port' => 9777,
     'swoole_setting' => [
-        'reactor_num' => 2,
+        //日志
+        'log_file' => 'runtime/error.log',
         'worker_num' => 2,    //worker process num
         'backlog' => 256,   //listen backlog
         'max_request' => 20000,

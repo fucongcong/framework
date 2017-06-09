@@ -2,6 +2,9 @@
 
 use Group\App\App;
 use Group\Container\Container;
+use \Group\Coroutine\SysCall;
+use \Group\Coroutine\Task;
+use \Group\Coroutine\Scheduler;
 
 if (!function_exists('app')) {
     /**
@@ -73,10 +76,11 @@ if (!function_exists('service')) {
     }
 }
 
-if (!function_exists('retval')) {
-    function retval($value) {
-        return new \Group\Coroutine\Retval($value);
-    }
+function getTaskId() {
+    return new SysCall(function(Task $task){
+        $task->send($task->getTaskId());
+        $task->run();
+    });
 }
 
 

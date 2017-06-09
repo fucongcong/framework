@@ -4,26 +4,29 @@ namespace Group\Coroutine;
 
 class Task
 {
-    protected $callbackData;
-
     protected $taskId;
 
     protected $coStack;
 
     protected $coroutine;
 
+    protected $scheduler;
+
     protected $exception = null;
+
+    protected $sendValue = null;
 
     /**
      * [__construct 构造函数，生成器+taskId, taskId由 scheduler管理]
      * @param Generator $coroutine [description]
      * @param [type]    $task      [description]
      */
-    public function __construct($taskId, \Generator $coroutine)
+    public function __construct($taskId, \Generator $coroutine, Scheduler $scheduler)
     {
         $this->taskId = $taskId;
         $this->coroutine = $coroutine;
         $this->coStack = new \SplStack();
+        $this->scheduler = $scheduler;
     }
 
     /**
@@ -46,54 +49,58 @@ class Task
 
     /**
      * [run 协程调度]
-     * @param  Generator $gen [description]
+     * @param  Generator $coroutine [description]
      * @return [type]         [description]
      */
-    public function run(\Generator $gen)
+    public function run()
     {
         while (true) {
-
             try {
-
-                /*
-                    异常处理
-                 */
                 if ($this->exception) {
 
-                    $gen->throw($this->exception);
+                    $this->coroutine->throw($this->exception);
                     $this->exception = null;
                     continue;
                 }
 
-                $value = $gen->current();
-                //\Log::info($this->taskId.__METHOD__ . " value === " . print_r($value, true), [__CLASS__]);
+                $value = $this->coroutine->current();
+                \Log::info($this->taskId.__METHOD__ . " value === " . print_r($value, true), [__CLASS__]);
 
-                /*
-                    入栈
-                 */
+                //如果是coroutine，入栈
                 if ($value instanceof \Generator) {
-
-                    $this->coStack->push($gen);
-                    //\Log::info($this->taskId.__METHOD__ . " coStack push ", [__CLASS__]);
-                    $gen = $value;
+                    $this->coStack->push($this->coroutine);
+                    $this->coroutine = $value;
                     continue;
                 }
 
                 /*
                     if value is null and stack is not empty pop and send continue
                  */
-                // if (is_null($value) && !$this->coStack->isEmpty()) {
+                if (is_null($value) && !$this->coStack->isEmpty()) {
 
-                //   //  //\Log::info($this->taskId.__METHOD__ . " values is null stack pop and send", [__CLASS__]);
-                //     $gen = $this->coStack->pop();
-                //     $gen->send($this->callbackData);
-                //     continue;
-                // }
+                    //\Log::info($this->taskId.__METHOD__ . " values is null stack pop and send", [__CLASS__]);
+                    $this->coroutine = $this->coStack->pop();
+                    $this->coroutine->send($this->sendValue);
+                    continue;
+                }
+
+                //如果是系统调用
+                if ($value instanceof SysCall || is_subclass_of($value, SysCall::class)) {
+                    call_user_func($value, $this);
+                    return;
+                }
+
+                //如果是异步IO
+                if ($value instanceof \Group\Async\Client\Base || is_subclass_of($value, \Group\Async\Client\Base::class)) {
+                    $this->coStack->push($this->coroutine);
+                    $value->call(array($this, 'callback'));
+                    return;
+                }
 
                 //
-                if ($value instanceof Group\Coroutine\RetVal) {
-                    return false;
-                }
+                // if ($value instanceof Group\this->Coroutine\RetVal) {
+                //     return false;
+                // }
 
                 /*
                     出栈，回射数据
@@ -102,14 +109,12 @@ class Task
                     return;
                 }
 
-                $gen = $this->coStack->pop();
-                $gen->send($value);
-                  //\Log::info($this->taskId.__METHOD__ . " values  pop and send", [__CLASS__]);
+                $this->coroutine = $this->coStack->pop();
+                $this->coroutine->send($value);
+                \Log::info($this->taskId.__METHOD__ . " values  pop and send", [__CLASS__]);
 
             } catch (\Exception $e) {
-
                 if ($this->coStack->isEmpty()) {
-
                     /*
                         throw the exception 
                     */
@@ -120,28 +125,17 @@ class Task
         }
     }
 
-    /**
-     * [callback description]
-     * @param  [type]   $r        [description]
-     * @param  [type]   $key      [description]
-     * @param  [type]   $calltime [description]
-     * @param  [type]   $res      [description]
-     * @return function           [description]
-     */
-    public function callback($r, $key, $calltime, $res)
+    public function callback($response, $error, $calltime)
     {
-        /*
-            继续run的函数实现 ，栈结构得到保存 
-         */
+        $this->coroutine = $this->coStack->pop();
+        $callbackData = array('response' => $response, 'error' => $error, 'calltime' => $calltime);
+        $this->send($callbackData);
+        $this->run();
+    }
 
-        $gen = $this->coStack->pop();
-        $this->callbackData = array('r' => $r, 'calltime' => $calltime, 'data' => $res);
-
-      //  //\Log::info(__METHOD__ . " coStack pop and data == " . print_r($this->callbackData, true), [__CLASS__]);
-        $value = $gen->send($this->callbackData);
-
-        $this->run($gen);
-
+    public function send($sendValue) {
+        $this->sendValue = $sendValue;
+        return $this->coroutine->send($sendValue);
     }
 
     /**
