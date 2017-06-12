@@ -258,7 +258,12 @@ Class Router implements RouterContract
 
         $routings = [];
         foreach ($sources as $source) {
-            $routing = include_once "src/{$source}/routing.php";
+            if (SWOOLE_HTTP) {
+                $routing = include "src/{$source}/routing.php";
+            } else {
+                $routing = include_once "src/{$source}/routing.php";
+            }
+
             if ($routing) {
                 $routings = array_merge($routings, $routing);
             }

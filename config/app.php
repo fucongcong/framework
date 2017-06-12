@@ -43,9 +43,9 @@ return [
     'swoole_port' => 9777,
     'swoole_setting' => [
         'reactor_num' => 4,
-        'worker_num' => 25,    //worker process num
-        'backlog' => 128,   //listen backlog
-        'max_request' => 2000,
+        'worker_num' => 40,    //worker process num
+        'backlog' => 256,   //listen backlog
+        'max_request' => 20000,
         'heartbeat_idle_time' => 30,
         'heartbeat_check_interval' => 10,
         'dispatch_mode' => 3, 

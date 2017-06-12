@@ -72,3 +72,11 @@ if (!function_exists('service')) {
         return app('service')->createService($serviceName);
     }
 }
+
+if (!function_exists('retval')) {
+    function retval($value) {
+        return new \Group\Coroutine\Retval($value);
+    }
+}
+
+
