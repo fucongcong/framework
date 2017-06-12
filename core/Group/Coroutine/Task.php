@@ -10,8 +10,6 @@ class Task
 
     protected $coroutine;
 
-    protected $scheduler;
-
     protected $exception = null;
 
     protected $sendValue = null;
@@ -21,12 +19,11 @@ class Task
      * @param Generator $coroutine [description]
      * @param [type]    $task      [description]
      */
-    public function __construct($taskId, \Generator $coroutine, Scheduler $scheduler)
+    public function __construct($taskId, \Generator $coroutine)
     {
         $this->taskId = $taskId;
         $this->coroutine = $coroutine;
         $this->coStack = new \SplStack();
-        $this->scheduler = $scheduler;
     }
 
     /**

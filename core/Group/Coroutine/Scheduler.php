@@ -18,7 +18,7 @@ class Scheduler
             $this->maxTaskId = 0;
         }
         $taskId = ++$this->maxTaskId;
-        $task = new Task($taskId, $coroutine, $this);
+        $task = new Task($taskId, $coroutine);
         $this->taskQueue->enqueue($task);
     }
 

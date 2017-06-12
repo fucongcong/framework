@@ -142,6 +142,8 @@ class Server
                 $task_count = $this->getTaskCount($info['fd']);
                 if ( $task_count <= 0 ) {
                     $this->sendData($serv, $info['fd'], $this->task_res[$info['fd']]);
+                    $this->task_res[$info['fd']] = [];
+                    $this->table->del($info['fd']);
                 }
             }
         } catch (\Exception $e) {

@@ -75,10 +75,6 @@ class App
         'Group\Async\AsyncServiceProvider',
     ];
 
-    protected $bootstraps = [
-        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
-    ];
-
     public function __construct()
     { 
         $this->aliasLoader();
@@ -92,14 +88,12 @@ class App
      * init appliaction
      *
      */
-    public function init($path, $loader)
+    public function init($path)
     {
         $this->initSelf();
 
-        $this->setServiceProviders();
-
         $this->registerServices();
-        
+
         \EventDispatcher::dispatch(KernalEvent::INIT);
 
         $this->container = $this->singleton('container');
@@ -182,7 +176,9 @@ class App
      *
      */
     public function registerServices()
-    {
+    {   
+        $this->setServiceProviders();
+
         foreach ($this->serviceProviders as $provider) {
             $provider = new $provider(self::$instance);
             $provider->register();
@@ -210,6 +206,8 @@ class App
     public function handleSwooleHttp($swooleHttpResponse)
     {
         $response = (yield $this->container->getResponse());
+$tid = (yield getTaskId());
+dump($tid."_".$this->container->getLocale(), [$response]);
         //$request = $this->container->getRequest();
         $swooleHttpResponse->status($response->getStatusCode());
         $swooleHttpResponse->end($response->getContent());

@@ -33,6 +33,7 @@ class SwooleKernal
         $this->http->on('Start', [$this, 'onStart']);
         $this->http->on('WorkerStart', [$this, 'onWorkerStart']);
         $this->http->on('Request', [$this, 'onRequest']);
+        $this->http->on('shutdown', [$this, 'onShutdown']);
 
         $this->start();
     }
@@ -42,6 +43,13 @@ class SwooleKernal
         if (PHP_OS !== 'Darwin') {
             swoole_set_process_name("php http server: master");
         }
+
+        echo "HTTP Server Start...".PHP_EOL;
+    }
+
+    public function onShutdown($serv)
+    {
+        echo "HTTP Server Shutdown...".PHP_EOL;
     }
 
     public function onWorkerStart($serv, $workerId)
@@ -50,15 +58,15 @@ class SwooleKernal
             opcache_reset();
         }
 
-        $this->scheduler = new Scheduler();
-
+        //$this->scheduler = new Scheduler();
+        $this->maxTaskId = 0;
         $this->app = new App();
-        $this->app->init($this->path, $this->loader);
+        $this->app->init($this->path);
         //设置不同进程名字,方便grep管理
         if (PHP_OS !== 'Darwin') {
             swoole_set_process_name("php http server: worker");
         }
-
+        
         echo "HTTP Worker Start...".PHP_EOL;
     }
 
@@ -78,15 +86,21 @@ class SwooleKernal
             $response->end();
             return;
         }
+
+        if ($this->maxTaskId >= PHP_INT_MAX) {
+            $this->maxTaskId = 0;
+        }
+        $taskId = ++$this->maxTaskId;
+        $task = new \Group\Coroutine\Task($taskId, $this->app->terminate($request, $response));
+        $task->run();
         
         //$this->fix_gpc_magic($request);
-        $this->scheduler->newTask($this->app->terminate($request, $response));
-        $this->scheduler->run();
+        // $this->scheduler->newTask($this->app->terminate($request, $response));
+        // $this->scheduler->run();
     }
 
     public function start()
     {   
-        echo "HTTP Server Start...".PHP_EOL;
         $this->http->start();
     }
 

@@ -169,9 +169,9 @@ class Container implements ContainerContract
      * 设置地区
      *
      */
-    public function setLocale()
+    public function setLocale($id ="")
     {
-        $this->locale = \Config::get('app::locale');
+        $this->locale = $id;
     }
 
     /**
