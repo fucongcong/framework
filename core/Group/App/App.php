@@ -75,10 +75,6 @@ class App
         'Group\Async\AsyncServiceProvider',
     ];
 
-    protected $bootstraps = [
-        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
-    ];
-
     public function __construct()
     { 
         $this->aliasLoader();
