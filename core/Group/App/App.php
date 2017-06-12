@@ -75,10 +75,6 @@ class App
         'Group\Async\AsyncServiceProvider',
     ];
 
-    protected $bootstraps = [
-        'Route', 'EventDispatcher', 'Event', 'Dao', 'Controller', 'Cache', 'Session', 'Log', 'Listener', 'Request', 'Response', 'Rpc'
-    ];
-
     public function __construct()
     { 
         $this->aliasLoader();
@@ -92,11 +88,9 @@ class App
      * init appliaction
      *
      */
-    public function init($path, $loader)
+    public function init($path)
     {   
         $this->initSelf();
-
-        $this->doBootstrap($loader);
 
         $request = \Request::createFromGlobals();
 
@@ -126,11 +120,9 @@ class App
      * init appliaction
      *
      */
-    public function initSwoole($path, $loader)
+    public function initSwoole($path)
     {
         $this->initSelf();
-        
-        $this->setServiceProviders();
 
         $this->registerServices();
        
@@ -210,7 +202,9 @@ class App
      *
      */
     public function registerServices()
-    {
+    {   
+        $this->setServiceProviders();
+
         foreach ($this->serviceProviders as $provider) {
             $provider = new $provider(self::$instance);
             $provider->register();
@@ -259,31 +253,6 @@ class App
     {
         if(isset($this->instances[$name]))
             unset($this->instances[$name]);
-    }
-
-    /**
-     * 类文件缓存
-     *
-     * @param loader
-     */
-    public function doBootstrap($loader) 
-    {   
-        $this->setServiceProviders();
-
-        if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
-            require "runtime/cache/bootstrap.class.cache";
-            return;
-        }
-
-        $bootstrapClass = new BootstrapClass($loader);
-        foreach ($this->serviceProviders as $serviceProvider) {
-            $bootstrapClass->setClass($serviceProvider);
-        }
-        foreach ($this->bootstraps as $bootstrap) {
-            $bootstrap = isset($this->aliases[$bootstrap]) ? $this->aliases[$bootstrap] : $bootstrap;
-            $bootstrapClass->setClass($bootstrap);
-        }
-        $bootstrapClass->bootstrap();
     }
 
     /**
