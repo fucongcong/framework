@@ -171,7 +171,7 @@ class Server
 
     private function createTaskTable()
     {
-        $this->table = new swoole_table(1024);
+        $this->table = new swoole_table(10240);
         $this->table->column("count", swoole_table::TYPE_INT);
         $this->table->create();
     }

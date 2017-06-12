@@ -64,7 +64,7 @@ class Task
                 }
 
                 $value = $this->coroutine->current();
-                \Log::info($this->taskId.__METHOD__ . " value === " . print_r($value, true), [__CLASS__]);
+                //\Log::info($this->taskId.__METHOD__ . " value === " . print_r($value, true), [__CLASS__]);
 
                 //如果是coroutine，入栈
                 if ($value instanceof \Generator) {
@@ -73,12 +73,8 @@ class Task
                     continue;
                 }
 
-                /*
-                    if value is null and stack is not empty pop and send continue
-                 */
+                //如果为null，而且栈不为空，出栈
                 if (is_null($value) && !$this->coStack->isEmpty()) {
-
-                    //\Log::info($this->taskId.__METHOD__ . " values is null stack pop and send", [__CLASS__]);
                     $this->coroutine = $this->coStack->pop();
                     $this->coroutine->send($this->sendValue);
                     continue;
@@ -97,27 +93,16 @@ class Task
                     return;
                 }
 
-                //
-                // if ($value instanceof Group\this->Coroutine\RetVal) {
-                //     return false;
-                // }
-
-                /*
-                    出栈，回射数据
-                 */
                 if ($this->coStack->isEmpty()) {
                     return;
                 }
 
                 $this->coroutine = $this->coStack->pop();
                 $this->coroutine->send($value);
-                \Log::info($this->taskId.__METHOD__ . " values  pop and send", [__CLASS__]);
+                //\Log::info($this->taskId.__METHOD__ . " values  pop and send", [__CLASS__]);
 
             } catch (\Exception $e) {
                 if ($this->coStack->isEmpty()) {
-                    /*
-                        throw the exception 
-                    */
                     \Log::error($this->taskId.__METHOD__ . " exception ===" . $e->getMessage(), [__CLASS__]);
                     return;
                 }
@@ -138,10 +123,6 @@ class Task
         return $this->coroutine->send($sendValue);
     }
 
-    /**
-     * [isFinished 判断该task是否完成]
-     * @return boolean [description]
-     */
     public function isFinished()
     {
         return !$this->coroutine->valid();
