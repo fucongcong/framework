@@ -205,14 +205,9 @@ class App
     */
     public function handleSwooleHttp($swooleHttpResponse)
     {
-        $response = (yield $this->container->getResponse());
-$tid = (yield getTaskId());
-dump($tid."_".$this->container->getLocale(), [$response]);
-        //$request = $this->container->getRequest();
+        $response = $this->container->getResponse();
         $swooleHttpResponse->status($response->getStatusCode());
         $swooleHttpResponse->end($response->getContent());
-        //yield \Group\Coroutine\SysCall::end('test for syscall end');
-        //\EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request,$response));
     }
 
     public function initSelf()
