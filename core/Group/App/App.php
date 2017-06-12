@@ -126,13 +126,10 @@ class App
      * init appliaction
      *
      */
-    public function initSwoole($path, $loader, $request)
+    public function initSwoole($path, $loader)
     {
         $this->initSelf();
-
-        $request = new \Request($request->get, $request->post, [], $request->cookie
-            , $request->files, $request->server);
-
+        
         $this->setServiceProviders();
 
         $this->registerServices();
@@ -149,6 +146,12 @@ class App
 
         $handler = new ExceptionsHandler();
         $handler->bootstrap($this);
+    }
+
+    public function initSwooleRequest($request)
+    {
+        $request = new \Request($request->get, $request->post, [], $request->cookie
+            , $request->files, $request->server);
 
         $this->container->setRequest($request);
 
