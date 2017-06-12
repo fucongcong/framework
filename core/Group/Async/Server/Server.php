@@ -142,6 +142,8 @@ class Server
                 $task_count = $this->getTaskCount($info['fd']);
                 if ( $task_count <= 0 ) {
                     $this->sendData($serv, $info['fd'], $this->task_res[$info['fd']]);
+                    $this->task_res[$info['fd']] = [];
+                    $this->table->del($info['fd']);
                 }
             }
         } catch (\Exception $e) {
@@ -171,7 +173,7 @@ class Server
 
     private function createTaskTable()
     {
-        $this->table = new swoole_table(1024);
+        $this->table = new swoole_table(10240);
         $this->table->column("count", swoole_table::TYPE_INT);
         $this->table->create();
     }
