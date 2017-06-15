@@ -470,11 +470,8 @@ class Cron
     {   
         if(function_exists("opcache_reset")) opcache_reset();
         
-        $loader = require __ROOT__.'/vendor/autoload.php';
-        $loader->setUseIncludePath(true);
         $app = new \Group\App\App();
         $app->initSelf();
-        $app->doBootstrap($loader);
         $app->registerServices();
         $app->singleton('container')->setAppPath(__ROOT__);
     }
