@@ -40,18 +40,18 @@
               <th>下次执行时间</th>
               <th>操作</th>
             </tr>
-            {% for key,work in works.workers|default(null) %}
+            {% for key,work in works|default(null) %}
             <tr>
               <td>{{ work.pid }}</td>
-              <td>{{ key }}</td>
+              <td>{{ work.job.name }}</td>
               <td>{{ work.job.time }}</td>
               <td>{{ work.job.command }}::handle()</td>
               <td>{% if work.nextTime %}{{ work.startTime }}{% else %}未开始{% endif %}</td>
               <td>{{ work.nextTime|default('/') }}</td>
               <td>
                 <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-info js-work-action" data-action="execWorker" data-job="{{ key }}">执行脚本</button>
-                  <button type="button" class="btn btn-danger js-work-action" data-action="rejobWorker" data-job="{{ key }}">重启进程</button>
+                  <button type="button" class="btn btn-info js-work-action" data-action="execWorker" data-job="{{ work.job.name }}">执行脚本</button>
+                  <button type="button" class="btn btn-danger js-work-action" data-action="rejobWorker" data-job="{{ work.job.name }}">重启进程</button>
                 </div>
               </td>
             </tr>
