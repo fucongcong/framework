@@ -123,7 +123,9 @@ class Cron
         if (!$this->getPid()) {
             exit("cron服务未启动\n");
         }
-        print_r(\FileCache::get('cronAdmin', $this->cacheDir));
+
+         exit("请执行app/cron server 查看当前cron信息\n");
+        //print_r(\FileCache::get('cronAdmin', $this->cacheDir));
     }
 
     public function restart()
@@ -220,7 +222,7 @@ class Cron
 
     public function server()
     {
-        $server = new \TastPHP\App\Cron\CronAdmin();
+        $server = new \Group\Cron\CronAdmin();
         $server->start();
     }
 
