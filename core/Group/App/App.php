@@ -206,8 +206,8 @@ class App
     public function handleSwooleHttp($swooleHttpResponse)
     {
         $response = $this->container->getResponse();
-        $swooleHttpResponse->status($response->getStatusCode());
-        $swooleHttpResponse->end($response->getContent());
+        $request = $this->container->getRequest();
+        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request, $response, $swooleHttpResponse));
     }
 
     public function initSelf()
