@@ -46,15 +46,16 @@ class CronAdmin
             $cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
             $jobs = \Config::get('cron::job');
             $pid = \FileCache::get('pid', $cacheDir) ? : 0;
-            //$works = \FileCache::get('cronAdmin', $cacheDir) ? : [];
-            $work_ids = \FileCache::get('work_ids', $cacheDir) ? : [];
 
             $works = [];
             foreach ($jobs as $job) {
                 $cronAdmin = \FileCache::get('cronAdmin', $cacheDir."/".$job['name']);
-                if (is_array($cronAdmin)) {
+                $work_id = \FileCache::get('work_id', $cacheDir."/".$job['name']);
+                if (is_array($cronAdmin) && is_array($work_id)) {
                     $work = $cronAdmin[0];
-                    $works[] = $work;
+                    if ($work['pid'] == $work_id[0]) {
+                        $works[] = $work;
+                    }
                 }
             }
 
