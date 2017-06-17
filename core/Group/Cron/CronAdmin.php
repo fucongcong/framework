@@ -54,7 +54,9 @@ class CronAdmin
                 $cronAdmin = \FileCache::get('cronAdmin', $cacheDir."/".$job['name']);
                 if (is_array($cronAdmin)) {
                     $work = $cronAdmin[0];
-                    $works[] = $work;
+                    if (in_array($work['pid'], $work_ids)) {
+                        $works[] = $work;
+                    }
                 }
             }
 

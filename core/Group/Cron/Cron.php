@@ -34,8 +34,6 @@ class Cron
 
     protected $table;
 
-    protected $max_handle;
-
     protected $daemon = false;
 
     protected $help = "
@@ -67,7 +65,6 @@ class Cron
         $this->workerNum = count($this->jobs);
         $this->classCache = \Config::get("cron::class_cache"); 
         $this->logDir = \Config::get("cron::log_dir");
-        $this->max_handle = \Config::get("cron::max_handle");
         $this->daemon = \Config::get("cron::daemon") ? : false;
         \Log::$cacheDir = $this->logDir;
     }
@@ -192,7 +189,6 @@ class Cron
         $this->table->column("workers_num", swoole_table::TYPE_INT);
 
         foreach ($this->jobs as $job) {
-            $this->table->column($job['name']."_count", swoole_table::TYPE_INT);
             $this->table->column($job['name'].'_worker', swoole_table::TYPE_STRING, 1024 * 20);
         }
         $this->table->create();
@@ -308,23 +304,8 @@ class Cron
         $job['timer'] = $timer;
 
         swoole_timer_tick(intval($timer * 1000), function($timerId, $job) {
-            //计数
-            $count = $this->table->incr($job['name'].'_maxNum', $job['name']."_count");
-            if ($count && $count >= $this->max_handle) {
-                //计数超过上限 重启该任务
-                $this->restartJob($timerId, $job);
-            }
 
-            $worker = $this->table->get($job['name'].'_worker');
-            $worker = json_decode($worker[$job['name'].'_worker'], true);
-            $worker['timerId'] = $timerId;
-            $worker['startTime'] = date('Y-m-d H:i:s', time());
-            $worker['nextTime'] = date('Y-m-d H:i:s', time() + intval($job['timer']));
-            $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode($worker)]);
-
-            \FileCache::set('cronAdmin', [$worker], $this->cacheDir."/".$job['name']);
-
-            call_user_func_array([new $job['command'], 'handle'], []);
+            $this->restartJob($timerId, $job);
 
         }, $job);
 
@@ -393,16 +374,13 @@ class Cron
         $worker = $this->table->get($job['name'].'_worker');
         $worker = json_decode($worker[$job['name'].'_worker'], true);
         $worker['startTime'] = date('Y-m-d H:i:s', time());
+        $worker['timer'] = intval($job['timer']);
         $worker['nextTime'] = date('Y-m-d H:i:s', time() + intval($job['timer']));
         $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode($worker)]);
 
         \FileCache::set('cronAdmin', [$worker], $this->cacheDir."/".$job['name']);
   
         \Log::info('定时任务启动'.$job['name'], [], 'cron.start');
-
-        //开启计数
-        $this->table->set($job['name'].'_maxNum', [$job['name']."_count" => 0]);
-        $this->table->incr($job['name'].'_maxNum', $job['name']."_count");
 
         //先执行一次任务
         call_user_func_array([new $job['command'], 'handle'], []);
@@ -414,7 +392,7 @@ class Cron
             if ($one['name'] == $job['name']) {
                 //清除该计数器
                 if ($timerId) swoole_timer_clear($timerId);
-                \Log::info('restart '.$job['name'], [$job], 'cron.restart');
+                //\Log::info('restart '.$job['name'], [$job], 'cron.restart');
                 $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode([])]);
                 $this->table->incr('workers_num', 'workers_num');
 
