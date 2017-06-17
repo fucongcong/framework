@@ -101,7 +101,6 @@ class Cron
                 $worker = $this->table->get($job['name'].'_worker');
                 $worker = json_decode($worker[$job['name'].'_worker'], true);
 
-                //这里可以优化 如果用redis等等持久化的缓存来存的话  就可以做到对子进程的管理了，比如重新跑脚本，现在swoole table只能用于当前进程
                 if (isset($worker['nextTime'])) continue;
 
                 if (empty($worker)) {
@@ -143,9 +142,16 @@ class Cron
         if (!empty($pid) && $pid) {
             if (swoole_process::kill($pid, 0)) {
                 //杀掉worker进程
-                foreach (\FileCache::get('work_ids', $this->cacheDir) as $work_id) {
-                    //向子进程发送退出命令,结束完当前任务后退出
-                    swoole_process::kill($work_id, SIGTERM);
+                foreach ($this->jobs as $job) {
+                    $work_id = \FileCache::get('work_id', $this->cacheDir."/".$job['name']);
+                    if (is_array($work_id)) {
+                        //向子进程发送退出命令,结束完当前任务后退出
+                        try {
+                            swoole_process::kill($work_id[0], SIGTERM);
+                        } catch (Exception $e) {
+                            \Log::info("进程{$work_id}不存在", [], 'cron.stop');
+                        }
+                    }
                 }
             }
         }
@@ -168,11 +174,11 @@ class Cron
 
                 if ($worker_count >= $workerNum['workers_num']){
                     \Log::info("主进程退出!", [], 'cron');
-                    unlink($this->logDir."/work_ids");
-                    unlink($this->logDir."/pid");
-                    // foreach ($this->jobs as $job) {
-                    //     unlink($this->cacheDir."/".$job['name']);
-                    // }
+                    foreach ($this->jobs as $job) {
+                        @unlink($this->logDir."/".$job['name']."/work_id");
+                    }
+                    
+                    @unlink($this->logDir."/pid");
                     swoole_process::kill($this->getPid(), SIGKILL); 
                 }
             }
@@ -326,15 +332,10 @@ class Cron
      *
      * @param pid int
      */
-    private function setWorkerPids($pid)
-    {
-        if (!\FileCache::isExist('work_ids', $this->cacheDir)) {
-            \FileCache::set('work_ids', [$pid => $pid], $this->cacheDir);
-        } else {
-            $workerPids = \FileCache::get('work_ids', $this->cacheDir);
-            $workerPids[$pid] = $pid;
-            \FileCache::set('work_ids', $workerPids, $this->cacheDir);
-        }
+    private function setWorkerPid($pid, $jobName)
+    {   
+        $dir = $this->cacheDir."/".$jobName;
+        \FileCache::set('work_id', [$pid], $dir);
     }
 
     /**
@@ -342,11 +343,10 @@ class Cron
      *
      * @param pid int
      */
-    private function removeWorkerPids($pid)
-    {
-        $workerPids = \FileCache::get('work_ids', $this->cacheDir);
-        unset($workerPids[$pid]);
-        \FileCache::set('work_ids', $workerPids, $this->cacheDir);
+    private function removeWorkerPid($pid, $jobName)
+    {   
+        $dir = $this->cacheDir."/".$jobName;
+        @unlink($this->cacheDir."/".$jobName."/work_id");
     }
 
     public function setPid()
@@ -396,7 +396,7 @@ class Cron
                 $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode([])]);
                 $this->table->incr('workers_num', 'workers_num');
 
-                $this->removeWorkerPids($job['workId']);
+                $this->removeWorkerPid($job['workId'], $job['name']);
                 swoole_process::kill($job['workId'], SIGKILL);
                 break;
             }
@@ -408,7 +408,7 @@ class Cron
         $process = new swoole_process(array($this, 'workerCallBack'), false);
         $processPid = $process->start();
 
-        $this->setWorkerPids($processPid);
+        $this->setWorkerPid($processPid, $this->jobs[$i]['name']);
 
         $this->jobs[$i]['workId'] = $processPid;
         $this->workers[$this->jobs[$i]['name']] = [
