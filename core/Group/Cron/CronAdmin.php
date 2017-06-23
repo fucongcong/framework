@@ -44,13 +44,23 @@ class CronAdmin
             }
 
             $cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
+            $jobs = \Config::get('cron::job');
             $pid = \FileCache::get('pid', $cacheDir) ? : 0;
-            $works = \FileCache::get('cronAdmin', $cacheDir) ? : [];
-            $work_ids = \FileCache::get('work_ids', $cacheDir) ? : [];
+
+            $works = [];
+            foreach ($jobs as $job) {
+                $cronAdmin = \FileCache::get('cronAdmin', $cacheDir."/".$job['name']);
+                $work_id = \FileCache::get('work_id', $cacheDir."/".$job['name']);
+                if (is_array($cronAdmin) && is_array($work_id)) {
+                    $work = $cronAdmin[0];
+                    if ($work['pid'] == $work_id[0]) {
+                        $works[] = $work;
+                    }
+                }
+            }
 
             $output = $this->twigInit()->render('console.html.twig', [
                 'pid' => $pid,
-                'work_ids' => $work_ids,
                 'works' => $works,
                 ]);
             $response->status(200);
@@ -69,33 +79,38 @@ class CronAdmin
     public function startMaster($post)
     {
         $path = __ROOT__;
-        exec("cd {$path} && app/cron start > /dev/group &");
+        exec("cd {$path} && app/cron start > /dev/null &");
+        \Log::info("cd {$path} && app/cron start > /dev/null &", ['startMaster']);
     }
 
     public function restartMaster($post)
     {
         $path = __ROOT__;
-        exec("cd {$path} && app/cron restart > /dev/group &");
+        exec("cd {$path} && app/cron restart > /dev/null &");
+        \Log::info("cd {$path} && app/cron restart > /dev/null &", ['restartMaster']);
     }
 
     public function stopMaster($post)
     {
         $path = __ROOT__;
-        exec("cd {$path} && app/cron stop > /dev/group &");
+        exec("cd {$path} && app/cron stop > /dev/null &");
+        \Log::info("cd {$path} && app/cron stop > /dev/null &", ['stopMaster']);
     }
 
     public function execWorker($post)
     {
         $path = __ROOT__;
         $jobName = $post['jobName'];
-        exec("cd {$path} && app/cron exec {$jobName} > /dev/group &");
+        exec("cd {$path} && app/cron exec {$jobName} > /dev/null &");
+        \Log::info("cd {$path} && app/cron exec {$jobName} > /dev/null &", ['execWorker']);
     }
 
     public function rejobWorker($post)
     {
         $path = __ROOT__;
         $jobName = $post['jobName'];
-        exec("cd {$path} && app/cron rejob {$jobName} > /dev/group &");
+        exec("cd {$path} && app/cron rejob {$jobName} > /dev/null &");
+        \Log::info("cd {$path} && app/cron rejob {$jobName} > /dev/null &", ['rejobWorker']);
     }
 
     private function twigInit()

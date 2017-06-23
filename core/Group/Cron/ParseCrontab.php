@@ -25,7 +25,7 @@ class ParseCrontab
      * @throws InvalidArgumentException 错误信息
      */
     static public function parse($crontab_string, $start_time = null)
-    {
+    {   
         if (!preg_match('/^((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)$/i', trim($crontab_string))) {
             if (!preg_match('/^((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)$/i', trim($crontab_string))) {
                 self::$error = "Invalid cron string: " . $crontab_string;
@@ -48,6 +48,7 @@ class ParseCrontab
                 'month'   => self::_parse_cron_number($cron[3], 1, 12),
                 'week'    => self::_parse_cron_number($cron[4], 0, 6),
             );
+            
             $cron = \Cron\CronExpression::factory($cron[0].' '.$cron[1].' '.$cron[2].' '.$cron[3].' '.$cron[4].' *');
         }
         if (
@@ -58,10 +59,9 @@ class ParseCrontab
             in_array(intval(date('n', $start)), $date['month'])
 
         ) {
-            $preDate = $cron->getPreviousRunDate()->format('Y-m-d H:i:s');
-            $Nextdate = $cron->getNextRunDate()->format('Y-m-d H:i:s');
-
-            return ((strtotime($Nextdate) - $start) + ($start - strtotime($preDate)))/2;
+            //$preDate = $cron->getPreviousRunDate($nextruntime)->format('Y-m-d H:i:s');
+            $nextdate = $cron->getNextRunDate(date('Y-m-d H:i:s', $start))->format('Y-m-d H:i:s');
+            return strtotime($nextdate) - $start;
         }
         return null;
     }

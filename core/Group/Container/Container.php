@@ -21,6 +21,7 @@ class Container implements ContainerContract
 
     protected $locale;
 
+    protected $swooleResponse;
     /**
      * Response object
      *
@@ -106,6 +107,11 @@ class Container implements ContainerContract
 
 		return self::$instance;
 	}
+
+    public function setSwooleResponse($response)
+    {
+        $this->swooleResponse = $response;
+    }
 
     /**
      * 设置时区
@@ -209,7 +215,7 @@ class Container implements ContainerContract
      */
     public function setRequest(\Request $request)
     {   
-        \EventDispatcher::dispatch(KernalEvent::REQUEST, new HttpEvent($request));
+        \EventDispatcher::dispatch(KernalEvent::REQUEST, new HttpEvent($request, null, $this->swooleResponse));
         $this->request = $request;
     }
 

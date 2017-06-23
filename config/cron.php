@@ -14,26 +14,26 @@ return [
     'tick_time' => 1000,
 
     //每个定时任务执行到达该上限时，该子进程会自动重启，释放内存
-    'max_handle' => 5,
+    //'max_handle' => 1,
 
     'job' => [
 
         [
             'name' => 'TestLog',//任务名
-            'time' => '*/1 * * * *',//定时规则 分 小时 天 周 月
+            'time' => '* */3 * * *',//定时规则 分 小时 天 周 月
             'command' => 'src\Web\Cron\Test',//执行的类库
         ],
 
         [
             'name' => 'TestLog2',//任务名
-            'time' => '*/2 * * * *',//定时规则 分 小时 天 周 月
+            'time' => '*/2 */4 * * *',//定时规则 分 小时 天 周 月
             'command' => 'src\Web\Cron\TestCache',//执行的类库
         ],
 
         [
             'name' => 'TestLog4',//任务名
-            'time' => '*/2 3 * * *',//定时规则 分 小时 天 周 月
-            'command' => 'src\Web\Cron\TestCache',//执行的类库
+            'time' => '* * * * *',//定时规则 分 小时 天 周 月
+            'command' => 'src\Web\Cron\TestSql',//执行的类库
         ],
 
         // [

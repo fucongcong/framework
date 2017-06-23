@@ -76,20 +76,6 @@ if (!function_exists('service')) {
     }
 }
 
-if (!function_exists('dao')) {
-    /**
-     * 返回一个dao对象
-     *
-     * @param  string     $daoName
-     * @return object
-     *
-     */
-    function dao($daoName)
-    {
-        return app('service')->createDao($daoName);
-    }
-}
-
 function getTaskId() {
     return new SysCall(function(Task $task){
         $task->send($task->getTaskId());

@@ -35,7 +35,7 @@ class TCP extends Base
         $client->on('error', function ($cli) use ($callback) {
             $cli->close();
             $this->isClosed = true;
-            call_user_func_array($callback, array('response' => null, 'error' => parent::CONNECT_ERROR, 'calltime' => $this->calltime));
+            call_user_func_array($callback, array('response' => false, 'error' => parent::CONNECT_ERROR, 'calltime' => $this->calltime));
         });
 
         $client->on("receive", function ($cli, $data) use ($callback) {
@@ -53,7 +53,7 @@ class TCP extends Base
                     if (!$this->isClosed) {
                         $client->close();
                         $this->calltime = microtime(true) - $this->calltime;
-                        call_user_func_array($callback, array('response' => null, 'error' => parent::CONNECT_TIMEOUT, 'calltime' => $this->calltime));
+                        call_user_func_array($callback, array('response' => false, 'error' => parent::CONNECT_TIMEOUT, 'calltime' => $this->calltime));
                     }
                 });
             }

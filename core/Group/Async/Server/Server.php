@@ -5,6 +5,7 @@ namespace Group\Async\Server;
 use swoole_server;
 use Group\Common\ArrayToolkit;
 use swoole_table;
+use Group\Exceptions\NotFoundException;
 
 class Server 
 {
@@ -13,8 +14,6 @@ class Server
     protected $servName;
 
     protected $config;
-
-    protected $table;
 
     protected $task_res;
 
@@ -31,8 +30,7 @@ class Server
         $this->serv->on('Task', [$this, 'onTask']);
         $this->serv->on('Finish', [$this, 'onFinish']);
 
-        $this->initConfig($config);
-
+        $this->config = $config;
         $this->servName = $servName;
         
         $this->serv->start();
@@ -66,10 +64,10 @@ class Server
             }
         }
         // 判定是否为Task Worker进程
-        if ($workerId >= $serv->setting['worker_num']) {
-        } else {
-            $this->createTaskTable();
-        }
+        // if ($workerId >= $serv->setting['worker_num']) {
+        // } else {
+        //     //$this->createTaskTable();
+        // }
     }
 
     public function onWorkerStop(swoole_server $serv, $workerId)
@@ -95,61 +93,23 @@ class Server
             $config = $this->config;
             foreach($data as $one){
                 list($cmd, $one, $info) = \Group\Async\DataPack::unpack($one);
-           
-                if (isset($config['onWork'][$cmd])) {
-                    $this->task_res[$fd] = [];
-                    $handler = new $config['onWork'][$cmd]['handler']($serv, $fd, $fromId, $one, $cmd, $this->table);
-                    $handler->handle();
-                }
+
+                $server = [
+                    'serv' => $serv,
+                    'fd' => $fd,
+                    'fromId' => $fromId,
+                ];
+
+                $this->doAction($cmd, $one, $server);
             }
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
     }
 
-    public function onTask(swoole_server $serv, $fd, $fromId, $data)
-    {
-        try {
-            list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data);
-            $config = $this->config;
-            if (isset($config['onTask'][$cmd])) {
-                $handler = new $config['onTask'][$cmd]['handler']($serv, $fd, $fromId, ['data' => $one, 'info' => $info, 'cmd' => $cmd]);
-                return $handler->handle();
-            }
-        } catch (\Exception $e) {
-            echo $e->getMessage();
-        }
-        return null;
-    }
+    public function onTask(swoole_server $serv, $fd, $fromId, $data) { }
 
-    public function onFinish(swoole_server $serv, $fd, $data)
-    {
-        try {
-            list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data);
-            $config = $this->config;
-            if (isset($config['onTask'][$cmd])) {
-                $this->updateTaskCount($info['fd'], -1);
-                if (!isset($config['onTask'][$cmd]['onFinish'])) {
-                    $return = $one;
-                } else {
-                    $handler = new $config['onTask'][$cmd]['onFinish']($serv, $info['fd'], $one, $this->table);
-                    $return = $handler->handle();
-                }
-                
-                if ($return) $this->task_res[$info['fd']][] = $return;
-
-                //返回数据
-                $task_count = $this->getTaskCount($info['fd']);
-                if ( $task_count <= 0 ) {
-                    $this->sendData($serv, $info['fd'], $this->task_res[$info['fd']]);
-                    $this->task_res[$info['fd']] = [];
-                    $this->table->del($info['fd']);
-                }
-            }
-        } catch (\Exception $e) {
-            echo $e->getMessage();
-        }
-    }
+    public function onFinish(swoole_server $serv, $fd, $data) { }
 
     private function sendData(swoole_server $serv, $fd, $data){
         $fdinfo = $serv->connection_info($fd);
@@ -164,28 +124,30 @@ class Server
         }
     }
 
-    public function initConfig($config) 
-    {
-        $config['onWork'] = ArrayToolkit::index($config['onWork'], 'cmd');
-        $config['onTask'] = ArrayToolkit::index($config['onTask'], 'cmd');
-        $this->config = $config;
-    }
+    private function doAction($cmd, array $parameters, $server)
+    {   
+        list($class, $action) = explode("::", $cmd);
+        list($group, $class) = explode("\\", $class);
+        $service = "src\\Async\\$group\\Service\\Impl\\{$class}ServiceImpl";
+        if (!class_exists($service)) {
+            throw new NotFoundException("Service $service not found !");
+        }
 
-    private function createTaskTable()
-    {
-        $this->table = new swoole_table(10240);
-        $this->table->column("count", swoole_table::TYPE_INT);
-        $this->table->create();
-    }
+        $reflector = new \ReflectionClass($service);
 
-    private function updateTaskCount($fd, $incr = 1){
-        $count = $this->table->get($fd);
-        $count['count'] = $count['count'] + $incr;
-        $this->table->set($fd, $count);
-    }
+        if (!$reflector->hasMethod($action)) {
+            throw new NotFoundException("Service ".$service." exist ,But the Action ".$action." not found");
+        }
 
-    private function getTaskCount($fd){
-        $task_count = $this->table->get($fd);
-        return $task_count['count'];
+        $instanc = $reflector->newInstanceArgs($server);
+        $method = $reflector->getmethod($action);
+        $args = [];
+        foreach ($method->getParameters() as $arg) {
+            $paramName = $arg ->getName();
+            if (isset($parameters[$paramName])) $args[$paramName] = $parameters[$paramName];
+        }
+
+        $res = $method->invokeArgs($instanc, $args);
+        $this->sendData($server['serv'], $server['fd'], $res);
     }
 }

@@ -24,6 +24,6 @@ class KernalResponseListener extends \Listener
             $swooleHttpResponse->end($response->getContent());
         }
 
-        \EventDispatcher::dispatch(KernalEvent::HTTPFINISH, new HttpEvent($event->getRequest(), $response));
+        \EventDispatcher::dispatch(KernalEvent::HTTPFINISH, new HttpEvent($event->getRequest(), $response, $swooleHttpResponse));
     }
 }

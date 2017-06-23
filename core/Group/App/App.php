@@ -31,7 +31,6 @@ class App
      */
     protected $aliases = [
         'App'               => 'Group\App\App',
-        'Async'             => 'Group\Async\AsyncServcie',
         'Cache'             => 'Group\Cache\Cache',
         'Config'            => 'Group\Config\Config',
         'Container'         => 'Group\Container\Container',
@@ -72,7 +71,6 @@ class App
         'Group\Cache\CacheServiceProvider',
         'Group\Cache\FileCacheServiceProvider',
         'Group\Cache\StaticCacheServiceProvider',
-        'Group\Async\AsyncServiceProvider',
     ];
 
     public function __construct()
@@ -91,7 +89,6 @@ class App
     public function init($path)
     {
         $this->initSelf();
-
         $this->registerServices();
 
         \EventDispatcher::dispatch(KernalEvent::INIT);
@@ -117,6 +114,7 @@ class App
         $request = new \Request($request->get, $request->post, [], $request->cookie
             , $request->files, $request->server);
 
+        $this->container->setSwooleResponse($response);
         $this->container->setRequest($request);
 
         $this->router = new Router($this->container);

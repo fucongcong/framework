@@ -12,6 +12,4 @@ $app = new App();
 
 $app -> initSelf();
 
-$app -> doBootstrap($loader);
-
 $app -> registerServices();
