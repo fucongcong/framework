@@ -92,24 +92,50 @@ class Server
         try {
             $config = $this->config;
             foreach($data as $one){
-                list($cmd, $one, $info) = \Group\Async\DataPack::unpack($one);
 
-                $server = [
-                    'serv' => $serv,
-                    'fd' => $fd,
-                    'fromId' => $fromId,
-                ];
+                $serv->task(['data' => $one, 'fd' => $fd]);
+                // list($cmd, $one, $info) = \Group\Async\DataPack::unpack($one);
 
-                $this->doAction($cmd, $one, $server);
+                // $server = [
+                //     'serv' => $serv,
+                //     'fd' => $fd,
+                //     'fromId' => $fromId,
+                // ];
+
+                // $this->doAction($cmd, $one, $server);
             }
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
     }
 
-    public function onTask(swoole_server $serv, $fd, $fromId, $data) { }
+    public function onTask(swoole_server $serv, $fd, $fromId, $data)
+    {
+        try {
+            list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data['data']);
 
-    public function onFinish(swoole_server $serv, $fd, $data) { }
+            $server = [
+                'serv' => $serv,
+                'fd' => $data['fd'],
+                'fromId' => $fromId,
+            ];
+
+            return $this->doAction($cmd, $one, $server);
+
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+    }
+
+    public function onFinish(swoole_server $serv, $fd, $data)
+    {
+        try {
+            $this->sendData($serv, $data['fd'], $data['data']);
+
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+    }
 
     private function sendData(swoole_server $serv, $fd, $data){
         $fdinfo = $serv->connection_info($fd);
@@ -147,7 +173,6 @@ class Server
             if (isset($parameters[$paramName])) $args[$paramName] = $parameters[$paramName];
         }
 
-        $res = $method->invokeArgs($instanc, $args);
-        $this->sendData($server['serv'], $server['fd'], $res);
+        return ['data' => $method->invokeArgs($instanc, $args), 'fd' => $server['fd']];
     }
 }
