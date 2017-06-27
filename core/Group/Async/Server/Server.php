@@ -6,6 +6,7 @@ use swoole_server;
 use Group\Common\ArrayToolkit;
 use swoole_table;
 use Group\Exceptions\NotFoundException;
+use Log;
 
 class Server 
 {
@@ -16,6 +17,12 @@ class Server
     protected $config;
 
     protected $task_res;
+
+    protected $task_count;
+
+    protected $inside_task_res;
+
+    protected $inside_task_count;
 
 	public function __construct($config =[], $servName)
 	{  
@@ -92,48 +99,129 @@ class Server
         try {
             $config = $this->config;
             foreach($data as $one){
-
-                $serv->task(['data' => $one, 'fd' => $fd]);
-                // list($cmd, $one, $info) = \Group\Async\DataPack::unpack($one);
-
-                // $server = [
-                //     'serv' => $serv,
-                //     'fd' => $fd,
-                //     'fromId' => $fromId,
-                // ];
-
-                // $this->doAction($cmd, $one, $server);
+                list($cmd, $one) = \Group\Async\DataPack::unpack($one);
+                $serv->task(['cmd' => $cmd, 'data' => $one, 'fd' => $fd]);
             }
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            $this->record([
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'type'    => $e->getCode(),
+            ]);
         }
     }
 
     public function onTask(swoole_server $serv, $fd, $fromId, $data)
     {
         try {
-            list($cmd, $one, $info) = \Group\Async\DataPack::unpack($data['data']);
-
+            $cmd = $data['cmd'];
+            $cmdData = $data['data'];
             $server = [
                 'serv' => $serv,
                 'fd' => $data['fd'],
+                'callId' => isset($data['callId']) ? $data['callId'] : $fd."-".$fromId,
                 'fromId' => $fromId,
             ];
 
-            return $this->doAction($cmd, $one, $server);
-
+            if (is_array($cmd)) {
+                $tasks = [];
+                foreach ($cmd as $callId => $oneCmd) {
+                    $tasks[$callId] = ['cmd' => $oneCmd, 'data' => $cmdData[$callId]];
+                }
+                return [
+                    'fd' => $server['fd'],
+                    'data' => [
+                        'tasks' => $tasks,
+                        'count' => count($tasks)
+                    ]
+                ];
+            } else {
+                return $this->doAction($cmd, $cmdData, $server);
+            }
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            $this->record([
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'type'    => $e->getCode(),
+            ]);
         }
     }
 
     public function onFinish(swoole_server $serv, $fd, $data)
     {
         try {
-            $this->sendData($serv, $data['fd'], $data['data']);
+            $forFd = $data['fd'];
+
+            if (isset($data['data']['tasks'])) {
+                //是不是内部的task任务
+                if (isset($data['data']['jobId'])) {
+                    $jobId = $data['data']['jobId'];
+                    $this->inside_task_res[$forFd][$jobId] = [];
+                    $this->inside_task_count[$forFd][$jobId] = $data['data']['count'];
+                } else {
+                    $this->task_res[$forFd] = [];
+                    $this->task_count[$forFd] = $data['data']['count'];
+                }
+
+                foreach ($data['data']['tasks'] as $callId => $task) {
+                    $serv->task(['cmd' => $task['cmd'], 'data' => $task['data'], 'fd' => $forFd, 'callId' => $callId]);
+                }
+                return;
+            }
+
+            $callId = $data['callId'];
+            $callIds = explode("_", $callId);
+            //是内部的task
+            if (count($callIds) > 1) {
+                $jobId = $callIds[0];
+                $callId = $callIds[1];
+                if (isset($this->inside_task_res[$forFd][$jobId])) {
+                    $this->inside_task_res[$forFd][$jobId][$callId] = $data['data'];
+                    //内部的数据组合完毕的话 丢给上级
+                    if ($this->inside_task_count[$forFd][$jobId] == count($this->inside_task_res[$forFd][$jobId])) {
+                        //不存在父级的话 直接send
+                        if (!isset($this->task_res[$forFd])) {
+                            $this->sendData($serv, $forFd, $this->inside_task_res[$forFd][$jobId]);
+                        } else {
+                            //拼到父级里面去
+                            $this->task_res[$forFd][$jobId] = $this->inside_task_res[$forFd][$jobId];
+                            if ($this->task_count[$forFd] == count($this->task_res[$forFd])) {
+                                $this->sendData($serv, $forFd, $this->task_res[$forFd]);
+                                unset($this->task_res[$forFd]);
+                                unset($this->task_count[$forFd]);
+                            }
+                        }
+                        unset($this->inside_task_res[$forFd][$jobId]);
+                        unset($this->inside_task_count[$forFd][$jobId]);
+                    }
+                    return;
+                }
+            }
+
+            if (isset($this->task_res[$forFd])) {
+                $this->task_res[$forFd][$data['callId']] = $data['data'];
+                if ($this->task_count[$forFd] == count($this->task_res[$forFd])) {
+                    $this->sendData($serv, $forFd, $this->task_res[$forFd]);
+                    unset($this->task_res[$forFd]);
+                    unset($this->task_count[$forFd]);
+                }
+                return;
+            }
+
+            $this->sendData($serv, $forFd, $data['data']);
 
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            $this->record([
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'type'    => $e->getCode(),
+            ]);
         }
     }
 
@@ -173,6 +261,26 @@ class Server
             if (isset($parameters[$paramName])) $args[$paramName] = $parameters[$paramName];
         }
 
-        return ['data' => $method->invokeArgs($instanc, $args), 'fd' => $server['fd']];
+        return ['data' => $method->invokeArgs($instanc, $args), 'fd' => $server['fd'], 'callId' => $server['callId']];
+    }
+
+    private function record($e, $type = 'error')
+    {   
+        $levels = array(
+            E_WARNING => 'Warning',
+            E_NOTICE => 'Notice',
+            E_USER_ERROR => 'User Error',
+            E_USER_WARNING => 'User Warning',
+            E_USER_NOTICE => 'User Notice',
+            E_STRICT => 'Runtime Notice',
+            E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
+            E_DEPRECATED => 'Deprecated',
+            E_USER_DEPRECATED => 'User Deprecated',
+            E_ERROR => 'Error',
+            E_CORE_ERROR => 'Core Error',
+            E_COMPILE_ERROR => 'Compile Error',
+            E_PARSE => 'Parse',
+        );
+        Log::$type('[' . $levels[$e['type']] . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
     }
 }

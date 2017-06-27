@@ -2,7 +2,7 @@
 
 namespace Group\Debug\Collector;
 
-class SqlCollector extends \DebugBar\DataCollector\ConfigCollector
+class ServiceCollector extends \DebugBar\DataCollector\ConfigCollector
 {
     protected $name;
 
@@ -12,7 +12,7 @@ class SqlCollector extends \DebugBar\DataCollector\ConfigCollector
      * @param array  $data
      * @param string $name
      */
-    public function __construct(array $data = array(), $name = 'sql')
+    public function __construct(array $data = array(), $name = 'service')
     {
         $this->name = $name;
     }
@@ -36,7 +36,7 @@ class SqlCollector extends \DebugBar\DataCollector\ConfigCollector
 
         if ($this->data) {
             foreach ($this->data as $k => $v) {
-                $data[$k.":".$v[1]] = "执行时间:".$v[0]." SQL语句:".$v[2]." 详情:".$this->getDataFormatter()->formatVar($v);
+                $data[$k.":".$v[0]] = "执行时间:".$v[1]." 命令:".$v[2]." 详情:".$this->getDataFormatter()->formatVar($v);
             }
         }
 

@@ -4,6 +4,9 @@ return [
 
     'client' => [],
 
+    //加密token，16位。可修改
+    'encipher' => 'uoI49l^^M!a5&bZt',
+
     //配置swoole异步服务器
     'server' => [
         //可以配置多个server，注意请监听不同的端口。

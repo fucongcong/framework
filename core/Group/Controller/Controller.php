@@ -24,15 +24,15 @@ class Controller implements ControllerContract
      */
     public function render($tpl, $array = array())
     {   
-        if ($this->getContainer()->isDebug()) {
-            if ($this->app->singleton('debugbar')->hasCollector('view')) {
-                $array['模板地址'] = $tpl;
-                $this->app->singleton('debugbar')->getCollector('view')->setData($array);
-            } else {
-                $array['模板地址'] = $tpl;
-                $this->app->singleton('debugbar')->addCollector(new \Group\Debug\Collector\VarCollector($array));
-            }
-        }
+        // if ($this->getContainer()->isDebug()) {
+        //     if ($this->app->singleton('debugbar')->hasCollector('view')) {
+        //         $array['模板地址'] = $tpl;
+        //         $this->app->singleton('debugbar')->getCollector('view')->setData($array);
+        //     } else {
+        //         $array['模板地址'] = $tpl;
+        //         $this->app->singleton('debugbar')->addCollector(new \Group\Debug\Collector\VarCollector($array));
+        //     }
+        // }
         
         return $this->twigInit()->render($tpl, $array);
     }

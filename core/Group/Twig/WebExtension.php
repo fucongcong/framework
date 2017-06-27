@@ -22,8 +22,6 @@ class WebExtension extends Twig_Extension
             'dump'  => new \Twig_Function_Method($this, 'dump'),
             'render'  => new \Twig_Function_Method($this, 'render', array('is_safe' => array('html'))),
             'csrf_token'  => new \Twig_Function_Method($this, 'getCsrfToken'),
-            'debug'  => new \Twig_Function_Method($this, 'debug', array('is_safe' => array('html'))),
-            'debugHeader'  => new \Twig_Function_Method($this, 'debugHeader', array('is_safe' => array('html'))),
         );
     }
 
@@ -109,22 +107,6 @@ class WebExtension extends Twig_Extension
         }
 
         return date('Y-m-d', $time);
-    }
-
-    public function debug()
-    {   
-        if (app('container')->isDebug()) {
-            $debugbarRenderer = app('debugbar')->getJavascriptRenderer();
-            return $debugbarRenderer->render();
-        }
-    }
-
-    public function debugHeader()
-    {   
-        if (app('container')->isDebug()) {
-            $debugbarRenderer = app('debugbar')->getJavascriptRenderer();
-            return $debugbarRenderer->renderHead();
-        }
     }
 
     public function getName()
