@@ -1,5 +1,7 @@
 <?php
 
+define('ASYNC', FALSE);
+
 $loader = require __DIR__.'/vendor/autoload.php';
 $loader->setUseIncludePath(true);
 

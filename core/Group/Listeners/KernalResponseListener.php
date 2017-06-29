@@ -21,6 +21,16 @@ class KernalResponseListener extends \Listener
             || $response instanceof \RedirectResponse 
             || $response instanceof \JsonResponse) {
             $swooleHttpResponse->status($response->getStatusCode());
+
+            foreach ($response->headers->allPreserveCase() as $name => $values) {
+                foreach ($values as $value) {
+                    $swooleHttpResponse->header($name, $value);
+                }
+            }
+
+            foreach ($response->headers->getCookies() as $cookie) {
+                $swooleHttpResponse->cookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
+            }
             $swooleHttpResponse->end($response->getContent());
         }
 

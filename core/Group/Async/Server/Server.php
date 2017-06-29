@@ -56,9 +56,8 @@ class Server
         opcache_reset();
         $loader = require __ROOT__.'/vendor/autoload.php';
         $loader->setUseIncludePath(true);
-        $app = new \Group\App\App();
+        $app = new \Group\Async\AsyncApp();
         $app->initSelf();
-        $app->doBootstrap($loader);
         $app->registerServices();
         $app->singleton('container')->setAppPath(__ROOT__);
 
@@ -281,6 +280,11 @@ class Server
             E_COMPILE_ERROR => 'Compile Error',
             E_PARSE => 'Parse',
         );
-        Log::$type('[' . $levels[$e['type']] . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
+        if (!isset($levels[$e['type']])) {
+            $level = 'Task Exception';
+        } else {
+            $level = $levels[$e['type']];
+        }
+        Log::$type('[' . $level . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
     }
 }

@@ -36,6 +36,8 @@ class Container implements ContainerContract
      */
     protected $request;
 
+    public $router;
+
     protected $debug = false;
 
     public function __construct()
@@ -91,7 +93,7 @@ class Container implements ContainerContract
             if (!empty($arg->getClass()) && $arg->getClass()->getName() == 'Group\Http\Request') $args[$paramName] = $request;
         }
 
-		return $method->invokeArgs($instanc, $args);
+        return $method->invokeArgs($instanc, $args);
 	}
 
     /**
@@ -111,6 +113,11 @@ class Container implements ContainerContract
     public function setSwooleResponse($response)
     {
         $this->swooleResponse = $response;
+    }
+
+    public function getSwooleResponse()
+    {
+        return $this->swooleResponse;
     }
 
     /**

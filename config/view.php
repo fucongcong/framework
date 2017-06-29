@@ -19,7 +19,7 @@ return [
     //模板扩展，继承自Twig_Extension，详见twig文档
     'extensions' =>[
         //like
-        //'src/Demo/DemoExtension',
+        //'src/Web/Twig/WebExtension',
     ],
 
 ];

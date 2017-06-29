@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Services\{{name}};
+namespace src\Async\{{name}}\Service;
 
 interface {{name}}Service
 {

@@ -17,4 +17,6 @@ abstract class ServiceProvider
      * @return Service
      */
     abstract public function register();
+
+    abstract public function getName();
 }

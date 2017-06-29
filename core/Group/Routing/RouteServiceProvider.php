@@ -18,4 +18,8 @@ class RouteServiceProvider extends ServiceProvider
         });
     }
 
+    public function getName()
+    {
+        return 'route';
+    }
 }

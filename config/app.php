@@ -17,10 +17,13 @@ return [
         //like  'demo'       => 'src\Service\demo',
     ],
 
-    //系统会提前加载服务
-    'serviceProviders' => [
-        'Group\Redis\RedisServiceProvider',
-        'Group\Session\SessionServiceProvider',
+    'onWorkStartServices' => [
+        
+        //'Group\Queue\QueueServiceProvider',
+    ],
+
+    'onRequestServices' => [
+        //'Group\Redis\RedisServiceProvider',
         //'Group\Queue\QueueServiceProvider',
     ],
 
@@ -43,7 +46,7 @@ return [
     'swoole_setting' => [
         //日志
         'log_file' => 'runtime/error.log',
-        'worker_num' => 1,    //worker process num
+        'worker_num' => 2,    //worker process num
         'backlog' => 256,   //listen backlog
         'max_request' => 20000,
         'heartbeat_idle_time' => 30,

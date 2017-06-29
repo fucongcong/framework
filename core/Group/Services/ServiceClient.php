@@ -44,18 +44,18 @@ class ServiceClient
         $data = \Group\Async\DataPack::pack($cmd, $data);
         $data .= $this->package_eof;
         $res = (yield new \Group\Async\Client\TCP($this->serv, $this->port, $data, $this->timeout));
-        if ($res) {
+        if ($res && $res['response']) {
             $res['response'] = explode($this->package_eof, $res['response']);
             $res['response'] = json_decode($res['response'][0], true);
 
-            if (app()->singleton('debugbar')->hasCollector('service')) {
-                $array = [
-                    0 => $cmd,
-                    1 => $res['calltime'],
-                    2 => $res['response']
-                ];
-                app()->singleton('debugbar')->getCollector('service')->setData($array);
-            }
+            // if (app()->singleton('debugbar')->hasCollector('service')) {
+            //     $array = [
+            //         0 => $cmd,
+            //         1 => $res['calltime'],
+            //         2 => $res['response']
+            //     ];
+            //     app()->singleton('debugbar')->getCollector('service')->setData($array);
+            // }
 
             yield $res['response'];
         }

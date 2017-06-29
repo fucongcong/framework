@@ -23,8 +23,7 @@ class GenerateServiceCommand extends Command
         $serviceName = ucfirst($name);
         $this->outPut('开始初始化'.$serviceName.'Service...');
 
-        $dir = __ROOT__."src/Services";
-        $daoDir = __ROOT__."src/Dao";
+        $dir = __ROOT__."src/Async";
 
         $this->outPut('正在生成目录...');
 
@@ -33,29 +32,26 @@ class GenerateServiceCommand extends Command
         }
 
         $filesystem = new Filesystem();
-        $filesystem->mkdir($daoDir."/".$serviceName."");
-        $filesystem->mkdir($daoDir."/".$serviceName."/Impl");
-        $filesystem->mkdir($dir."/".$serviceName."/Impl");
-        $filesystem->mkdir($dir."/".$serviceName."/Rely");
+        $filesystem->mkdir($dir."/".$serviceName."");
+        $filesystem->mkdir($dir."/".$serviceName."/Dao/Impl");
+        $filesystem->mkdir($dir."/".$serviceName."/Service/Impl");
+        $filesystem->mkdir($dir."/".$serviceName."/Service/Rely");
 
         $this->outPut('开始创建模板...');
         $data = $this->getFile("Service.tpl", $serviceName);
-        file_put_contents ($dir."/".$serviceName."/".$serviceName."Service.php", $data);
+        file_put_contents ($dir."/".$serviceName."/Service/".$serviceName."Service.php", $data);
 
         $data = $this->getFile("ServiceImpl.tpl", $serviceName);
-        file_put_contents ($dir."/".$serviceName."/Impl/".$serviceName."ServiceImpl.php", $data);
-
-        $data = $this->getFile("ServiceImpl.tpl", $serviceName);
-        file_put_contents ($dir."/".$serviceName."/Impl/".$serviceName."ServiceImpl.php", $data);
+        file_put_contents ($dir."/".$serviceName."/Service/Impl/".$serviceName."ServiceImpl.php", $data);
 
         $data = $this->getFile("BaseService.tpl", $serviceName);
-        file_put_contents ($dir."/".$serviceName."/Rely/".$serviceName."BaseService.php", $data);
+        file_put_contents ($dir."/".$serviceName."/Service/Rely/".$serviceName."BaseService.php", $data);
 
         $data = $this->getFile("Dao.tpl", $serviceName);
-        file_put_contents ($daoDir."/".$serviceName."/".$serviceName."Dao.php", $data);
+        file_put_contents ($dir."/".$serviceName."/Dao/".$serviceName."Dao.php", $data);
 
         $data = $this->getFile("DaoImpl.tpl", $serviceName);
-        file_put_contents ($daoDir."/".$serviceName."/Impl/".$serviceName."DaoImpl.php", $data);
+        file_put_contents ($dir."/".$serviceName."/Dao/Impl/".$serviceName."DaoImpl.php", $data);
 
         $this->outPut('初始化'.$serviceName.'Service完成');
     }

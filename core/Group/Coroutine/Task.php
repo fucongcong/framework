@@ -2,8 +2,12 @@
 
 namespace Group\Coroutine;
 
+use Group\Handlers\ExceptionsHandler;
+
 class Task
-{
+{   
+    public $container;
+
     protected $taskId;
 
     protected $coStack;
@@ -19,11 +23,22 @@ class Task
      * @param Generator $coroutine [description]
      * @param [type]    $task      [description]
      */
-    public function __construct($taskId, \Generator $coroutine)
+    public function __construct($taskId, $container, \Generator $coroutine)
     {
         $this->taskId = $taskId;
+        $this->container = $container;
         $this->coroutine = $coroutine;
         $this->coStack = new \SplStack();
+    }
+
+    public function setContainer($container)
+    {
+        $this->container = $container;
+    }
+
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     /**
@@ -61,6 +76,7 @@ class Task
                 }
 
                 $value = $this->coroutine->current();
+
                 //\Log::info($this->taskId.__METHOD__ . " value === " . print_r($value, true), [__CLASS__]);
 
                 //如果是coroutine，入栈
@@ -99,8 +115,9 @@ class Task
                 //\Log::info($this->taskId.__METHOD__ . " values  pop and send", [__CLASS__]);
 
             } catch (\Exception $e) {
+                $exception = new ExceptionsHandler();
+                $exception->handleException($e);
                 if ($this->coStack->isEmpty()) {
-                    \Log::error($this->taskId.__METHOD__ . " exception ===" . $e->getMessage(), [__CLASS__]);
                     return;
                 }
             }

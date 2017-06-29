@@ -6,7 +6,8 @@ use ServiceProvider;
 use Group\Cache\RedisCacheService;
 
 class CacheServiceProvider extends ServiceProvider
-{
+{   
+    protected $cache = null;
     /**
      * Register the service provider.
      *
@@ -14,14 +15,17 @@ class CacheServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $cache = null;
+        if (\Config::get("database::cache") == 'redis') $this->cache = 'redisCache';
 
-        if (\Config::get("database::cache") == 'redis') $cache = 'redisCache';
-
-        if ($cache == 'redisCache') {
-            $this->app->singleton($cache, function () {
+        if ($this->cache == 'redisCache') {
+            $this->app->singleton($this->cache, function () {
                 return new RedisCacheService($this->app->singleton('redis'));
             });
         }
+    }
+
+    public function getName()
+    {
+        return $this->cache;
     }
 }

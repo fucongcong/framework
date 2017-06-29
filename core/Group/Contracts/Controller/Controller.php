@@ -35,9 +35,5 @@ interface Controller
      */
     public function getContainer();
 
-    public function setFlashMessage($type, $message);
-
-    public function getFlashMessage();
-
     public function redirect($url, $status = 302);
 }

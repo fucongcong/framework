@@ -1,8 +1,8 @@
 <?php
 
-namespace src\Services\{{name}}\Rely;
+namespace src\Async\{{name}}\Service\Rely;
 
-use Service;
+use Group\Async\Service;
 
 abstract class {{name}}BaseService extends Service
 {

@@ -35,7 +35,7 @@ class EventDispatcherService implements EventDispatcherContract
         $this->setEvents($eventName);
 
         if (isset($this->listeners[$eventName])) {
-            $this->doDispatch($eventName, $event);
+            return $this->doDispatch($eventName, $event);
         }
 
         return $event;
@@ -180,10 +180,13 @@ class EventDispatcherService implements EventDispatcherContract
 
         foreach ($listeners as $listener) {
             if (is_callable($listener, false)) {
-                call_user_func($listener, $event);
+                $listener($event);
+                //call_user_func($listener, $event);
             }
             if ($listener instanceof Listener) {
-                call_user_func_array([$listener, $listener->getMethod()], [$event]);
+                $method = $listener->getMethod();
+                $listener->$method($event);
+                //call_user_func_array([$listener, $listener->getMethod()], [$event]);
             }
         }
     }

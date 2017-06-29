@@ -18,4 +18,9 @@ class StaticCacheServiceProvider extends ServiceProvider
             return new StaticCacheService();
         });
     }
+
+    public function getName()
+    {
+        return 'staticCache';
+    }
 }

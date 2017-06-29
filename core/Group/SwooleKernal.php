@@ -5,6 +5,7 @@ namespace Group;
 use Group\App\App;
 use swoole_http_server;
 use Group\Coroutine\Scheduler;
+use Group\Container\Container;
 
 class SwooleKernal
 {   
@@ -61,7 +62,7 @@ class SwooleKernal
         //$this->scheduler = new Scheduler();
         $this->maxTaskId = 0;
         $this->app = new App();
-        $this->app->init($this->path);
+        $this->app->init();
         //设置不同进程名字,方便grep管理
         if (PHP_OS !== 'Darwin') {
             swoole_set_process_name("php http server: worker");
@@ -81,7 +82,10 @@ class SwooleKernal
         preg_match_all("/^(.+\.php)(\/.*)$/", $request->server['REQUEST_URI'], $matches);
 
         $request->server['REQUEST_URI'] = isset($matches[2]) ? $matches[2][0] : '';
-        
+        foreach ($request->server as $key => $value) {
+            $request->server[strtoupper($key)] = $value;
+        }
+
         if ($request->server['request_uri'] == '/favicon.ico') {
             $response->end();
             return;
@@ -91,7 +95,8 @@ class SwooleKernal
             $this->maxTaskId = 0;
         }
         $taskId = ++$this->maxTaskId;
-        $task = new \Group\Coroutine\Task($taskId, $this->app->terminate($request, $response));
+        $container = new Container();
+        $task = new \Group\Coroutine\Task($taskId, $container, $this->app->terminate($request, $response, $this->path));
         $task->run();
         
         //$this->fix_gpc_magic($request);

@@ -78,7 +78,7 @@ Class Router implements RouterContract
             }
         }
 
-        \EventDispatcher::dispatch(KernalEvent::NOTFOUND, new HttpEvent($this->container->getRequest()));       
+        \EventDispatcher::dispatch(KernalEvent::NOTFOUND, new HttpEvent($this->container->getRequest(), null, $this->container->getSwooleResponse()));       
     }
 
     /**

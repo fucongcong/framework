@@ -18,4 +18,9 @@ class FileCacheServiceProvider extends ServiceProvider
             return new LocalFileCacheService();
         });
     }
+
+    public function getName()
+    {
+        return 'localFileCache';
+    }
 }

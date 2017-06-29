@@ -36,4 +36,9 @@ class RedisServiceProvider extends ServiceProvider
             return $redis;
         });
     }
+
+    public function getName()
+    {
+        return 'redis';
+    }
 }

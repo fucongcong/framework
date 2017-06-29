@@ -27,8 +27,8 @@
         "doctrine/dbal": "v2.5.12",
         "monolog/monolog":"~1.17.1",
         "symfony/http-foundation": "~2.7.0",
-        "mtdowling/cron-expression":"~1.0",
         "phpunit/phpunit": "4.*",
+        "firebase/php-jwt": "5.0.0",
         "pda/pheanstalk":"~3.1.0",
         "maximebf/debugbar": ">=1.0.0"
     }

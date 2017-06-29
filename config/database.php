@@ -12,7 +12,7 @@ return
 
             "port" => "3306",
 
-            "dbname" => "Group",
+            "dbname" => "Demo",
 
             "user" => "cm",
 
@@ -21,85 +21,83 @@ return
             "charset" => "utf8",
         ],
 
-        'write' => [
+        // 'write' => [
 
-            'master1' => [
+        //     'master1' => [
 
-                "driver" => "pdo_mysql",
+        //         "driver" => "pdo_mysql",
 
-                "host" => "127.0.0.1",
+        //         "host" => "127.0.0.1",
 
-                "port" => "3306",
+        //         "port" => "3306",
 
-                "dbname" => "Group1",
+        //         "dbname" => "Group1",
 
-                "user" => "root",
+        //         "user" => "root",
 
-                "password" => "123",
+        //         "password" => "123",
 
-                "charset" => "utf8",
-            ],
+        //         "charset" => "utf8",
+        //     ],
 
-            'master2' => [
+        //     'master2' => [
 
-                "driver" => "pdo_mysql",
+        //         "driver" => "pdo_mysql",
 
-                "host" => "127.0.0.1",
+        //         "host" => "127.0.0.1",
 
-                "port" => "3306",
+        //         "port" => "3306",
 
-                "dbname" => "Group2",
+        //         "dbname" => "Group2",
 
-                "user" => "root",
+        //         "user" => "root",
 
-                "password" => "123",
+        //         "password" => "123",
 
-                "charset" => "utf8",
-            ],
-        ],
+        //         "charset" => "utf8",
+        //     ],
+        // ],
 
-        'read' => [
+        // 'read' => [
 
-            'slave1' => [
+        //     'slave1' => [
 
-                "driver" => "pdo_mysql",
+        //         "driver" => "pdo_mysql",
 
-                "host" => "127.0.0.1",
+        //         "host" => "127.0.0.1",
 
-                "port" => "3306",
+        //         "port" => "3306",
 
-                "dbname" => "Group3",
+        //         "dbname" => "Group3",
 
-                "user" => "root",
+        //         "user" => "root",
 
-                "password" => "123",
+        //         "password" => "123",
 
-                "charset" => "utf8",
-            ],
+        //         "charset" => "utf8",
+        //     ],
 
-            'slave2' =>  [
+        //     'slave2' =>  [
 
-                "driver" => "pdo_mysql",
+        //         "driver" => "pdo_mysql",
 
-                "host" => "127.0.0.1",
+        //         "host" => "127.0.0.1",
 
-                "port" => "3306",
+        //         "port" => "3306",
 
-                "dbname" => "Group4",
+        //         "dbname" => "Group4",
 
-                "user" => "root",
+        //         "user" => "root",
 
-                "password" => "123",
+        //         "password" => "123",
 
-                "charset" => "utf8",
-            ],
-        ],
+        //         "charset" => "utf8",
+        //     ],
+        // ],
     ],
 
-
-
     //redis null
-    'cache' => 'null',
+    'cache' => 'redis',
 
     'redis' => [
 

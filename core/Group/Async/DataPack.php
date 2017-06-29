@@ -27,7 +27,7 @@ class DataPack
             $token = $data['cmd'];
         }
 
-        if (Encipher::decrypt($data['token']) != $token) throw new \Exception("Error Auth!", 1);
+        if (!isset($data['token']) || Encipher::decrypt($data['token']) != $token) throw new \Exception("Error Auth!", 1);
         
         return [$data['cmd'], $data['data']];
     }

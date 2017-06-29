@@ -15,4 +15,9 @@ class ServiceRegister extends \ServiceProvider
             return new \Service();
         });
     }
+
+    public function getName()
+    {
+        return 'service';
+    }
 }

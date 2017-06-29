@@ -31,16 +31,19 @@ class ExceptionsHandler
         E_PARSE => 'Parse',
     );
 
+    public function __construct()
+    {
+        $this->app = app();
+    }
+
     /**
      * Bootstrap the given application.
      *
      * @param  App  $app
      * @return void
      */
-    public function bootstrap(App $app)
+    public function bootstrap()
     {
-        $this->app = $app;
-
         error_reporting(-1);
 
         set_error_handler([$this, 'handleError']);
@@ -112,7 +115,7 @@ class ExceptionsHandler
 
     protected function renderForConsole($e)
     {
-        
+        $this->renderHttpResponse($e);
     }
 
     /**
@@ -165,8 +168,13 @@ class ExceptionsHandler
     }
 
     protected function record($e, $type = 'error')
-    {
-        \Log::$type('[' . $this->levels[$e['type']] . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
+    {   
+        if (!isset($this->levels[$e['type']])) {
+            $level = 'Task Exception';
+        } else {
+            $level = $this->levels[$e['type']];
+        }
+        \Log::$type('[' . $level . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
     }
 
     /**

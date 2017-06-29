@@ -10,6 +10,7 @@ use Group\Events\HttpEvent;
 use Group\Events\KernalEvent;
 use Group\Cache\BootstrapClass;
 use Group\Container\Container;
+use \Symfony\Component\HttpFoundation\ParameterBag;
 
 class App
 {
@@ -22,8 +23,6 @@ class App
     private static $instance;
 
     public $container;
-
-    public $router;
 
     /**
      * array aliases
@@ -44,12 +43,11 @@ class App
         'Route'             => 'Group\Routing\Route',
         'Request'           => 'Group\Http\Request',
         'Response'          => 'Group\Http\Response',
-        'Rpc'               => 'Group\Rpc\Rpc',
+        'Cookie'            => 'Group\Http\Cookie',
         'JsonResponse'      => 'Group\Http\JsonResponse',
         'RedirectResponse'  => 'Group\Http\RedirectResponse',
         'Service'           => 'Group\Services\Service',
         'ServiceProvider'   => 'Group\Services\ServiceProvider',
-        'Session'           => 'Group\Session\Session',
         'Test'              => 'Group\Test\Test',
         'Log'               => 'Group\Log\Log',
         'Listener'          => 'Group\Listeners\Listener',
@@ -64,62 +62,72 @@ class App
         'dao' => 'Group\Dao\Dao',
     ];
 
-    protected $serviceProviders = [
+    protected $onWorkStartServices = [
         'Group\Services\ServiceRegister',
-        'Group\Routing\RouteServiceProvider',
-        'Group\EventDispatcher\EventDispatcherServiceProvider',
-        'Group\Cache\CacheServiceProvider',
         'Group\Cache\FileCacheServiceProvider',
         'Group\Cache\StaticCacheServiceProvider',
+        'Group\Redis\RedisServiceProvider',
+        'Group\Cache\CacheServiceProvider',
     ];
+
+    protected $onRequestServices = [
+        'Group\Controller\TwigServiceProvider',
+        'Group\Routing\RouteServiceProvider',
+        'Group\EventDispatcher\EventDispatcherServiceProvider',
+    ];
+
+    protected $names = [];
 
     public function __construct()
     { 
         $this->aliasLoader();
 
         $this->doSingle();
-
-        $this->doSingleInstance();
     }
 
     /**
      * init appliaction
      *
      */
-    public function init($path)
+    public function init()
     {
         $this->initSelf();
-        $this->registerServices();
-
-        \EventDispatcher::dispatch(KernalEvent::INIT);
-
-        $this->container = $this->singleton('container');
-        $this->container->setAppPath($path);
-        
-        if ($this->container->isDebug()) {
-            $debugbar = new \Group\Debug\DebugBar();
-            self::getInstance()->instances['debugbar'] = $debugbar;
-        }
-
-        $handler = new ExceptionsHandler();
-        $handler->bootstrap($this);
+        $this->setServiceProviders();
+        $this->registerOnWorkStartServices();
     }
 
     /**
      * terminate app
      *
      */
-    public function terminate($request, $response)
-    {
+    public function terminate($request, $response, $path)
+    {   
+        $this->instances['container'] = Container::getInstance();
+
+        $this->registerOnRequestServices();
+
+        \EventDispatcher::dispatch(KernalEvent::INIT);
+
+        $this->container = $this->singleton('container');
+        $this->container->setAppPath($path);
+
+        $handler = new ExceptionsHandler();
+        $handler->bootstrap();
+
         $request = new \Request($request->get, $request->post, [], $request->cookie
             , $request->files, $request->server);
+        if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
+            && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
+        ) {
+            parse_str($request->getContent(), $data);
+            $request->request = new ParameterBag($data);
+        }
 
         $this->container->setSwooleResponse($response);
         $this->container->setRequest($request);
 
-        $this->router = new Router($this->container);
-        self::getInstance()->router = $this->router;
-        yield $this->router->match();
+        $this->container->router = new Router($this->container);
+        yield $this->container->router->match();
 
         yield $this->handleSwooleHttp($response);
     }
@@ -133,7 +141,6 @@ class App
         $aliases = Config::get('app::aliases');
         $this->aliases = array_merge($aliases, $this->aliases);
         AliasLoaderHandler::getInstance($this->aliases)->register();
-
     }
 
     /**
@@ -143,12 +150,39 @@ class App
      * @return object
      */
     public function singleton($name, $callable = null)
-    {
+    {   
+        // dump($name);dump($callable);
+        // $names = $this->getOnRequestServicesName();
+        // if (in_array($name, $names)) {
+        //     $taskId = (yield getTaskId());
+        //     if (!isset($this->instances[$taskId][$name]) && $callable) {
+        //         $this->instances[$taskId][$name] = call_user_func($callable);
+        //     }
+
+        //     yield $this->instances[$taskId][$name];
+        // }
+
         if (!isset($this->instances[$name]) && $callable) {
             $this->instances[$name] = call_user_func($callable);
         }
 
         return $this->instances[$name];
+    }
+
+    public function setTaskSingleton($name, $val)
+    {
+        $taskId = (yield getTaskId());
+        $this->instances[$taskId][$name] = $val;
+    }
+
+    public function getTaskSingleton($name)
+    {   
+        $taskId = (yield getTaskId());
+        if (isset($this->instances[$taskId][$name])) {
+            yield $this->instances[$taskId][$name];
+        }
+
+        yield null;
     }
 
     /**
@@ -164,23 +198,57 @@ class App
         }
     }
 
-    public function doSingleInstance()
-    {
-        $this->instances['container'] = Container::getInstance();
-    }
-
     /**
      *  注册服务
      *
      */
     public function registerServices()
     {   
-        $this->setServiceProviders();
+        $this->registerOnWorkStartServices();
 
-        foreach ($this->serviceProviders as $provider) {
+        $this->registerOnRequestServices();
+    }
+
+    public function registerOnWorkStartServices()
+    {
+        foreach ($this->onWorkStartServices as $provider) {
             $provider = new $provider(self::$instance);
             $provider->register();
         }
+    }
+
+    public function registerOnRequestServices()
+    {
+        foreach ($this->onRequestServices as $provider) {
+            $provider = new $provider(self::$instance);
+            $provider->register();
+        }
+    }
+
+    public function getOnRequestServicesName()
+    {   
+        if (empty($this->names)) {
+            $names = [];
+            foreach ($this->onRequestServices as $provider) {
+                $provider = new $provider(self::$instance);
+                $names[] = $provider->getName();
+            }
+
+            $this->names = $names;
+        }
+        
+        return $this->names;
+    }
+
+    public function releaseOnRequestServices()
+    {
+        foreach ($this->onRequestServices as $provider) {
+            $provider = new $provider(self::$instance);
+            $name = $provider->getName();
+            unset($this->instances[$name]);
+        }
+
+        unset($this->instances['container']);
     }
 
     /**
@@ -206,6 +274,8 @@ class App
         $response = $this->container->getResponse();
         $request = $this->container->getRequest();
         \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request, $response, $swooleHttpResponse));
+
+        //$this->releaseOnRequestServices();
     }
 
     public function initSelf()
@@ -250,19 +320,11 @@ class App
      */
     public function setServiceProviders()
     {
-        $providers = Config::get('app::serviceProviders');
-        $this->serviceProviders = array_merge($providers, $this->serviceProviders);
-    }
+        $onWorkStartServices = Config::get('app::onWorkStartServices');
+        $this->onWorkStartServices = array_merge($onWorkStartServices, $this->onWorkStartServices);
 
-    /**
-     * ingore ServiceProviders
-     *
-     */
-    public function ingoreServiceProviders($provider)
-    {   
-        foreach ($this->serviceProviders as $key => $val) {
-            if ($val == $provider) unset($this->serviceProviders[$key]);
-        } 
+        $onRequestServices = Config::get('app::onRequestServices');
+        $this->onRequestServices = array_merge($onRequestServices, $this->onRequestServices);
     }
 
     /**
