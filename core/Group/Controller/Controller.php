@@ -12,9 +12,12 @@ class Controller implements ControllerContract
 {
     protected $app;
 
-    public function __construct($app)
+    protected $container;
+
+    public function __construct($app, $container)
     {
         $this->app = $app;
+        $this->container = $container;
     }
 
     /**
@@ -26,22 +29,12 @@ class Controller implements ControllerContract
      */
     public function render($tpl, $array = array())
     {   
-        // if ($this->getContainer()->isDebug()) {
-        //     if ($this->app->singleton('debugbar')->hasCollector('view')) {
-        //         $array['模板地址'] = $tpl;
-        //         $this->app->singleton('debugbar')->getCollector('view')->setData($array);
-        //     } else {
-        //         $array['模板地址'] = $tpl;
-        //         $this->app->singleton('debugbar')->addCollector(new \Group\Debug\Collector\VarCollector($array));
-        //     }
-        // }
-        
-        return $this->app->singleton('twig')->render($tpl, $array);
+        return $this->container->singleton('twig')->render($tpl, $array);
     }
 
     public function twigInit()
     {   
-        return $this->app->singleton('twig');
+        return $this->container->singleton('twig');
     }
 
     /**
@@ -61,8 +54,8 @@ class Controller implements ControllerContract
      * @return Group\Routing\Route
      */
     public function route()
-    {
-        return $this->app->singleton('route');
+    {   
+        return $this->container->singleton('route');
     }
 
     /**
@@ -72,7 +65,7 @@ class Controller implements ControllerContract
      */
     public function getContainer()
     {
-        return $this->app->singleton('container');
+        return $this->container;
     }
 
     public function redirect($url, $status = 302)

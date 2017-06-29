@@ -28,8 +28,7 @@ class TwigServiceProvider extends ServiceProvider
             $twig->addExtension(new WebExtension());
             $extensions = \Config::get('view::extensions');
             foreach ($extensions as $extension) {
-                if($this->getContainer()->buildMoudle($extension)->isSubclassOf('Twig_Extension'))
-                    $twig->addExtension(new $extension);
+                $twig->addExtension(new $extension);
             }
 
             return $twig;

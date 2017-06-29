@@ -16,7 +16,7 @@ class KernalResponseListener extends \Listener
     {	
     	$response = $event->getResponse();
         $swooleHttpResponse = $event->getSwooleHttpResponse();
-        
+
         if ($response instanceof \Response 
             || $response instanceof \RedirectResponse 
             || $response instanceof \JsonResponse) {
@@ -34,6 +34,6 @@ class KernalResponseListener extends \Listener
             $swooleHttpResponse->end($response->getContent());
         }
 
-        \EventDispatcher::dispatch(KernalEvent::HTTPFINISH, new HttpEvent($event->getRequest(), $response, $swooleHttpResponse));
+        //\EventDispatcher::dispatch(KernalEvent::HTTPFINISH, new HttpEvent($event->getRequest(), $response, $swooleHttpResponse));
     }
 }

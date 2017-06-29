@@ -180,13 +180,13 @@ class EventDispatcherService implements EventDispatcherContract
 
         foreach ($listeners as $listener) {
             if (is_callable($listener, false)) {
-                $listener($event);
-                //call_user_func($listener, $event);
+                //$listener($event);
+                call_user_func($listener, $event);
             }
             if ($listener instanceof Listener) {
-                $method = $listener->getMethod();
-                $listener->$method($event);
-                //call_user_func_array([$listener, $listener->getMethod()], [$event]);
+                // $method = $listener->getMethod();
+                // $listener->$method($event);
+                call_user_func_array([$listener, $listener->getMethod()], [$event]);
             }
         }
     }

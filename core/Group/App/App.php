@@ -10,6 +10,7 @@ use Group\Events\HttpEvent;
 use Group\Events\KernalEvent;
 use Group\Cache\BootstrapClass;
 use Group\Container\Container;
+use Group\Events\Event;
 use \Symfony\Component\HttpFoundation\ParameterBag;
 
 class App
@@ -102,14 +103,12 @@ class App
      */
     public function terminate($request, $response, $path)
     {   
-        $this->instances['container'] = Container::getInstance();
+        $container = (yield getContainer());
+        $container->setAppPath($path);
 
-        $this->registerOnRequestServices();
+        $this->registerOnRequestServices($container);
 
-        \EventDispatcher::dispatch(KernalEvent::INIT);
-
-        $this->container = $this->singleton('container');
-        $this->container->setAppPath($path);
+        $container->singleton('eventDispatcher')->dispatch(KernalEvent::INIT, new Event($container));
 
         $handler = new ExceptionsHandler();
         $handler->bootstrap();
@@ -123,11 +122,11 @@ class App
             $request->request = new ParameterBag($data);
         }
 
-        $this->container->setSwooleResponse($response);
-        $this->container->setRequest($request);
+        $container->setSwooleResponse($response);
+        $container->setRequest($request);
 
-        $this->container->router = new Router($this->container);
-        yield $this->container->router->match();
+        $container->router = new Router($container);
+        yield $container->router->match();
 
         yield $this->handleSwooleHttp($response);
     }
@@ -151,38 +150,11 @@ class App
      */
     public function singleton($name, $callable = null)
     {   
-        // dump($name);dump($callable);
-        // $names = $this->getOnRequestServicesName();
-        // if (in_array($name, $names)) {
-        //     $taskId = (yield getTaskId());
-        //     if (!isset($this->instances[$taskId][$name]) && $callable) {
-        //         $this->instances[$taskId][$name] = call_user_func($callable);
-        //     }
-
-        //     yield $this->instances[$taskId][$name];
-        // }
-
         if (!isset($this->instances[$name]) && $callable) {
             $this->instances[$name] = call_user_func($callable);
         }
 
         return $this->instances[$name];
-    }
-
-    public function setTaskSingleton($name, $val)
-    {
-        $taskId = (yield getTaskId());
-        $this->instances[$taskId][$name] = $val;
-    }
-
-    public function getTaskSingleton($name)
-    {   
-        $taskId = (yield getTaskId());
-        if (isset($this->instances[$taskId][$name])) {
-            yield $this->instances[$taskId][$name];
-        }
-
-        yield null;
     }
 
     /**
@@ -198,17 +170,6 @@ class App
         }
     }
 
-    /**
-     *  注册服务
-     *
-     */
-    public function registerServices()
-    {   
-        $this->registerOnWorkStartServices();
-
-        $this->registerOnRequestServices();
-    }
-
     public function registerOnWorkStartServices()
     {
         foreach ($this->onWorkStartServices as $provider) {
@@ -217,10 +178,10 @@ class App
         }
     }
 
-    public function registerOnRequestServices()
+    public function registerOnRequestServices($container)
     {
         foreach ($this->onRequestServices as $provider) {
-            $provider = new $provider(self::$instance);
+            $provider = new $provider($container);
             $provider->register();
         }
     }
@@ -238,17 +199,6 @@ class App
         }
         
         return $this->names;
-    }
-
-    public function releaseOnRequestServices()
-    {
-        foreach ($this->onRequestServices as $provider) {
-            $provider = new $provider(self::$instance);
-            $name = $provider->getName();
-            unset($this->instances[$name]);
-        }
-
-        unset($this->instances['container']);
     }
 
     /**
@@ -270,12 +220,14 @@ class App
      *
     */
     public function handleSwooleHttp($swooleHttpResponse)
-    {
-        $response = $this->container->getResponse();
-        $request = $this->container->getRequest();
-        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent($request, $response, $swooleHttpResponse));
+    {   
+        $container = (yield getContainer());
+        $response = $container->getResponse();
+        $request = $container->getRequest();
 
-        //$this->releaseOnRequestServices();
+        $container->singleton('eventDispatcher')->dispatch(KernalEvent::RESPONSE, new HttpEvent($request, $response, $swooleHttpResponse));
+
+        unset($container);
     }
 
     public function initSelf()
@@ -287,31 +239,6 @@ class App
     {
         if(isset($this->instances[$name]))
             unset($this->instances[$name]);
-    }
-
-    /**
-     * 类文件缓存
-     *
-     * @param loader
-     */
-    public function doBootstrap($loader) 
-    {   
-        $this->setServiceProviders();
-
-        // if (Config::get('app::environment') == "prod" && is_file("runtime/cache/bootstrap.class.cache")) {
-        //     require "runtime/cache/bootstrap.class.cache";
-        //     return;
-        // }
-
-        // $bootstrapClass = new BootstrapClass($loader);
-        // foreach ($this->serviceProviders as $serviceProvider) {
-        //     $bootstrapClass->setClass($serviceProvider);
-        // }
-        // foreach ($this->bootstraps as $bootstrap) {
-        //     $bootstrap = isset($this->aliases[$bootstrap]) ? $this->aliases[$bootstrap] : $bootstrap;
-        //     $bootstrapClass->setClass($bootstrap);
-        // }
-        // $bootstrapClass->bootstrap();
     }
 
     /**

@@ -11,6 +11,8 @@ use Group\Events\KernalEvent;
 
 class Container implements ContainerContract
 {   
+    protected $instances;
+
 	private static $instance;
 
     protected $timezone;
@@ -51,6 +53,21 @@ class Container implements ContainerContract
         $this->needDebug();
     }
 
+    /**
+     *  向App存储一个单例对象
+     *
+     * @param  name，callable
+     * @return object
+     */
+    public function singleton($name, $callable = null)
+    {
+        if (!isset($this->instances[$name]) && $callable) {
+            $this->instances[$name] = call_user_func($callable);
+        }
+
+        return $this->instances[$name];
+    }
+
 	/**
 	 * build a moudle class
 	 *
@@ -84,7 +101,7 @@ class Container implements ContainerContract
 			throw new NotFoundException("Class ".$class." exist ,But the Action ".$action." not found");
 		}
 
-		$instanc = $reflector->newInstanceArgs(array(App::getInstance()));
+		$instanc = $reflector->newInstanceArgs(array(App::getInstance(), $this));
 		$method = $reflector->getmethod($action);
         $args = [];
         foreach ($method->getParameters() as $arg) {
@@ -92,7 +109,7 @@ class Container implements ContainerContract
             if (isset($parameters[$paramName])) $args[$paramName] = $parameters[$paramName];
             if (!empty($arg->getClass()) && $arg->getClass()->getName() == 'Group\Http\Request') $args[$paramName] = $request;
         }
-
+        
         return $method->invokeArgs($instanc, $args);
 	}
 
@@ -222,8 +239,8 @@ class Container implements ContainerContract
      */
     public function setRequest(\Request $request)
     {   
-        \EventDispatcher::dispatch(KernalEvent::REQUEST, new HttpEvent($request, null, $this->swooleResponse));
         $this->request = $request;
+        $this->singleton('eventDispatcher')->dispatch(KernalEvent::REQUEST, new HttpEvent($request, null, $this->swooleResponse));
     }
 
     /**

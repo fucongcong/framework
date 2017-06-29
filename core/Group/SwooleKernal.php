@@ -86,11 +86,11 @@ class SwooleKernal
             $request->server[strtoupper($key)] = $value;
         }
 
-        if ($request->server['request_uri'] == '/favicon.ico') {
+        if ($request->server['request_uri'] == '/favicon.ico' || substr($request->server['REQUEST_URI'], 0, 7) == "/assets") {
             $response->end();
             return;
         }
-
+        
         if ($this->maxTaskId >= PHP_INT_MAX) {
             $this->maxTaskId = 0;
         }
@@ -98,7 +98,7 @@ class SwooleKernal
         $container = new Container();
         $task = new \Group\Coroutine\Task($taskId, $container, $this->app->terminate($request, $response, $this->path));
         $task->run();
-        
+        unset($container);
         //$this->fix_gpc_magic($request);
         // $this->scheduler->newTask($this->app->terminate($request, $response));
         // $this->scheduler->run();

@@ -42,9 +42,7 @@ Class Router implements RouterContract
     public function __construct(Container $container)
     {
         $this->container = $container;
-
         $request = $this->container->getRequest();
-
         $this->setRoute($this->methods, $request->getPathInfo(), $request->getMethod());
     }
 
@@ -78,7 +76,7 @@ Class Router implements RouterContract
             }
         }
 
-        \EventDispatcher::dispatch(KernalEvent::NOTFOUND, new HttpEvent($this->container->getRequest(), null, $this->container->getSwooleResponse()));       
+        $this->container->singleton('eventDispatcher')->dispatch(KernalEvent::NOTFOUND, new HttpEvent($this->container->getRequest(), null, $this->container->getSwooleResponse()));       
     }
 
     /**
@@ -191,8 +189,8 @@ Class Router implements RouterContract
      * @param  uri
      */
     public function setRoute($methods, $uri, $method)
-    {
-        $this->route = \Route::getInstance();
+    {   
+        $this->route = $this->container->singleton('route');
         $this->route->setMethods($methods);
         $this->route->setCurrentMethod($method);
         $this->route->setUri($uri);

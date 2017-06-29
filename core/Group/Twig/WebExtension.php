@@ -17,7 +17,6 @@ class WebExtension extends Twig_Extension
     {
         return array(
             'assets' => new \Twig_Function_Method($this, 'getPublic'),
-            'url'   => new \Twig_Function_Method($this, 'getUrl'),
             'dump'  => new \Twig_Function_Method($this, 'dump'),
             'render'  => new \Twig_Function_Method($this, 'render', array('is_safe' => array('html'))),
             'csrf_token'  => new \Twig_Function_Method($this, 'getCsrfToken'),
@@ -42,16 +41,6 @@ class WebExtension extends Twig_Extension
     }
 
     /**
-     * 获取路由
-     *
-     * @return string
-     */
-    public function getUrl($url, $params = [])
-    {
-        return Route::deParse($url, $params);
-    }
-
-    /**
      * 在模板调试使用
      *
      * @param var
@@ -62,12 +51,12 @@ class WebExtension extends Twig_Extension
         return var_dump($var);
     }
 
-    public function render($controller, $params)
-    {   
-        $config['controller'] = $controller;
-        $config['parameters'] = $params;
-        return app()->router->getTpl($config);
-    }
+    // public function render($controller, $params)
+    // {   
+    //     $config['controller'] = $controller;
+    //     $config['parameters'] = $params;
+    //     return app()->router->getTpl($config);
+    // }
 
     public function smarttimeFilter($time) {
         $diff = time() - $time;

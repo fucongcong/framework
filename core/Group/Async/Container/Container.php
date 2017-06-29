@@ -64,7 +64,7 @@ class Container
 			throw new NotFoundException("Class ".$class." exist ,But the Action ".$action." not found");
 		}
 
-		$instanc = $reflector->newInstanceArgs(array(App::getInstance()));
+		$instanc = $reflector->newInstanceArgs(array(App::getInstance(), $this));
 		$method = $reflector->getmethod($action);
         $args = [];
         foreach ($method->getParameters() as $arg) {

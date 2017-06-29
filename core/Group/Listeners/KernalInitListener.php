@@ -49,7 +49,8 @@ class KernalInitListener extends \Listener
                 throw new \RuntimeException("Class ".$listener['listener']." must instanceof Listener !");
             }
 
-            \EventDispatcher::addListener($listener['eventName'], $lis, $listener['priority']);
+            $container = $event->getProperty();
+            $container->singleton('eventDispatcher')->addListener($listener['eventName'], $lis, $listener['priority']);
         }
     }
 }
