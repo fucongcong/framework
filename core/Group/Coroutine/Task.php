@@ -115,7 +115,7 @@ class Task
                 //\Log::info($this->taskId.__METHOD__ . " values  pop and send", [__CLASS__]);
 
             } catch (\Exception $e) {
-                $exception = new ExceptionsHandler();
+                $exception = new ExceptionsHandler($this->container);
                 $exception->handleException($e);
                 if ($this->coStack->isEmpty()) {
                     return;

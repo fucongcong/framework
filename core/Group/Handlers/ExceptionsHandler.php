@@ -13,7 +13,7 @@ class ExceptionsHandler
      *
      * @var App
      */
-    protected $app;
+    protected $container;
 
     private $levels = array(
         E_WARNING => 'Warning',
@@ -31,9 +31,9 @@ class ExceptionsHandler
         E_PARSE => 'Parse',
     );
 
-    public function __construct()
+    public function __construct($container)
     {
-        $this->app = app();
+        $this->container = $container;
     }
 
     /**
@@ -79,7 +79,7 @@ class ExceptionsHandler
             switch ($level) {
                 case E_USER_ERROR:
                     $this->record($error);
-                    if ($this->app->container->runningInConsole()) {
+                    if ($this->container->runningInConsole()) {
                         $this->renderForConsole($e);
                     } else {
                         $this->renderHttpResponse($e);
@@ -106,7 +106,7 @@ class ExceptionsHandler
         ];
 
         $this->record($error);
-        if ($this->app->container->runningInConsole()) {
+        if ($this->container->runningInConsole()) {
             $this->renderForConsole($error);
         } else {
             $this->renderHttpResponse($error);
@@ -127,7 +127,7 @@ class ExceptionsHandler
     protected function renderHttpResponse($e)
     {
         //dev下面需要render信息
-        if ($this->app->container->getEnvironment() == 'prod') {
+        if ($this->container->getEnvironment() == 'prod') {
             $controller = new \Controller($this->app);
             $e = $controller->twigInit()->render(\Config::get('view::error_page'));
         }else {
@@ -143,7 +143,7 @@ class ExceptionsHandler
             }
         }
 
-        \EventDispatcher::dispatch(KernalEvent::EXCEPTION, new ExceptionEvent($e));
+        $this->container->singleton('eventDispatcher')->dispatch(KernalEvent::EXCEPTION, new ExceptionEvent($e, $this->container));
     }
 
     /**
@@ -157,7 +157,7 @@ class ExceptionsHandler
             if ($this->isFatal($e['type'])) {
                 $this->record($e);
                 $e['trace'] = '';
-                if ($this->app->container->runningInConsole()) {
+                if ($this->container->runningInConsole()) {
                     $this->renderForConsole($e);
                 } else {
                     $this->renderHttpResponse($e);
@@ -174,7 +174,9 @@ class ExceptionsHandler
         } else {
             $level = $this->levels[$e['type']];
         }
-        \Log::$type('[' . $level . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
+
+        //要异步 否则报错
+        //\Log::$type('[' . $level . '] ' . $e['message'] . '[' . $e['file'] . ' : ' . $e['line'] . ']', []);
     }
 
     /**

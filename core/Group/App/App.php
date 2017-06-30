@@ -110,7 +110,7 @@ class App
 
         $container->singleton('eventDispatcher')->dispatch(KernalEvent::INIT, new Event($container));
 
-        $handler = new ExceptionsHandler();
+        $handler = new ExceptionsHandler($container);
         $handler->bootstrap();
 
         $request = new \Request($request->get, $request->post, [], $request->cookie

@@ -42,6 +42,8 @@ class Container implements ContainerContract
 
     protected $debug = false;
 
+    protected $context;
+
     public function __construct()
     {
         $this->setTimezone();
@@ -111,20 +113,6 @@ class Container implements ContainerContract
         }
         
         return $method->invokeArgs($instanc, $args);
-	}
-
-    /**
-     * return single class
-     *
-     * @return Group\Container Container
-     */
-	public static function getInstance()
-    {
-		if (!(self::$instance instanceof self)){
-			self::$instance = new self;
-		}
-
-		return self::$instance;
 	}
 
     public function setSwooleResponse($response)
@@ -240,7 +228,7 @@ class Container implements ContainerContract
     public function setRequest(\Request $request)
     {   
         $this->request = $request;
-        $this->singleton('eventDispatcher')->dispatch(KernalEvent::REQUEST, new HttpEvent($request, null, $this->swooleResponse));
+        $this->singleton('eventDispatcher')->dispatch(KernalEvent::REQUEST, new HttpEvent($request, null, $this->swooleResponse, $this));
     }
 
     /**
@@ -268,5 +256,19 @@ class Container implements ContainerContract
     public function isDebug()
     {
         return $this->debug;
+    }
+
+    public function setContext($key, $val)
+    {
+        $this->context[$key] = $val;
+    }
+
+    public function getContext($key, $default = null)
+    {
+        if (isset($this->context[$key])) {
+            return $this->context[$key];
+        }
+
+        return $default;
     }
 }

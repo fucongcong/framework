@@ -93,14 +93,24 @@ class Controller implements ControllerContract
 
     public function pasreJwt($request)
     {   
-        // $jwt = $request->cookies->get('JWT');
-        // $tks = explode('.', $jwt);
-        // if (count($tks) != 3) {
-        //     return false;;
-        // }
+        $jwt = $request->cookies->get('JWT');
+        $tks = explode('.', $jwt);
+        if (count($tks) != 3) {
+            return false;;
+        }
 
-        // $data = JWT::decode($jwt, Config::get('jwt::publicKey'), array('RS256'));
-        // return (array) $data['data'];
+        $data = JWT::decode($jwt, Config::get('jwt::publicKey'), array('RS256'));
+        $data =  (array) $data;
+
+        return $data['data'];
+    }
+
+    public function clearJwt($request, $response)
+    {   
+        $httpHost = Config::get('jwt::domain');
+        $response->headers->clearCookie('JWT', '/', $httpHost);
+
+        return $response;
     }
 
     public function __call($method, $parameters)

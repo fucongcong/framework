@@ -10,11 +10,14 @@ final class HttpEvent extends \Event
 
     protected $swooleHttpResponse;
 
-    public function __construct(\Request $request = null, $response = null, $swooleHttpResponse)
+    protected $container;
+
+    public function __construct(\Request $request = null, $response = null, $swooleHttpResponse, $container = null)
     {	
     	$this->request = $request;
         $this->response = $response;
         $this->swooleHttpResponse = $swooleHttpResponse;
+        $this->container = $container;
     }
 
     public function getResponse()
@@ -30,5 +33,10 @@ final class HttpEvent extends \Event
     public function getSwooleHttpResponse()
     {
         return $this->swooleHttpResponse;
+    }
+
+    public function getContainer()
+    {
+        return $this->container;
     }
 }

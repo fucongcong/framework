@@ -6,14 +6,22 @@ final class ExceptionEvent extends \Event
 {   
     protected $error;
 
-    public function __construct($error)
+    protected $container;
+
+    public function __construct($error, $container)
     {
         $this->error = $error;
+        $this->container = $container;
     }
 
     public function getError()
     {
         return $this->error;
+    }
+
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     public function getTrace()

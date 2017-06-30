@@ -15,7 +15,7 @@ class ExceptionListener extends \Listener
     public function onException(\Event $event)
     {   
         $response = new \Response($event->getTrace(), 500);
-        $swooleHttpResponse = app('container')->getSwooleResponse();
-        \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent(null, $response, $swooleHttpResponse));   
+        $swooleHttpResponse = $event->getContainer()->getSwooleResponse();
+        $event->getContainer()->singleton('eventDispatcher')->dispatch(KernalEvent::RESPONSE, new HttpEvent(null, $response, $swooleHttpResponse));   
     }
 }
