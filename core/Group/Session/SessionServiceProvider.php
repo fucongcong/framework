@@ -24,7 +24,7 @@ class SessionServiceProvider extends ServiceProvider
         $this->app->singleton('session', function () {
 
             $storage = new NativeSessionStorage($this->getOptions(), $this->getHandler(), new MetadataBag());
-            $this->checkUserHandler();
+            //$this->checkUserHandler();
             $session = new SfSession($storage, new AttributeBag('_group_attributes'), new FlashBag());
 
             if (!$session->isStarted()) {
