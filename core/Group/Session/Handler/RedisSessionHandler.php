@@ -66,7 +66,7 @@ class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInte
 
         $this->redis->expire($hashKey, $this->ttl);
 
-        return $status;
+        return true;
     }
 
     /**
@@ -79,7 +79,7 @@ class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInte
         return $this->redis->hDel($hashKey, $key);
     }
 
-    public function gc()
+    public function gc($lifetime)
     {
         // not required here because redis will auto expire the records anyhow.
         return true;

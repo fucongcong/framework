@@ -61,7 +61,6 @@ class CronAdmin
 
             $output = $this->twigInit()->render('console.html.twig', [
                 'pid' => $pid,
-                'work_ids' => $work_ids,
                 'works' => $works,
                 ]);
             $response->status(200);
