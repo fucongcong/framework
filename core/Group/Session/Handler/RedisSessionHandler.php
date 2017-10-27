@@ -4,7 +4,7 @@ namespace Group\Session\Handler;
 
 use Group\Redis\RedisHelper;
 
-class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInterface
+class RedisSessionHandler implements \SessionHandlerInterface
 {
     /**
      * @var \Redis Redis driver.
@@ -50,9 +50,10 @@ class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInte
      */
     public function read($sessionId)
     {
-        list($hashKey, $key) = RedisHelper::hashKey($this->prefix, $sessionId);
+        //list($hashKey, $key) = RedisHelper::hashKey($this->prefix, $sessionId);
 
-        return $this-> redis->hGet($hashKey, $key) ? : '';
+        //return $this->redis->hGet($hashKey, $key) ? : '';
+        return $this->redis->get($this->prefix.":".$sessionId) ? : '';
     }
 
     /**
@@ -60,11 +61,13 @@ class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInte
      */
     public function write($sessionId, $data)
     {
-        list($hashKey, $key) = RedisHelper::hashKey($this->prefix, $sessionId);
+        // list($hashKey, $key) = RedisHelper::hashKey($this->prefix, $sessionId);
 
-        $status = $this->redis->hSet($hashKey, $key, $data);
+        // $status = $this->redis->hSet($hashKey, $key, $data);
 
-        $this->redis->expire($hashKey, $this->ttl);
+        // $this->redis->expire($hashKey, $this->ttl);
+
+        $this->redis->set($this->prefix.":".$sessionId, $data, $this->ttl);
 
         return true;
     }
@@ -74,12 +77,13 @@ class RedisSessionHandler extends \SessionHandler implements \SessionHandlerInte
      */
     public function destroy($sessionId)
     {
-        list($hashKey, $key) = RedisHelper::hashKey($this->prefix, $sessionId);
+        // list($hashKey, $key) = RedisHelper::hashKey($this->prefix, $sessionId);
 
-        return $this->redis->hDel($hashKey, $key);
+        // return $this->redis->hDel($hashKey, $key);
+        return $this->redis->del($this->prefix.":".$sessionId);
     }
 
-    public function gc($lifetime)
+    public function gc($time)
     {
         // not required here because redis will auto expire the records anyhow.
         return true;

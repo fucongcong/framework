@@ -25,6 +25,7 @@ class SessionServiceProvider extends ServiceProvider
 
             $storage = new NativeSessionStorage($this->getOptions(), $this->getHandler(), new MetadataBag());
             //$this->checkUserHandler();
+            //session_set_save_handler($this->getHandler(), false);
             $session = new SfSession($storage, new AttributeBag('_group_attributes'), new FlashBag());
 
             if (!$session->isStarted()) {
@@ -77,9 +78,9 @@ class SessionServiceProvider extends ServiceProvider
 
         switch ($driver) {
             case 'redis':
-                $config = \Config::get("database::redis");  
+                $config = \Config::get("database::redis");
                 ini_set('session.save_path', "tcp://".$config['default']['host'].":".$config['default']['port']);
-                ini_set('session.save_handler', 'redis'); 
+                ini_set('session.save_handler', 'redis');
                 break;
             default:
                 ini_set('session.save_handler', 'files');

@@ -2,9 +2,12 @@
 
 namespace Group\Controller;
 
-use Group\Twig\WebExtension;
 use Group\Contracts\Controller\Controller as ControllerContract;
 use Group\Exceptions\NotFoundException;
+use Config;
+use JsonResponse;
+use Firebase\JWT\JWT;
+use Cookie;
 
 class Controller implements ControllerContract
 {
@@ -39,32 +42,7 @@ class Controller implements ControllerContract
 
     public function twigInit()
     {
-        return $this->app->singleton('twig', function() {
-            $loader = new \Twig_Loader_Filesystem(\Config::get('view::path'));
-
-            if (\Config::get('view::cache')) {
-                $env = array(
-                    'cache' => \Config::get('view::cache_dir')
-                );
-            }
-
-            $twig = new \Twig_Environment($loader, isset($env) ? $env : array());
-
-            //开启twig的cache后默认不显示twig数据收集。这里有一点小bug
-            if ($this->getContainer()->isDebug() && empty($env)) {
-                $twig = new \DebugBar\Bridge\Twig\TraceableTwigEnvironment($twig);
-                $this->app->singleton('debugbar')->addCollector(new \DebugBar\Bridge\Twig\TwigCollector($twig));
-            }
-            
-            $twig->addExtension(new WebExtension());
-            $extensions = \Config::get('view::extensions');
-            foreach ($extensions as $extension) {
-                if($this->getContainer()->buildMoudle($extension)->isSubclassOf('Twig_Extension'))
-                    $twig->addExtension(new $extension);
-            }
-
-            return $twig;
-        });
+        return $this->app->singleton('twig');
     }
 
     /**
@@ -116,5 +94,94 @@ class Controller implements ControllerContract
     public function __call($method, $parameters)
     {
         throw new NotFoundException("Method [$method] does not exist.");
+    }
+
+    public function errorJsonResponse($msg = "", $data = [], $code = 400)
+    {
+        return new JsonResponse([
+                'msg' => $msg,
+                'data' => $data,
+                'code' => $code
+            ]
+        );
+    }
+
+    public function successJsonResponse($msg = "", $data = [], $code = 200)
+    {
+        return new JsonResponse([
+                'msg' => $msg,
+                'data' => $data,
+                'code' => $code
+            ]
+        );
+    }
+
+    public function isLogin()
+    {   
+        return $this->getUserId();
+    }
+
+    public function getUser()
+    {
+        return $this->getContainer()->getContext('user', []);
+    }
+
+    public function getUserId()
+    {
+        return $this->getContainer()->getContext('userId', 0);
+    }
+
+    public function setJwt($request, $data, $response)
+    {   
+        $httpHost = Config::get('jwt::domain');
+        $exprieTime = time() + Config::get('jwt::exprieTime');
+        $token = array(
+            'data' => $data,
+            "iss" => $httpHost,
+            "aud" => $httpHost,
+            "iat" => time(),
+            "exp" => $exprieTime
+        );
+
+        $jwt = JWT::encode($token, Config::get('jwt::privateKey'), 'RS256');
+        $response->headers->setCookie(new Cookie('JWT', $jwt, $exprieTime, '/', $httpHost));
+
+        return $response;
+    }
+
+    public function pasreJwt($request)
+    {   
+        $jwt = $request->cookies->get('JWT');
+        $tks = explode('.', $jwt);
+        if (count($tks) != 3) {
+            return false;;
+        }
+
+        $data = JWT::decode($jwt, Config::get('jwt::publicKey'), array('RS256'));
+        $data =  (array) $data;
+
+        return $data['data'];
+    }
+
+    public function clearJwt($request, $response)
+    {   
+        $httpHost = Config::get('jwt::domain');
+        $response->headers->clearCookie('JWT', '/', $httpHost);
+
+        return $response;
+    }
+
+    public function messageResponse($type, $message, $goto = null, $duration = 0)
+    {
+        if (!in_array($type, array('info', 'warning', 'danger'))) {
+            throw new \RuntimeException('type不正确');
+        }
+
+        return $this->render('Web/Views/message.html.twig', array(
+            'type' => $type,
+            'message' => $message,
+            'duration' => $duration,
+            'goto' => $goto,
+        ));
     }
 }

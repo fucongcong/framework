@@ -1,7 +1,7 @@
 <?php
 return [
     // prod|dev
-    'environment' => 'prod',
+    'environment' => 'dev',
 
     //只有在dev环境下才生效。tip: swoole http server下无法正常debug
     'debug' => false,
@@ -19,6 +19,7 @@ return [
 
     //系统会提前加载服务
     'serviceProviders' => [
+        //'Group\Controller\TwigServiceProvider',
         'Group\Redis\RedisServiceProvider',
         'Group\Session\SessionServiceProvider',
         'Group\Queue\QueueServiceProvider',

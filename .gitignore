@@ -9,3 +9,5 @@ index.php
 /config/view.php
 /config/cron.php
 /demo
+.DS_Store
+*/.DS_Store

@@ -1,11 +1,12 @@
 <?php
 
-namespace Group\Twig;
+namespace Group\Controller;
 
 use Twig_Extension;
 use Route;
 use Group\Routing\Router;
 use Group\Session\CsrfSessionService;
+use Qiniu\Auth;
 
 class WebExtension extends Twig_Extension
 {
@@ -17,8 +18,7 @@ class WebExtension extends Twig_Extension
     public function getFunctions()
     {
         return array(
-            'asset' => new \Twig_Function_Method($this, 'getPublic'),
-            'url'   => new \Twig_Function_Method($this, 'getUrl'),
+            'assets' => new \Twig_Function_Method($this, 'getAssets'),
             'dump'  => new \Twig_Function_Method($this, 'dump'),
             'render'  => new \Twig_Function_Method($this, 'render', array('is_safe' => array('html'))),
             'csrf_token'  => new \Twig_Function_Method($this, 'getCsrfToken'),
@@ -27,11 +27,17 @@ class WebExtension extends Twig_Extension
         );
     }
 
-    public function getFilters ()
+    public function getFilters()
     {
         return array(
             'smart_time' => new \Twig_Filter_Method($this, 'smarttimeFilter'),
+            'get_short' => new \Twig_Filter_Method($this, 'getShort', ['is_safe' => ['html']]),
         );
+    }
+
+    public function getShort($string, $len = 40)
+    {
+        return \Group\Common\StringToolkit::getShort($string, $len, "...");
     }
 
     /**
@@ -39,9 +45,9 @@ class WebExtension extends Twig_Extension
      *
      * @return string
      */
-    public function getPublic($url)
+    public function getAssets($path)
     {
-        return "/".$url;
+        return "/assets/".$path;
     }
 
     /**

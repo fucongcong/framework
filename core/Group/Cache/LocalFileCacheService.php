@@ -16,9 +16,9 @@ class LocalFileCacheService
     public function get($cacheName, $cacheDir = false)
     {
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        $dir = $cacheDir."/".$cacheName;
+        $dir = __ROOT__.$cacheDir."/".$cacheName;
 
-        if ($this->isExist($cacheName, $cacheDir)) return include $dir;
+        if ($this->isExist($cacheName, $cacheDir)) return require_once $dir;
         return null;
     }
 
@@ -29,10 +29,10 @@ class LocalFileCacheService
      * @param  data(array)
      * @param  cacheDir(string)
      */
-    public function set($cacheName, $data, $cacheDir = false)
+    public function set($cacheName, $data, $cacheDir = false, $flag = false)
     {
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        $dir = $cacheDir."/".$cacheName;
+        $dir = __ROOT__.$cacheDir."/".$cacheName;
 
         if (is_array($data)) {
             $data = var_export($data, true);
@@ -49,9 +49,8 @@ return ".$data.";";
             }
         }
 
-        file_put_contents("$dir/$file", $data);
+        file_put_contents("$dir/$file", $data, $flag);
     }
-
     /**
      * 文件是否存在
      *
@@ -62,7 +61,7 @@ return ".$data.";";
     public function isExist($cacheName, $cacheDir = false)
     {
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        $dir = $cacheDir."/".$cacheName;
+        $dir = __ROOT__.$cacheDir."/".$cacheName;
 
         return file_exists($dir);
 
