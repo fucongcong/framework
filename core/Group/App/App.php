@@ -36,6 +36,7 @@ class App
         'Config'            => 'Group\Config\Config',
         'Container'         => 'Group\Container\Container',
         'Controller'        => 'Group\Controller\Controller',
+        'Cookie'            => 'Group\Http\Cookie',
         'Dao'               => 'Group\Dao\Dao',
         'Event'             => 'Group\Events\Event',
         'EventDispatcher'   => 'Group\EventDispatcher\EventDispatcher',
@@ -205,10 +206,7 @@ class App
     {   
         $this->setServiceProviders();
 
-        foreach ($this->serviceProviders as $provider) {
-            $provider = new $provider(self::$instance);
-            $provider->register();
-        }
+        $this->register();
     }
 
     /**
@@ -274,6 +272,18 @@ class App
         foreach ($this->serviceProviders as $key => $val) {
             if ($val == $provider) unset($this->serviceProviders[$key]);
         } 
+    }
+
+    /**
+     *  注册服务
+     *
+     */
+    public function register()
+    {   
+        foreach ($this->serviceProviders as $provider) {
+            $provider = new $provider(self::$instance);
+            $provider->register();
+        }
     }
 
     /**

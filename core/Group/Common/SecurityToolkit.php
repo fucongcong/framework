@@ -57,6 +57,7 @@ class SecurityToolkit
         $text = preg_replace('/<br(\s?\/)?>/i', '[br]', $text);
         $text = preg_replace('/(\[br\]\s*){10,}/i', '[br]', $text);
         //过滤危险的属性，如：过滤on事件lang js
+
         while (preg_match('/(<[a-z]+)(lang|on|action|background|codebase|dynsrc|lowsrc|style|class|width|height|align|hspace|valign)[^><]+/i', $text, $mat)) {
             $text = str_replace($mat[0], $mat[1], $text);
         }
@@ -64,12 +65,13 @@ class SecurityToolkit
             $text = str_replace($mat[0], $mat[1] . $mat[3], $text);
         }
         if (empty($tags)) {
-            $tags = 'table|tbody|td|th|tr|i|b|u|strong|img|p|br|div|span|strong|em|ul|ol|li|dl|dd|dt|a';
+            $tags = 'table|tbody|td|th|tr|i|b|u|img|p|br|div|span|strong|em|ul|ol|li|dl|dd|dt|a|h1|h2|h3|h4|h5';
             $tags .= '|object|param|embed';
             // 音乐和视频
         }
         //允许的HTML标签
         $text = preg_replace('/<(\/?(?:' . $tags . '))( [^><\[\]]*)?>/i', '[\1\2]', $text);
+
         //过滤多余html
         $text = preg_replace('/<\/?([a-z]+)[^><]*>/i', '', $text);
         //转换引号

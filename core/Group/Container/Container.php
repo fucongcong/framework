@@ -37,6 +37,8 @@ class Container implements ContainerContract
 
     protected $debug = false;
 
+    protected $context;
+
     public function __construct()
     {
         $this->setTimezone();
@@ -238,5 +240,19 @@ class Container implements ContainerContract
     public function isDebug()
     {
         return $this->debug;
+    }
+
+    public function setContext($key, $val)
+    {
+        $this->context[$key] = $val;
+    }
+
+    public function getContext($key, $default = null)
+    {
+        if (isset($this->context[$key])) {
+            return $this->context[$key];
+        }
+
+        return $default;
     }
 }
