@@ -19,7 +19,7 @@ return [
 
     //系统会提前加载服务
     'serviceProviders' => [
-        'Group\Controller\TwigServiceProvider',
+        //'Group\Controller\TwigServiceProvider',
         'Group\Redis\RedisServiceProvider',
         'Group\Session\SessionServiceProvider',
         'Group\Queue\QueueServiceProvider',

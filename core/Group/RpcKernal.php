@@ -55,7 +55,7 @@ class RpcKernal
 
         $app = new \Group\App\App();
         $app->initSelf();
-        $app->doBootstrap($loader);
+        //$app->doBootstrap($loader);
         $app->ingoreServiceProviders("Group\Rpc\RpcServiceProvider");
         $app->registerServices();
         $app->singleton('container')->setAppPath(__ROOT__);
