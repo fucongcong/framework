@@ -273,7 +273,7 @@ class Cron
             $recv = $worker->read(); 
             $recv = json_decode($recv, true);
             if (!is_array($recv)) return;
-
+            
             $this->bindTick($recv);
         });
 
@@ -409,8 +409,7 @@ class Cron
         $processPid = $process->start();
 
         $this->setWorkerPid($processPid, $this->jobs[$i]['name']);
-        $process->name("GroupCron: ".$this->jobs[$i]['name']);
-
+        
         $this->jobs[$i]['workId'] = $processPid;
         $this->workers[$this->jobs[$i]['name']] = [
             'process' => $process,
