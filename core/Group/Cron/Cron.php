@@ -4,7 +4,6 @@ namespace Group\Cron;
 
 use Group\Cron\ParseCrontab;
 use Group\App\App;
-use Group\Cache\BootstrapClass;
 use swoole_process;
 use swoole_table;
 
@@ -28,11 +27,11 @@ class Cron
 
     protected $workers;
 
-    protected $classCache;
-
     protected $logDir;
 
     protected $table;
+
+    protected $max_handle;
 
     protected $daemon = false;
 
@@ -58,14 +57,14 @@ class Cron
     public function __construct($argv, $loader)
     {
         $this->cacheDir = \Config::get('cron::cache_dir') ? : 'runtime/cron';
-        $this->tickTime = \Config::get('cron::tick_time') ? : 1000;
+        $this->tickTime = \Config::get('cron::tick_time') ? : 2;
         $this->argv = $argv;
         $this->loader = $loader;
         $this->jobs = \Config::get('cron::job');
         $this->workerNum = count($this->jobs);
-        $this->classCache = \Config::get("cron::class_cache"); 
         $this->logDir = \Config::get("cron::log_dir");
         $this->daemon = \Config::get("cron::daemon") ? : false;
+        $this->max_handle = \Config::get("cron::max_handle") ? : 10;
         \Log::$cacheDir = $this->logDir;
     }
 
@@ -76,8 +75,6 @@ class Cron
     public function run()
     {
         $this->checkArgv();
-
-        //$this->bootstrapClass();
     }
 
     public function start()
@@ -96,7 +93,7 @@ class Cron
         //设置信号
         $this->setSignal();
 
-        swoole_timer_tick($this->tickTime, function($timerId) {
+        swoole_timer_tick($this->tickTime * 1000, function($timerId) {
             foreach ($this->jobs as $key => $job) {
                 $worker = $this->table->get($job['name'].'_worker');
                 $worker = json_decode($worker[$job['name'].'_worker'], true);
@@ -121,7 +118,6 @@ class Cron
         }
 
          exit("请执行app/cron server 查看当前cron信息\n");
-        //print_r(\FileCache::get('cronAdmin', $this->cacheDir));
     }
 
     public function restart()
@@ -285,7 +281,7 @@ class Cron
                 foreach ($workers as $worker) {
                     if ($worker['pid'] == $pid) {
                         $timerId = isset($worker['timerId']) ? $worker['timerId'] : 0;
-                        $this->restartJob($timerId, $worker['job']);
+                        $this->restartJob($worker['job']);
                     }
                 }
             }
@@ -303,19 +299,23 @@ class Cron
      */
     public function bindTick($job)
     {
-        $timer = ParseCrontab::parse($job['time']);
+        set_time_limit(0);
 
-        if (is_null($timer)) return;
+        $count = 0;
+        while ($count <= $this->max_handle) {
+            $timer = ParseCrontab::parse($job['time']);
+            if (is_null($timer)) return;
 
-        $job['timer'] = $timer;
+            $job['timer'] = $timer;
+            $this->jobStart($job);
 
-        swoole_timer_tick(intval($timer * 1000), function($timerId, $job) {
+            if (sleep($timer) > 0) {
+               return; 
+            }
+            $count++;
+        }
 
-            $this->restartJob($timerId, $job);
-
-        }, $job);
-
-        $this->jobStart($job);
+        $this->restartJob($job);
     }
 
     private function checkStatus()
@@ -386,13 +386,10 @@ class Cron
         call_user_func_array([new $job['command'], 'handle'], []);
     }
 
-    private function restartJob($timerId = 0, $job)
+    private function restartJob($job)
     {
         foreach ($this->jobs as $key => $one) {
             if ($one['name'] == $job['name']) {
-                //清除该计数器
-                if ($timerId) swoole_timer_clear($timerId);
-                //\Log::info('restart '.$job['name'], [$job], 'cron.restart');
                 $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode([])]);
                 $this->table->incr('workers_num', 'workers_num');
 
@@ -409,7 +406,7 @@ class Cron
         $processPid = $process->start();
 
         $this->setWorkerPid($processPid, $this->jobs[$i]['name']);
-
+        
         $this->jobs[$i]['workId'] = $processPid;
         $this->workers[$this->jobs[$i]['name']] = [
             'process' => $process,
@@ -428,21 +425,6 @@ class Cron
         \Log::info("工作worker{$processPid}启动", [$this->jobs[$i]['name']], 'cron.work');
     }
 
-    /**
-     * 缓存类文件
-     *
-     */
-    private function bootstrapClass()
-    {
-        $classCache = new BootstrapClass($this->loader, $this->classCache);
-        foreach ($this->jobs as $job) {
-            $classCache->setClass($job['command']); 
-        }
-        $classCache->bootstrap();
-        
-        require $this->classCache;
-    }
-
     private function init()
     {   
         if(function_exists("opcache_reset")) opcache_reset();
@@ -450,6 +432,5 @@ class Cron
         $app = new \Group\App\App();
         $app->initSelf();
         $app->registerServices();
-        $app->singleton('container')->setAppPath(__ROOT__);
     }
 }
