@@ -269,7 +269,7 @@ class Cron
             $recv = $worker->read(); 
             $recv = json_decode($recv, true);
             if (!is_array($recv)) return;
-
+            
             $this->bindTick($recv);
         });
 
