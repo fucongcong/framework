@@ -19,7 +19,7 @@ return [
 
     //系统会提前加载服务
     'serviceProviders' => [
-        'Group\Controller\TwigServiceProvider',
+        //'Group\Controller\TwigServiceProvider',
         'Group\Redis\RedisServiceProvider',
         'Group\Session\SessionServiceProvider',
         'Group\Queue\QueueServiceProvider',
@@ -37,7 +37,7 @@ return [
         'src\Services\User\Impl\UserServiceImpl' => [
             //方法执行前
             'before' => [
-                //对应 方法 -> 通知处理
+                //对应 方法 -> 通知处理 
                 'testAop' => ['src\Web\Aop\UserServiceAop::before', 'src\Web\Aop\UserServiceAop::before']
             ],
             'after' => [
