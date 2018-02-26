@@ -2,6 +2,7 @@
 
 namespace Group\App;
 
+use Group\App\Bean;
 use Group\Handlers\AliasLoaderHandler;
 use Group\Config\Config;
 use Group\Routing\Router;
@@ -174,7 +175,7 @@ class App
     public function singleton($name, $callable = null)
     {
         if (!isset($this->instances[$name]) && $callable) {
-            $this->instances[$name] = call_user_func($callable);
+            $this->instances[$name] = new Bean($name, call_user_func($callable));
         }
 
         return $this->instances[$name];
