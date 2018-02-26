@@ -38,7 +38,7 @@ return [
             //方法执行前
             'before' => [
                 //对应 方法 -> 通知处理
-                'testAop' => 'src\Web\Aop\UserServiceAop::before'
+                'testAop' => ['src\Web\Aop\UserServiceAop::before', 'src\Web\Aop\UserServiceAop::before']
             ],
             'after' => [
                 'testAop' => 'src\Web\Aop\UserServiceAop::after'

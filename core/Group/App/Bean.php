@@ -40,12 +40,23 @@ class Bean
     {   
         $aopConfig = Config::get("app::aop");
         if (isset($aopConfig[$this->name][$addr][$method])) {
-            list($class, $action) = explode("::", $aopConfig[$this->name][$addr][$method]);
-            $aspect = app()->singleton($class, function() use ($class) {
-                return new $class;
-            });
-
-            call_user_func_array([$aspect, $action], $parameters);
+            if (is_string($aopConfig[$this->name][$addr][$method])) {
+                $this->callAspect($aopConfig[$this->name][$addr][$method], $parameters);
+            } else {
+                foreach ($aopConfig[$this->name][$addr][$method] as $one) {
+                    $this->callAspect($one, $parameters);
+                }
+            }
         }
+    }
+
+    private function callAspect($map, $parameters)
+    {
+        list($class, $action) = explode("::", $map);
+        $aspect = app()->singleton($class, function() use ($class) {
+            return new $class;
+        });
+
+        call_user_func_array([$aspect, $action], $parameters);
     }
 }
