@@ -19,7 +19,7 @@ return [
 
     //系统会提前加载服务
     'serviceProviders' => [
-        //'Group\Controller\TwigServiceProvider',
+        'Group\Controller\TwigServiceProvider',
         'Group\Redis\RedisServiceProvider',
         'Group\Session\SessionServiceProvider',
         'Group\Queue\QueueServiceProvider',
@@ -29,6 +29,25 @@ return [
     //需要实例化的单例
     'singles' => [
         //like  'demo'       => 'src\demo\demo',
+    ],
+
+    //aop切面
+    'aop' => [
+        //singles实例化的单例的别名
+        'src\Services\User\Impl\UserServiceImpl' => [
+            //方法执行前
+            'before' => [
+                //对应 方法 -> 通知处理
+                'testAop' => 'src\Web\Aop\UserServiceAop::before'
+            ],
+            'after' => [
+                'testAop' => 'src\Web\Aop\UserServiceAop::after'
+            ],
+            'exception' => [
+                //对应 方法 -> 通知处理
+                'testAop' => 'src\Web\Aop\UserServiceAop::exception'
+            ],
+        ], 
     ],
 
     //扩展console命令行控制台
