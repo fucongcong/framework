@@ -16,7 +16,7 @@ class RedisServiceProvider extends ServiceProvider
     {
         $this->app->singleton('redis', function () {
 
-            if (\Config::get("database::cache") != 'redis') return;
+            if (\Config::get("database::cache") != 'redis') return null;
 
             $redis = new Redis;
             $config = \Config::get("database::redis");

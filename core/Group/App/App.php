@@ -77,6 +77,8 @@ class App
         'Group\Async\AsyncServiceProvider',
     ];
 
+    protected $aops;
+
     public function __construct()
     { 
         $this->aliasLoader();
@@ -175,7 +177,16 @@ class App
     public function singleton($name, $callable = null)
     {
         if (!isset($this->instances[$name]) && $callable) {
-            $this->instances[$name] = new Bean($name, call_user_func($callable));
+            $obj = call_user_func($callable);
+            if (!is_object($obj)) {
+                $this->instances[$name] = null;
+            } else {
+                if (isset($this->aops[$name])) {
+                    $this->instances[$name] = new Bean($name, $obj);
+                } else {
+                    $this->instances[$name] = $obj;
+                }
+            }
         }
 
         return $this->instances[$name];
@@ -192,6 +203,8 @@ class App
         foreach ($this->singles as $alias => $class) {
             $this->instances[$alias] = new $class();
         }
+
+        $this->aops = Config::get("app::aop");
     }
 
     public function doSingleInstance()

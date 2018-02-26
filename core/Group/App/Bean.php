@@ -17,6 +17,11 @@ class Bean
         $this->bean = $bean;
     }
 
+    public function getBean()
+    {
+        return $this->bean;
+    }
+    
     public function __call($method, $parameters)
     {   
         $this->execution('before', $method, $parameters);
@@ -26,7 +31,7 @@ class Bean
             $res = call_user_func_array([$this->bean, $method], $parameters);
         } catch (Exception $e) {
             $parameters[] = $e;
-            $this->execution('exception', $method, $parameters);
+            $this->execution('throw', $method, $parameters);
             return $res;
         }
         

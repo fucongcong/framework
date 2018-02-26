@@ -43,9 +43,9 @@ return [
             'after' => [
                 'testAop' => 'src\Web\Aop\UserServiceAop::after'
             ],
-            'exception' => [
+            'throw' => [
                 //对应 方法 -> 通知处理
-                'testAop' => 'src\Web\Aop\UserServiceAop::exception'
+                'testAop' => 'src\Web\Aop\UserServiceAop::throw'
             ],
         ], 
     ],
