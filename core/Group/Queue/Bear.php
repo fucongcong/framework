@@ -336,7 +336,6 @@ class Bear
         $loader->setUseIncludePath(true);
         $app = new \Group\App\App();
         $app->initSelf();
-        $app->doBootstrap($loader);
         $app->registerServices();
         $app->singleton('container')->setAppPath(__ROOT__);
     }
