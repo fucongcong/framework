@@ -78,7 +78,11 @@ class Bear
             if (swoole_process::kill($pid, 0)) {
                 //杀掉worker进程
                 foreach (\FileCache::get('work_ids', $this->logDir."/") as $work_id) {
-                    swoole_process::kill($work_id, SIGTERM);
+                    try {
+                        swoole_process::kill($work_id, SIGTERM);
+                    } catch (Exception $e) {
+                        \Log::info("进程{$work_id}不存在", [], 'queue.stop');
+                    }
                 }
             }   
         }
@@ -200,20 +204,22 @@ class Bear
         swoole_timer_tick(intval($timer), function($timerId) use ($recv, $listener, $pheanstalk){
         
             $recv = $listener->getJob($recv, $pheanstalk);
-            $recv = unserialize($recv); 
-            if (is_object($recv['job'])) {
-                try{
-                    foreach ($recv['handle'] as $handerClass => $job) {
-                       $handler = new $handerClass($recv['job']->getId(), $recv['job']->getData());
-                       $handler->handle();
+            if ($recv) {
+                $recv = unserialize($recv); 
+                if (is_object($recv['job'])) {
+                    try{
+                        foreach ($recv['handle'] as $handerClass => $job) {
+                           $handler = new $handerClass($recv['job']->getId(), $recv['job']->getData());
+                           $handler->handle();
+                        }
+                        //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
+                        $pheanstalk->delete($recv['job']);
+                        //\Log::info("jobId:".$recv['job']->getId()."任务完成".$recv['job']->getData(), [], 'queue.worker');
+                    }catch(\Exception $e){
+                        \Log::error("jobId:".$recv['job']->getId()."任务出错了！", ['jobId' => $recv['job']->getId(), 'jobData' => $recv['job']->getData(), 'message' => $e->getMessage()], 'queue.worker');
                     }
-                    //删除任务 是否应该放到用户队列任务 让用户自行删除？包括可以操作release和bury
-                    $pheanstalk->delete($recv['job']);
-                    //\Log::info("jobId:".$recv['job']->getId()."任务完成".$recv['job']->getData(), [], 'queue.worker');
-                }catch(\Exception $e){
-                    \Log::error("jobId:".$recv['job']->getId()."任务出错了！", ['jobId' => $recv['job']->getId(), 'jobData' => $recv['job']->getData(), 'message' => $e->getMessage()], 'queue.worker');
                 }
-            } 
+            }
         });
     }
 
