@@ -165,7 +165,6 @@ class App
         $aliases = Config::get('app::aliases');
         $this->aliases = array_merge($aliases, $this->aliases);
         AliasLoaderHandler::getInstance($this->aliases)->register();
-
     }
 
     /**
