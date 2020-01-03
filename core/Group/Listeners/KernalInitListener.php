@@ -35,6 +35,11 @@ class KernalInitListener extends \Listener
                 'listener'  => 'Group\Listeners\NotFoundListener',
                 'priority'  => 0,
             ],
+            [
+                'eventName' => KernalEvent::MIDDLEWARE,
+                'listener'  => 'Group\Listeners\KernalMiddlewareListener',
+                'priority'  => 0,
+            ],
         ];
 
         $listeners = array_merge(\Config::get('listener::services'), $listeners);

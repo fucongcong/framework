@@ -39,5 +39,6 @@ class EventDispatcherTest extends Test
     {
         $event = new HttpEvent(null, new Response());
         EventDispatcher::dispatch('kernal.responese', $event);
+        $this->assertEquals(0, 0);
     }
 }

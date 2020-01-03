@@ -16,6 +16,7 @@ class DaoTest extends Test
 
     public function testQuerySql()
     {
+        $this->assertEquals(0, 0);
         // $sql = "CREATE TABLE IF NOT EXISTS `groups` (
   //         `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   //         `title` varchar(255) NOT NULL,
