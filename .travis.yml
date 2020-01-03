@@ -10,9 +10,6 @@ before_script:
     - phpenv config-add config.ini
     - wget https://phar.phpunit.de/phpunit-7.0.phar
     - php phpunit-7.0.phar --version
-    - chmod +x phpunit-7.0.phar
-    - sudo mv phpunit-7.0.phar /usr/local/bin/phpunit
-    - phpunit --version
     # - wget http://download.redis.io/releases/redis-3.0.5.tar.gz
     # - tar xzf redis-3.0.5.tar.gz
     # - cd redis-3.0.5
@@ -22,4 +19,4 @@ before_script:
     # - cd ..
 script:
     - sudo find -L ./core -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    - phpunit --bootstrap test/test.php core/Group
+    - vendor/bin/phpunit --bootstrap test/test.php core/Group
