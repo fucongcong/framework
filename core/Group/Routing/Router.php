@@ -7,6 +7,7 @@ use Group\Contracts\Routing\Router as RouterContract;
 use App;
 use Group\Events\KernalEvent;
 use Group\Events\HttpEvent;
+use Group\Events\Event;
 use Group\Container\Container;
 use Response;
 
@@ -135,6 +136,8 @@ Class Router implements RouterContract
      */
     public function controller($config)
     {   
+        \EventDispatcher::dispatch(KernalEvent::MIDDLEWARE, new Event([$this->container->getRequest(), $config]));
+
         $tplData = $this->getTpl($config);
 
         if ($tplData instanceof Response || $tplData instanceof \RedirectResponse || $tplData instanceof \JsonResponse) {
