@@ -25,7 +25,7 @@ class RedisSessionHandler implements \SessionHandlerInterface
     public function __construct(\Redis $redis)
     {
         $this->prefix = \Config::get('session::prex');
-        $this->ttl = \Config::get('session::lifetime');
+        $this->ttl = intval(\Config::get('session::lifetime'));
         $this->redis = $redis;
     }
 

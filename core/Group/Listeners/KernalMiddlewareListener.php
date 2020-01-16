@@ -10,10 +10,10 @@ class KernalMiddlewareListener extends \Listener
 {
     public function setMethod()
     {
-        return 'onKernalRequest';
+        return 'onKernalMiddleware';
     }
 
-    public function onKernalRequest(\Event $event)
+    public function onKernalMiddleware(\Event $event)
     {   
         list($request, $config) = $event->getProperty();
 
@@ -28,16 +28,16 @@ class KernalMiddlewareListener extends \Listener
             }
 
             if (!$token) {
-                $response = new \JsonResponse(['name' => 'badCSRFToken'], 403);
-                \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent(null, $response));
+                $response = new \JsonResponse(['msg' => 'badCSRFToken'], 403);
+                app('container')->setResponse($response);
                 return;
                 //throw new \Exception("缺少csrf_token参数!", 1);
             }
             $csrfProvider = new CsrfSessionService();
             if (!$csrfProvider->isCsrfTokenValid($token)) {
                 //throw new \Exception("csrf_token参数验证失败!", 1);
-                $response = new \JsonResponse(['name' => 'badCSRFToken'], 403);
-                \EventDispatcher::dispatch(KernalEvent::RESPONSE, new HttpEvent(null, $response));
+                $response = new \JsonResponse(['msg' => 'badCSRFToken'], 403);
+                app('container')->setResponse($response);
                 return;
             }
          

@@ -137,7 +137,10 @@ Class Router implements RouterContract
     public function controller($config)
     {   
         \EventDispatcher::dispatch(KernalEvent::MIDDLEWARE, new Event([$this->container->getRequest(), $config]));
-
+        if ($this->container->getResponse()) {
+            return;
+        }
+        
         $tplData = $this->getTpl($config);
 
         if ($tplData instanceof Response || $tplData instanceof \RedirectResponse || $tplData instanceof \JsonResponse) {
