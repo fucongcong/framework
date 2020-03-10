@@ -22,7 +22,8 @@ class SqlMigrateCommand extends Command
     }
 
     private function ListSql($sqlDir)
-    {
+    {   
+        $files = [];
         if (is_dir($sqlDir)) {
             $dir = opendir($sqlDir);
 
@@ -31,10 +32,15 @@ class SqlMigrateCommand extends Command
                 $fileName = $file[0];
 
                 if ($fileName && isset($file[1]) && $file[1] == "php") {
-                    $this->filterLockFile($fileName);
+                    $files[substr($fileName, 3)] = $fileName;
                 }
             }
             closedir($dir);
+        }
+
+        sort($files);
+        foreach ($files as $name) {
+            $this->filterLockFile($name);
         }
     }
 
