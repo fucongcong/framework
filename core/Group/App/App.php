@@ -43,6 +43,7 @@ class App
         'EventDispatcher'   => 'Group\EventDispatcher\EventDispatcher',
         'Filesystem'        => 'Group\Common\Filesystem',
         'FileCache'         => 'Group\Cache\FileCache',
+        'CronFileCache'     => 'Group\Cron\FileCache',
         'StaticCache'       => 'Group\Cache\StaticCache',
         'Route'             => 'Group\Routing\Route',
         'Request'           => 'Group\Http\Request',
@@ -73,6 +74,7 @@ class App
         'Group\EventDispatcher\EventDispatcherServiceProvider',
         'Group\Cache\CacheServiceProvider',
         'Group\Cache\FileCacheServiceProvider',
+        'Group\Cron\FileCacheServiceProvider',
         'Group\Cache\StaticCacheServiceProvider',
         'Group\Async\AsyncServiceProvider',
     ];

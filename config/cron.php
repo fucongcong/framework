@@ -5,7 +5,7 @@ return [
 
     'cache_dir' => 'runtime/cron',
 
-    'class_cache' => 'runtime/cron/bootstrap.class.cache',
+    'timezone' => "PRC",
 
     //log路径
     'log_dir' => 'runtime/cron',
@@ -17,11 +17,16 @@ return [
     'max_handle' => 5,
 
     'job' => [
+        // [
+        //     'name' => 'TestLog3',//任务名
+        //     'time' => '* * * * *',//定时规则 分 小时 天 周 月
+        //     'command' => 'src\Web\Cron\TestSql',//执行的类库
+        // ],
 
         [
             'name' => 'TestLog',//任务名
-            'time' => '* */3 * * *',//定时规则 分 小时 天 周 月
-            'command' => 'src\Web\Cron\Test',//执行的类库
+            'time' => '* * * * *',//定时规则 分 小时 天 周 月
+            'command' => 'src\Web\Cron\TestSql',//执行的类库
         ],
 
         [
