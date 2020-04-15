@@ -65,6 +65,13 @@ class Cron
         $this->daemon = \Config::get("cron::daemon") ? : false;
         $this->max_handle = \Config::get("cron::max_handle") ? : 10;
         \Log::$cacheDir = $this->logDir;
+        if (defined('__FILEROOT__')) {
+            $path = __FILEROOT__;
+        } else {
+            $path = __ROOT__;
+        }
+        $this->logDir = $path.$this->logDir;
+        $this->cacheDir = $path.$this->cacheDir;
     }
 
     /**
