@@ -70,7 +70,12 @@ class Log
     {
         $logger = new Logger($model);
         $env = app('container')->getEnvironment();
-        $path = app('container')->getAppPath();
+        if (defined('__FILEROOT__')) {
+            $path = __FILEROOT__;
+        } else {
+            $path = __ROOT__;
+        }
+        //$path = app('container')->getAppPath();
         $cacheDir = static::$cacheDir;
 
         $logger->pushHandler(new StreamHandler($path.$cacheDir.'/'.$env.'.log', self::$levels[$level]));
