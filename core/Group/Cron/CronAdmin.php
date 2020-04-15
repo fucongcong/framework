@@ -114,8 +114,13 @@ class CronAdmin
     }
 
     private function get($cacheName, $cacheDir)
-    {
-        $dir = __ROOT__.$cacheDir."/".$cacheName;
+    {   
+        if (defined('__FILEROOT__')) {
+            $path = __FILEROOT__;
+        } else {
+            $path = __ROOT__;
+        }
+        $dir = $path.$cacheDir."/".$cacheName;
 
         if (file_exists($dir)) return require $dir;
         return null;
