@@ -81,4 +81,17 @@ return ".$data.";";
         return file_exists($dir);
 
     }
+
+    public function remove($filename, $cacheDir = false)
+    {
+        $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
+        if (defined('__FILEROOT__')) {
+            $dir = __FILEROOT__;
+        } else {
+            $dir = __ROOT__;
+        }
+        $dir = $dir.$cacheDir."/".$cacheName;
+
+        return @unlink($dir);
+    }
 }

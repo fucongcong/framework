@@ -71,7 +71,6 @@ class Cron
             $path = __ROOT__;
         }
         $this->logDir = $path.$this->logDir;
-        $this->cacheDir = $path.$this->cacheDir;
     }
 
     /**
@@ -355,27 +354,18 @@ class Cron
     private function removeWorkerPid($pid, $jobName)
     {   
         $dir = $this->cacheDir."/".$jobName;
-        @unlink($this->cacheDir."/".$jobName."/work_id");
+        \FileCache::remove('work_id', $dir);
     }
 
     public function setPid()
-    {
+    {   
         $pid = posix_getpid();
-        $parts = explode('/', $this->cacheDir."/pid");
-        $file = array_pop($parts);
-        $dir = '';
-        foreach ($parts as $part) {
-            if (!is_dir($dir .= "$part/")) {
-                 mkdir($dir);
-            }
-        }
-        file_put_contents("$dir/$file", $pid);
+        return \FileCache::set('pid', $this->cacheDir);
     }
 
     public function getPid()
-    {
-        if (file_exists($this->cacheDir."/pid"))
-        return file_get_contents($this->cacheDir."/pid");
+    {   
+        return \FileCache::get('pid', $this->cacheDir);
     }
 
     private function jobStart($job)
