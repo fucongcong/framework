@@ -69,7 +69,7 @@ class LocalFileCacheService
     }
 
     public function remove($cacheName, $cacheDir = false)
-    {
+    {    
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
         $dir = __FILEROOT__.$cacheDir."/".$cacheName;
 
