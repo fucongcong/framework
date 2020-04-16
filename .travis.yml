@@ -1,12 +1,15 @@
 language: php
 php:
-    - 5.6
+    - 7.1
+    - 7.2
 install:
     - composer install
 services:
   - redis-server
 before_script:
     - phpenv config-add config.ini
+    - wget https://phar.phpunit.de/phpunit-7.0.phar
+    - php phpunit-7.0.phar --version
     # - wget http://download.redis.io/releases/redis-3.0.5.tar.gz
     # - tar xzf redis-3.0.5.tar.gz
     # - cd redis-3.0.5
