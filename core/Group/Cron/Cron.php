@@ -157,7 +157,7 @@ class Cron
                         try {
                             swoole_process::kill($work_id[0], SIGTERM);
                         } catch (Exception $e) {
-                            \Log::info("进程{$work_id}不存在", [], 'cron.stop');
+                            \Log::info("进程{$work_id[0]}不存在", [], 'cron.stop');
                         }
                     }
                 }
@@ -184,7 +184,7 @@ class Cron
                 $job = $this->getJobByPid($ret['pid']);
                 if ($job && file_exists($this->cacheDir."/linsten_id")) {
                     $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode([])]);
-                    $this->removeWorkerPid($job['workId'], $job['name']);
+                    $this->removeWorkerPid($job['name']);
 
                     $this->table->incr('workers_num', 'workers_num');
                     $workerNum['workers_num']++;
@@ -378,7 +378,7 @@ class Cron
      *
      * @param pid int
      */
-    private function removeWorkerPid($pid, $jobName)
+    private function removeWorkerPid($jobName)
     {   
         FileCache::remove('work_id', $this->cacheDir."/".$jobName);
     }
@@ -434,7 +434,7 @@ class Cron
                 // $this->table->set($job['name'].'_worker', [$job['name'].'_worker' => json_encode([])]);
                 // $this->table->incr('workers_num', 'workers_num');
 
-                $this->removeWorkerPid($job['workId'], $job['name']);
+                $this->removeWorkerPid($job['name']);
                 swoole_process::kill($job['workId'], SIGKILL);
                 break;
             }
