@@ -20,8 +20,13 @@ class TwigServiceProvider extends ServiceProvider
 
             if (\Config::get('view::cache')) {
                 $cache_dir = \Config::get('view::cache_dir');
+                if (defined('__FILEROOT__')) {
+                    $dir = __FILEROOT__;
+                } else {
+                    $dir = __ROOT__;
+                }
                 $env = array(
-                    'cache' => __ROOT__.$cache_dir
+                    'cache' => $dir.$cache_dir
                 );
             }
 

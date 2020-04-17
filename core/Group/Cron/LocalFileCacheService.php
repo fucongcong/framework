@@ -1,6 +1,6 @@
 <?php
 
-namespace Group\Cache;
+namespace Group\Cron;
 
 class LocalFileCacheService
 {
@@ -16,14 +16,14 @@ class LocalFileCacheService
     public function get($cacheName, $cacheDir = false)
     {
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        if (defined('__FILEROOT__')) {
-            $dir = __FILEROOT__;
-        } else {
-            $dir = __ROOT__;
-        }
-        $dir = $dir.$cacheDir."/".$cacheName;
+        $dir = __FILEROOT__.$cacheDir."/".$cacheName;
 
-        if ($this->isExist($cacheName, $cacheDir)) return require_once $dir;
+        if ($this->isExist($cacheName, $cacheDir)) {
+            $data = file_get_contents($dir);
+            if ($data) {
+                return json_decode($data, true);
+            }
+        }
         return null;
     }
 
@@ -37,18 +37,9 @@ class LocalFileCacheService
     public function set($cacheName, $data, $cacheDir = false, $flag = false)
     {
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        if (defined('__FILEROOT__')) {
-            $dir = __FILEROOT__;
-        } else {
-            $dir = __ROOT__;
-        }
-        $dir = $dir.$cacheDir."/".$cacheName;
+        $dir = __FILEROOT__.$cacheDir."/".$cacheName;
 
-        if (is_array($data)) {
-            $data = var_export($data, true);
-            $data = "<?php
-return ".$data.";";
-        }
+        $data = json_encode($data);
 
         $parts = explode('/', $dir);
         $file = array_pop($parts);
@@ -71,26 +62,16 @@ return ".$data.";";
     public function isExist($cacheName, $cacheDir = false)
     {
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        if (defined('__FILEROOT__')) {
-            $dir = __FILEROOT__;
-        } else {
-            $dir = __ROOT__;
-        }
-        $dir = $dir.$cacheDir."/".$cacheName;
+        $dir = __FILEROOT__.$cacheDir."/".$cacheName;
 
         return file_exists($dir);
 
     }
 
-    public function remove($filename, $cacheDir = false)
-    {
+    public function remove($cacheName, $cacheDir = false)
+    {    
         $cacheDir = $cacheDir == false ? self::$cacheDir : $cacheDir;
-        if (defined('__FILEROOT__')) {
-            $dir = __FILEROOT__;
-        } else {
-            $dir = __ROOT__;
-        }
-        $dir = $dir.$cacheDir."/".$cacheName;
+        $dir = __FILEROOT__.$cacheDir."/".$cacheName;
 
         return @unlink($dir);
     }
