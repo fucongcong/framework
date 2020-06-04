@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Services\{{name}}\Rely;
+namespace src\Services\{{group}}\Rely;
 
 use Service;
 
